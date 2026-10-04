@@ -22,9 +22,6 @@ export async function GET() {
 
     const text = await response.text();
 
-    console.log("Radio.co history status:", response.status);
-    console.log("Radio.co history response:", text);
-
     if (!response.ok) {
       return NextResponse.json(
         {

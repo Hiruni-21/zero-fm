@@ -141,7 +141,7 @@ export async function POST(request: Request) {
       {
         success: true,
         message:
-          "Your song request has been submitted successfully.",
+          "Your request has been received by ZERO FM. It has not been sent to Radio.co and is only recorded in the server logs for now.",
       },
       {
         status: 200,

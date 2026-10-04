@@ -77,12 +77,12 @@ export async function GET(request: Request) {
       },
     );
 
-    const result = exactMatch || results[0];
+    // Only use artwork when both artist and song title match.
+    // Never display an unrelated search result.
+    const result = exactMatch;
 
-    if (!result.artworkUrl100) {
-      return NextResponse.json({
-        artwork: null,
-      });
+    if (!result?.artworkUrl100) {
+      return NextResponse.json({ artwork: null });
     }
 
     /*

@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { MouseEvent } from "react";
+import type { CSSProperties, MouseEvent } from "react";
+import Schedule from "./Schedule";
+import { useLanguage } from "./LanguageContext";
+import {
+  fetchNowPlaying,
+  NOW_PLAYING_POLL_MS,
+} from "../lib/now-playing";
+import {
+  PLAY_EVENT,
+  showToast,
+} from "../lib/ui-events";
 
 const RADIO_STREAM_URL =
   "https://s5.radio.co/s83b3fe12f/listen";
@@ -163,34 +173,6 @@ function VolumeIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function PreviousIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="5" y="5" width="2" height="14" rx="1" />
-      <path d="M18 6.5v11a1 1 0 0 1-1.6.8l-7.2-5.5a1 1 0 0 1 0-1.6l7.2-5.5a1 1 0 0 1 1.6.8Z" />
-    </svg>
-  );
-}
-
-function NextIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden="true"
-    >
-      <rect x="17" y="5" width="2" height="14" rx="1" />
-      <path d="M6 6.5v11a1 1 0 0 0 1.6.8l7.2-5.5a1 1 0 0 0 0-1.6L7.6 5.7A1 1 0 0 0 6 6.5Z" />
-    </svg>
-  );
-}
-
 function SettingsIcon({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -258,81 +240,6 @@ function GooglePlayIcon({ className = "" }: { className?: string }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Schedule                                                                   */
-/* -------------------------------------------------------------------------- */
-
-const SCHEDULE = [
-  {
-    time: "12:00",
-    endTime: "14:00",
-    program: "Non Stop Sri Lankan Chartbusters",
-    number: "01",
-  },
-  {
-    time: "14:00",
-    endTime: "17:00",
-    program: "Zero Hits",
-    number: "LIVE",
-  },
-  {
-    time: "17:00",
-    endTime: "20:00",
-    program: "Deep Lo-Fi & Sri Lankan Ambient",
-    number: "NEXT",
-  },
-  {
-    time: "20:00",
-    endTime: "22:00",
-    program: "Night Vibes",
-    number: "04",
-  },
-  {
-    time: "22:00",
-    endTime: "00:00",
-    program: "Live DJ Sets & Community Calls",
-    number: "05",
-  },
-  {
-    time: "00:00",
-    endTime: "02:00",
-    program: "Throwback Night",
-    number: "06",
-  },
-];
-
-function getCurrentSchedule() {
-  const now = new Date();
-
-  const minutes =
-    now.getHours() * 60 + now.getMinutes();
-
-  return SCHEDULE.find((item) => {
-    const [startHour, startMinute] = item.time
-      .split(":")
-      .map(Number);
-
-    const [endHour, endMinute] = item.endTime
-      .split(":")
-      .map(Number);
-
-    const start =
-      startHour * 60 + startMinute;
-
-    let end =
-      endHour * 60 + endMinute;
-
-    if (end === 0) {
-      end = 24 * 60;
-    }
-
-    return (
-      minutes >= start &&
-      minutes < end
-    );
-  });
-}
-
-/* -------------------------------------------------------------------------- */
 /* Waveform                                                                   */
 /* -------------------------------------------------------------------------- */
 
@@ -350,6 +257,8 @@ const WAVEFORM = [
 /* -------------------------------------------------------------------------- */
 
 export default function RadioPlayer() {
+  const { t } = useLanguage();
+
   const audioRef =
     useRef<HTMLAudioElement | null>(null);
 
@@ -358,6 +267,8 @@ export default function RadioPlayer() {
 
   const [volume, setVolume] =
     useState(80);
+  const [isMuted, setIsMuted] = useState(false);
+  const previousVolumeRef = useRef(80);
 
   const [track, setTrack] =
     useState<TrackData | null>(null);
@@ -371,30 +282,30 @@ export default function RadioPlayer() {
   const [error, setError] =
     useState("");
 
-  const [currentProgram, setCurrentProgram] =
-    useState(getCurrentSchedule());
+  // Waiting for the stream to start after pressing play
+  const [isBuffering, setIsBuffering] =
+    useState(false);
+
+  const [settingsOpen, setSettingsOpen] =
+    useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Sleep timer: when the radio should stop by itself
+  const [sleepEndsAt, setSleepEndsAt] =
+    useState<number | null>(null);
+  const [sleepMinutesLeft, setSleepMinutesLeft] =
+    useState(0);
+  const [sleepChoice, setSleepChoice] =
+    useState<number | null>(null);
 
   /* ------------------------------------------------------------------------ */
   /* Current Track                                                            */
   /* ------------------------------------------------------------------------ */
 
-  const fetchNowPlaying = async () => {
+  const loadNowPlaying = async () => {
     try {
-      const response = await fetch(
-        "/api/now-playing",
-        {
-          cache: "no-store",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to fetch current track"
-        );
-      }
-
-      const result: NowPlayingResponse =
-        await response.json();
+      const result =
+        await fetchNowPlaying<NowPlayingResponse>();
 
       setTrack(result.data ?? null);
       setError("");
@@ -409,32 +320,13 @@ export default function RadioPlayer() {
   };
 
   useEffect(() => {
-    fetchNowPlaying();
+    loadNowPlaying();
 
     const interval = window.setInterval(
       () => {
-        fetchNowPlaying();
+        loadNowPlaying();
       },
-      15000
-    );
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  /* ------------------------------------------------------------------------ */
-  /* Schedule Refresh                                                         */
-  /* ------------------------------------------------------------------------ */
-
-  useEffect(() => {
-    const interval = window.setInterval(
-      () => {
-        setCurrentProgram(
-          getCurrentSchedule()
-        );
-      },
-      30000
+      NOW_PLAYING_POLL_MS
     );
 
     return () => {
@@ -447,11 +339,11 @@ export default function RadioPlayer() {
   /* ------------------------------------------------------------------------ */
 
   useEffect(() => {
-    if (!audioRef.current) return;
+  if (!audioRef.current) return;
 
-    audioRef.current.volume =
-      volume / 100;
-  }, [volume]);
+  audioRef.current.volume = volume / 100;
+  audioRef.current.muted = isMuted || volume === 0;
+}, [volume, isMuted]);
 
   /* ------------------------------------------------------------------------ */
   /* Playback                                                                 */
@@ -468,11 +360,14 @@ export default function RadioPlayer() {
       }
 
       setError("");
+      setIsBuffering(true);
 
       await audioRef.current.play();
 
       setIsPlaying(true);
     } catch (error) {
+      setIsBuffering(false);
+
       console.error(
         "Unable to play radio stream:",
         error
@@ -481,7 +376,7 @@ export default function RadioPlayer() {
       setIsPlaying(false);
 
       setError(
-        "Unable to start the live stream. Please try again."
+        t("player.playError")
       );
     }
   };
@@ -493,13 +388,15 @@ export default function RadioPlayer() {
 
   const handlePause = () => {
     setIsPlaying(false);
+    setIsBuffering(false);
   };
 
   const handleAudioError = () => {
     setIsPlaying(false);
+    setIsBuffering(false);
 
     setError(
-      "Live stream is currently unavailable."
+      t("player.unavailable")
     );
   };
 
@@ -525,6 +422,164 @@ export default function RadioPlayer() {
   useEffect(() => {
     setArtworkFailed(false);
   }, [artwork]);
+
+  /* ------------------------------------------------------------------------ */
+  /* Interactions                                                             */
+  /* ------------------------------------------------------------------------ */
+
+  // Keep the latest values for listeners that are set up once
+  const latest = useRef({ togglePlay, isPlaying, volume, isMuted });
+  latest.current = { togglePlay, isPlaying, volume, isMuted };
+
+  // "Listen Live" buttons elsewhere on the page start the player
+  useEffect(() => {
+    const onPlayRequest = () => {
+      document
+        .getElementById("live")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      if (!latest.current.isPlaying) {
+        void latest.current.togglePlay();
+      }
+    };
+
+    window.addEventListener(PLAY_EVENT, onPlayRequest);
+    return () => window.removeEventListener(PLAY_EVENT, onPlayRequest);
+  }, []);
+
+  // Keyboard shortcuts: Space / K play-pause, M mute, arrows change volume
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.isContentEditable ||
+          ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A", "IFRAME"].includes(
+            target.tagName
+          ))
+      ) {
+        return;
+      }
+
+      // Don't react while a popup is open
+      if (document.querySelector('[aria-modal="true"]')) return;
+
+      const { volume: currentVolume, isMuted: muted } = latest.current;
+
+      if (event.key === " " || event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        void latest.current.togglePlay();
+      } else if (event.key.toLowerCase() === "m") {
+        setIsMuted(!muted);
+        showToast(muted ? t("player.unmuted") : t("player.muted"));
+      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        event.preventDefault();
+        const next = Math.min(
+          100,
+          Math.max(0, currentVolume + (event.key === "ArrowUp" ? 5 : -5))
+        );
+        setVolume(next);
+        setIsMuted(false);
+        showToast(t("player.volumeToast", { n: next }));
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [t]);
+
+  // Show the song on the browser tab and phone lock screen while playing
+  useEffect(() => {
+    const baseTitle = document.title.replace(/^▶ .*? · /, "");
+
+    if (isPlaying) {
+      document.title = `▶ ${trackTitle} · ${baseTitle}`;
+    }
+
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: trackTitle,
+        artist: trackArtist,
+        album: "Zero FM Live",
+        artwork: artwork
+          ? [{ src: artwork, sizes: "512x512" }]
+          : [],
+      });
+
+      navigator.mediaSession.setActionHandler("play", () => {
+        void latest.current.togglePlay();
+      });
+      navigator.mediaSession.setActionHandler("pause", () => {
+        void latest.current.togglePlay();
+      });
+    }
+
+    return () => {
+      document.title = baseTitle;
+    };
+  }, [isPlaying, trackTitle, trackArtist, artwork]);
+
+  // Sleep timer countdown
+  useEffect(() => {
+    if (!sleepEndsAt) return;
+
+    const tick = () => {
+      const left = sleepEndsAt - Date.now();
+
+      if (left <= 0) {
+        audioRef.current?.pause();
+        setSleepEndsAt(null);
+        setSleepChoice(null);
+        showToast(t("player.sleepEnded"));
+        return;
+      }
+
+      setSleepMinutesLeft(Math.ceil(left / 60_000));
+    };
+
+    tick();
+    const interval = window.setInterval(tick, 15_000);
+    return () => window.clearInterval(interval);
+  }, [sleepEndsAt, t]);
+
+  const setSleepTimer = (minutes: number | null) => {
+    setSleepChoice(minutes);
+
+    if (!minutes) {
+      setSleepEndsAt(null);
+      showToast(t("player.sleepOff"));
+      return;
+    }
+
+    setSleepEndsAt(Date.now() + minutes * 60_000);
+    setSleepMinutesLeft(minutes);
+    showToast(t("player.sleepSet", { n: minutes }));
+  };
+
+  // Close the settings menu when clicking elsewhere
+  useEffect(() => {
+    if (!settingsOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!settingsRef.current?.contains(event.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSettingsOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [settingsOpen]);
 
   /* ------------------------------------------------------------------------ */
   /* Helpers                                                                  */
@@ -561,37 +616,43 @@ export default function RadioPlayer() {
       {/* HEADER                                                             */}
       {/* ================================================================== */}
 
-      <div className="mx-auto mb-64 flex w-full max-w-[1380px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto mb-8 flex w-full max-w-[1380px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] shadow-[0_8px_30px_rgba(255,212,0,0.12)] sm:h-12 sm:w-12">
+          <div className="mt-24 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] shadow-[0_8px_30px_rgba(255,212,0,0.12)] sm:h-12 sm:w-12">
             <RadioIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
 
           <div className="min-w-0">
-            <p className="font-mono text-[8px] font-bold uppercase tracking-[0.24em] text-[#FFD400] sm:text-[9px]">
-              Zero FM On-Air Studio
+            <p className="mt-24 font-mono text-[8px] font-bold uppercase tracking-[0.24em] text-[#FFD400] sm:text-[9px]">
+              {t("player.studio")}
             </p>
 
             <h1 className="mt-1 truncate text-2xl font-bold tracking-[-0.035em] text-white sm:text-[30px]">
-              Live Player & Station Schedule
+              {t("player.title")}
             </h1>
           </div>
         </div>
 
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-[#0F1523] px-4 py-2.5 sm:flex">
+        <div className="mt-24 hidden shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-[#0F1523] px-4 py-2.5 sm:flex">
           <span className="h-2 w-2 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.35)]" />
 
           <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-white/45">
-            Colombo, Sri Lanka (UTC+5:30)
+            {t("player.location")}
           </span>
         </div>
       </div>
+
+      {/* ================================================================== */}
+      {/* AUDIO                                                               */}
+      {/* ================================================================== */}
 
       <audio
         ref={audioRef}
         src={RADIO_STREAM_URL}
         preload="none"
         onPlay={handlePlay}
+        onPlaying={() => setIsBuffering(false)}
+        onWaiting={() => setIsBuffering(true)}
         onPause={handlePause}
         onError={handleAudioError}
       />
@@ -600,13 +661,16 @@ export default function RadioPlayer() {
       {/* THREE CARDS                                                        */}
       {/* ================================================================== */}
 
-<div className="mx-auto grid w-full max-w-[1380px] items-stretch gap-2.5 px-3 sm:px-4 lg:h-[560px] lg:grid-cols-[1.16fr_0.84fr_0.94fr] lg:px-5 xl:gap-3">        {/* ================================================================ */}
+      <div className="mx-auto grid w-full max-w-[1380px] items-stretch gap-2.5 px-3 sm:px-4 lg:h-[680px] lg:min-h-[560px] lg:grid-cols-[1.16fr_0.84fr_0.94fr] lg:px-5 xl:gap-3">
+
+        {/* ================================================================ */}
         {/* LEFT — RADIO PLAYER                                             */}
         {/* ================================================================ */}
 
         <section
           id="live"
-className="relative h-full overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]"        >
+          className="relative min-h-full overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]"
+        >
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div
               className={`absolute left-[-120px] top-[-80px] h-[330px] w-[330px] rounded-full blur-[100px] transition-opacity duration-700 ${
@@ -620,6 +684,7 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
           </div>
 
           <div className="relative p-4 sm:p-5">
+
             {/* ON AIR */}
 
             <div className="flex items-center justify-between">
@@ -651,7 +716,7 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 </span>
 
                 <span className="font-mono text-[8px] font-bold uppercase tracking-[0.2em] text-[#FFD400]">
-                  On Air
+                  {t("player.onAir")}
                 </span>
               </div>
 
@@ -666,20 +731,27 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
                 <span className="font-mono text-[7px] uppercase tracking-[0.15em] text-white/30">
                   {isPlaying
-                    ? "Live Stream"
-                    : "Ready"}
+                    ? t("player.liveStream")
+                    : t("player.ready")}
                 </span>
               </div>
             </div>
 
             {/* ARTWORK */}
 
-            <div className="relative mx-auto mt-5 aspect-square w-full max-w-[245px] overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#111A2B] shadow-[0_25px_80px_rgba(0,0,0,0.35)]">
+            <div
+              className={`group/art relative mx-auto mt-5 aspect-square w-full max-w-[245px] overflow-hidden rounded-[18px] border bg-[#111A2B] shadow-[0_25px_80px_rgba(0,0,0,0.35)] transition-[border-color,box-shadow] duration-500 ${
+                isPlaying
+                  ? "artwork-breathe border-[#FFD400]/25 shadow-[0_25px_80px_rgba(255,212,0,0.10)]"
+                  : "border-white/[0.08]"
+              }`}
+            >
               {artwork && !artworkFailed ? (
                 <img
+                  key={artwork}
                   src={artwork}
                   alt={`${trackTitle} artwork`}
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="track-fade absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/art:scale-105"
                   onError={() => {
                     setArtworkFailed(true);
                   }}
@@ -718,7 +790,7 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
 
                 <span className="font-mono text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-400">
-                  Live Now
+                  {t("player.liveNow")}
                 </span>
               </div>
 
@@ -730,11 +802,17 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 </>
               ) : (
                 <>
-                  <h2 className="mx-auto mt-3 max-w-[500px] break-words text-lg font-bold leading-tight text-white sm:text-xl">
+                  <h2
+                    key={`title-${trackTitle}`}
+                    className="track-fade mx-auto mt-3 max-w-[500px] break-words text-lg font-bold leading-tight text-white sm:text-xl"
+                  >
                     {trackTitle}
                   </h2>
 
-                  <p className="mt-1.5 text-sm text-white/45">
+                  <p
+                    key={`artist-${trackArtist}`}
+                    className="track-fade mt-1.5 text-sm text-white/45"
+                  >
                     {trackArtist}
                   </p>
                 </>
@@ -742,11 +820,11 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
               <div className="mt-3 flex items-center justify-center gap-2">
                 <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 font-mono text-[7px] uppercase tracking-[0.12em] text-white/35">
-                  Live Radio
+                  {t("player.liveRadio")}
                 </span>
 
                 <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 font-mono text-[7px] uppercase tracking-[0.12em] text-white/35">
-                  320kbps Stream
+                  {t("player.streamBitrate")}
                 </span>
               </div>
             </div>
@@ -784,54 +862,59 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
             {/* CONTROLS */}
 
             <div className="mt-4 flex items-center gap-2">
+
               {/* VOLUME */}
 
               <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                <VolumeIcon
-                  className={`h-4 w-4 shrink-0 ${
-                    volume > 0
-                      ? "text-[#FFD400]"
-                      : "text-white/25"
-                  }`}
-                />
+                <button
+  type="button"
+  onClick={() => {
+    if (isMuted || volume === 0) {
+      setIsMuted(false);
 
-                <div className="relative flex-1">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={volume}
-                    onChange={(event) =>
-                        setVolume(Number(event.target.value))
-                    }
-                    aria-label="Volume"
-                    className="volume-slider w-full cursor-pointer appearance-none"
-                    style={{
-                        background: `linear-gradient(
-                        to right,
-                        #FFD400 0%,
-                        #FFD400 ${volume}%,
-                        rgba(255,255,255,0.10) ${volume}%,
-                        rgba(255,255,255,0.10) 100%
-                        ) center / 100% 5px no-repeat`,
-                    }}
-/>
-                </div>
+      if (volume === 0) {
+        setVolume(previousVolumeRef.current || 80);
+      }
+    } else {
+      previousVolumeRef.current = volume;
+      setIsMuted(true);
+    }
+  }}
+  aria-label={isMuted || volume === 0 ? t("player.unmute") : t("player.mute")}
+  title={isMuted || volume === 0 ? t("player.unmute") : t("player.mute")}
+  className="shrink-0 cursor-pointer rounded-full transition hover:scale-110"
+>
+  <VolumeIcon
+    className={`h-4 w-4 ${
+      isMuted || volume === 0
+        ? "text-white/25"
+        : "text-[#FFD400]"
+    }`}
+  />
+</button>
 
+              <div className="relative flex h-[13px] flex-1 items-center">
+  <input
+    type="range"
+    min="0"
+    max="100"
+    value={volume}
+    onChange={(event) =>
+      setVolume(Number(event.target.value))
+    }
+    aria-label={t("player.volumeAria")}
+    className="volume-slider block h-[13px] w-full cursor-pointer appearance-none"
+    style={
+      {
+        "--volume": `${volume}%`,
+      } as CSSProperties
+    }
+  />
+</div>
                 <span className="hidden w-5 text-right font-mono text-[8px] text-white/30 sm:block">
                   {volume}
                 </span>
               </div>
-
-              {/* PREVIOUS */}
-
-              <button
-                type="button"
-                aria-label="Previous track"
-                className="hidden h-8 w-8 items-center justify-center rounded-full text-white/30 transition hover:bg-white/[0.04] hover:text-white sm:flex"
-              >
-                <PreviousIcon className="h-4 w-4" />
-              </button>
 
               {/* PLAY */}
 
@@ -840,55 +923,139 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 onClick={togglePlay}
                 aria-label={
                   isPlaying
-                    ? "Pause Zero FM"
-                    : "Play Zero FM"
+                    ? t("player.pause")
+                    : t("player.play")
                 }
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] shadow-[0_0_28px_rgba(255,212,0,0.14)] transition duration-200 hover:scale-105 hover:bg-[#FFE45C] active:scale-95"
+                title={`${isPlaying ? t("player.pause") : t("player.play")} (Space)`}
+                className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] shadow-[0_0_28px_rgba(255,212,0,0.14)] transition duration-200 hover:scale-105 hover:bg-[#FFE45C] active:scale-95"
               >
-                {isPlaying ? (
+                {isPlaying && !isBuffering && (
+                  <span
+                    aria-hidden="true"
+                    className="play-ring pointer-events-none absolute inset-0 rounded-full border-2 border-[#FFD400]"
+                  />
+                )}
+
+                {isBuffering ? (
+                  <span
+                    aria-label={t("player.connecting")}
+                    className="h-5 w-5 animate-spin rounded-full border-2 border-[#090D16]/25 border-t-[#090D16]"
+                  />
+                ) : isPlaying ? (
                   <PauseIcon className="h-6 w-6" />
                 ) : (
                   <PlayIcon className="ml-0.5 h-6 w-6" />
                 )}
               </button>
 
-              {/* NEXT */}
+              {/* SETTINGS: sleep timer and keyboard shortcuts */}
 
-              <button
-                type="button"
-                aria-label="Next track"
-                className="hidden h-8 w-8 items-center justify-center rounded-full text-white/30 transition hover:bg-white/[0.04] hover:text-white sm:flex"
-              >
-                <NextIcon className="h-4 w-4" />
-              </button>
+              <div ref={settingsRef} className="relative hidden sm:block">
+                <button
+                  type="button"
+                  aria-label={t("player.settings")}
+                  aria-expanded={settingsOpen}
+                  onClick={() => setSettingsOpen((open) => !open)}
+                  className={`relative flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/[0.04] hover:text-white ${
+                    settingsOpen || sleepEndsAt
+                      ? "text-[#FFD400]"
+                      : "text-white/30"
+                  }`}
+                >
+                  <SettingsIcon
+                    className={`h-4 w-4 transition-transform duration-300 ${
+                      settingsOpen ? "rotate-90" : ""
+                    }`}
+                  />
 
-              {/* SETTINGS */}
+                  {sleepEndsAt && (
+                    <span className="absolute right-1 top-1 size-1.5 rounded-full bg-[#FFD400]" />
+                  )}
+                </button>
 
-              <button
-                type="button"
-                aria-label="Player settings"
-                className="hidden h-8 w-8 items-center justify-center rounded-full text-white/30 transition hover:bg-white/[0.04] hover:text-white sm:flex"
-              >
-                <SettingsIcon className="h-4 w-4" />
-              </button>
+                {settingsOpen && (
+                  <div className="settings-pop absolute bottom-11 right-0 z-30 w-[230px] rounded-xl border border-white/[0.1] bg-[#111A2B] p-3 text-left shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                    <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#FFD400]">
+                      {t("player.sleepTimer")}
+                    </p>
+
+                    {sleepEndsAt && (
+                      <p className="mt-1 text-[11px] text-white/55">
+                        {t("player.sleepLeft", { n: sleepMinutesLeft })}
+                      </p>
+                    )}
+
+                    <div className="mt-2 grid grid-cols-4 gap-1.5">
+                      {[null, 15, 30, 60].map((minutes) => {
+                        const selected = sleepChoice === minutes;
+
+                        return (
+                          <button
+                            key={minutes ?? "off"}
+                            type="button"
+                            onClick={() => {
+                              setSleepTimer(minutes);
+                              setSettingsOpen(false);
+                            }}
+                            className={`rounded-lg border px-1 py-1.5 font-mono text-[10px] transition ${
+                              selected
+                                ? "border-[#FFD400]/40 bg-[#FFD400]/10 text-[#FFD400]"
+                                : "border-white/[0.08] text-white/70 hover:border-[#FFD400]/30 hover:text-[#FFD400]"
+                            }`}
+                          >
+                            {minutes ? `${minutes}m` : t("player.off")}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <p className="mt-4 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#FFD400]">
+                      {t("player.shortcuts")}
+                    </p>
+
+                    <ul className="mt-2 space-y-1.5 text-[11px] text-white/60">
+                      {[
+                        ["Space", t("player.shortcutPlay")],
+                        ["M", t("player.shortcutMute")],
+                        ["↑ ↓", t("player.shortcutVolume")],
+                      ].map(([key, label]) => (
+                        <li
+                          key={key}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <span>{label}</span>
+                          <kbd className="rounded border border-white/[0.12] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[9px] text-white/70">
+                            {key}
+                          </kbd>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
               {/* SHARE */}
 
               <button
                 type="button"
-                aria-label="Share Zero FM"
+                aria-label={t("player.share")}
                 onClick={async () => {
                   try {
+                    const text = t("player.shareText", {
+                      track: trackTitle,
+                    });
+
                     if (navigator.share) {
                       await navigator.share({
                         title: "Zero FM",
-                        text: "Listen to Zero FM Live",
+                        text,
                         url: window.location.href,
                       });
                     } else {
                       await navigator.clipboard.writeText(
-                        window.location.href
+                        `${text} ${window.location.href}`
                       );
+                      showToast(t("player.linkCopied"));
                     }
                   } catch {
                     // User cancelled share.
@@ -909,186 +1076,51 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
         </section>
 
         {/* ================================================================ */}
-        {/* MIDDLE — TODAY'S PROGRAMS                                       */}
+        {/* MIDDLE — REAL-TIME TODAY'S PROGRAMS                            */}
         {/* ================================================================ */}
 
         <section
-          id="programs"
-        className="relative flex h-full min-h-0 overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]"        >
-          <div className="pointer-events-none absolute right-[-100px] top-[-100px] h-[260px] w-[260px] rounded-full bg-[#FFD400]/[0.025] blur-[90px]" />
+  className="relative flex h-full min-h-0 min-w-0 overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]"
+>
+  <div className="pointer-events-none absolute right-[-100px] top-[-100px] h-[260px] w-[260px] rounded-full bg-[#FFD400]/[0.025] blur-[90px]" />
 
-          <div className="relative flex min-h-0 w-full flex-col p-4 sm:p-5">
-            {/* HEADER */}
-
-            <div className="flex shrink-0 items-start justify-between">
-              <div>
-                <p className="font-mono text-[7px] font-bold uppercase tracking-[0.22em] text-[#FFD400]/80">
-                  Zero FM
-                </p>
-
-                <div className="mt-2 flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5 text-white/65" />
-
-                  <h2 className="text-lg font-bold text-white">
-                    Today's Programs
-                  </h2>
-                </div>
-              </div>
-
-              <span className="pt-3 font-mono text-[7px] uppercase tracking-[0.15em] text-white/30">
-                ASIA / COLOMBO
-              </span>
-            </div>
-
-            {/* SCROLLABLE PROGRAM CONTENT */}
-
-            <div className="program-scroll mt-4 min-h-0 flex-1 overflow-y-auto pr-2">
-              {/* LIVE NOW */}
-
-              <div className="rounded-xl border border-[#FFD400]/20 bg-[#FFD400]/[0.025] p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-[#FFD400]/85">
-                    Live Now
-                  </span>
-
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/[0.07] px-2.5 py-1 font-mono text-[7px] font-bold uppercase tracking-[0.1em] text-emerald-400">
-                    ● Live
-                  </span>
-                </div>
-
-                <p className="mt-2 text-sm font-semibold text-white">
-                  {currentProgram?.program ||
-                    "Zero Hits"}
-                </p>
-
-                <p className="mt-1 font-mono text-[8px] text-white/35">
-                  {currentProgram
-                    ? `${currentProgram.time} – ${currentProgram.endTime}`
-                    : "14:00 – 17:00"}
-                </p>
-              </div>
-
-              {/* NEXT PROGRAM */}
-
-              <div className="mt-3 rounded-xl border border-white/[0.08] bg-[#090D16]/50 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-white/40">
-                    Next Program
-                  </span>
-
-                  <span className="font-mono text-[9px] font-bold text-[#FFD400]/80">
-                    17:00
-                  </span>
-                </div>
-
-                <p className="mt-2 text-sm font-semibold text-white">
-                  Deep Lo-Fi & Sri Lankan Ambient
-                </p>
-
-                <p className="mt-1 font-mono text-[8px] text-white/35">
-                  17:00 – 20:00
-                </p>
-              </div>
-
-              {/* SCHEDULE */}
-
-              <div className="mt-4">
-                {SCHEDULE.map((item) => {
-                  const isLive =
-                    currentProgram?.program ===
-                    item.program;
-
-                  const isNext =
-                    item.program ===
-                    "Deep Lo-Fi & Sri Lankan Ambient";
-
-                  return (
-                    <div
-                      key={item.time}
-                      className="flex items-center gap-3 border-b border-white/[0.06] py-3"
-                    >
-                      <div className="w-10 shrink-0">
-                        <p
-                          className={`font-mono text-[9px] ${
-                            isLive
-                              ? "text-[#FFD400]"
-                              : "text-white/70"
-                          }`}
-                        >
-                          {item.time}
-                        </p>
-
-                        <p className="mt-0.5 font-mono text-[7px] text-white/25">
-                          {item.time} –{" "}
-                          {item.endTime}
-                        </p>
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-[11px] font-semibold ${
-                            isLive
-                              ? "text-white"
-                              : "text-white/75"
-                          }`}
-                        >
-                          {item.program}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`font-mono text-[7px] font-bold uppercase ${
-                          isLive
-                            ? "text-emerald-400"
-                            : isNext
-                              ? "text-[#FFD400]/60"
-                              : "text-white/25"
-                        }`}
-                      >
-                        {isLive
-                          ? "LIVE"
-                          : isNext
-                            ? "NEXT"
-                            : item.number}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* FULL SCHEDULE */}
-
-            <button
-              type="button"
-              onClick={() =>
-                scrollTo("programs")
-              }
-              className="mt-4 flex h-11 shrink-0 w-full items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.015] font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-white/50 transition hover:border-[#FFD400]/20 hover:text-white"
-            >
-              View Full Schedule
-              <span>→</span>
-            </button>
-          </div>
-        </section>
+  <div className="relative flex min-h-0 w-full min-w-0 flex-col overflow-hidden">
+    <Schedule />
+  </div>
+</section>
 
         {/* ================================================================ */}
         {/* RIGHT — MOBILE COMPANION                                        */}
         {/* ================================================================ */}
 
-        <section className="relative overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]">
-          <div className="pointer-events-none absolute right-[-80px] top-[-80px] h-[260px] w-[260px] rounded-full bg-[#FFD400]/[0.025] blur-[80px]" />
+        <section
+          id="app"
+          className="relative scroll-mt-24 overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0F1523] transition-[border-color,box-shadow] duration-300 hover:border-white/[0.12]"
+        >
 
-          <div className="pointer-events-none absolute bottom-[-100px] left-[-100px] h-[250px] w-[250px] rounded-full bg-blue-500/[0.025] blur-[90px]" />
+          {/* BACKGROUND IMAGE */}
 
-          <div className="relative h-full p-4 sm:p-5">
+          <img
+            src="/images/cinematic-podcast-studio.png"
+            alt=""
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35"
+          />
+
+          {/* DARK OVERLAY */}
+
+          <div className="pointer-events-none absolute inset-0 bg-[#0F1523]/65" />
+
+          {/* EXISTING CONTENT */}
+
+          <div className="relative z-10 h-full p-4 sm:p-5">
+
             {/* BADGE */}
 
             <div className="inline-flex items-center gap-2 rounded-full border border-[#FFD400]/20 bg-[#FFD400]/[0.025] px-3 py-1.5">
               <SmartphoneIcon className="h-3 w-3 text-[#FFD400]/90" />
 
               <span className="font-mono text-[7px] font-bold uppercase tracking-[0.2em] text-[#FFD400]/90">
-                Mobile Companion
+                {t("mobileApp.tag")}
               </span>
             </div>
 
@@ -1096,56 +1128,23 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
             <div className="mt-5 max-w-[270px]">
               <h2 className="text-[27px] font-black leading-[0.94] tracking-[-0.04em] text-white">
-                TAKE ZERO FM
+                {t("mobileApp.title1")}
                 <br />
+
                 <span className="text-[#FFD400]">
-                  WITH YOU
+                  {t("mobileApp.title2")}
                 </span>
               </h2>
 
               <p className="mt-4 max-w-[320px] text-[10px] leading-5 text-white/40">
-                Listen anytime, anywhere in lossless
-                digital fidelity. Zero ads,
-                unlimited stream recordings &
-                real-time song requesting.
+                {t("mobileApp.desc")}
               </p>
-            </div>
-
-            {/* PHONE */}
-
-            <div className="pointer-events-none absolute right-0 top-[48px] hidden h-[148px] w-[98px] rotate-[6deg] rounded-[18px] border-[3px] border-[#273247] bg-[#080D17] shadow-2xl sm:block">
-              <div className="absolute left-1/2 top-2 h-3 w-9 -translate-x-1/2 rounded-full bg-black" />
-
-              <div className="flex h-full flex-col items-center justify-center rounded-[14px] bg-gradient-to-b from-[#182235] to-[#090D16]">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#FFD400]/20 bg-[#FFD400]/90">
-                  <span className="text-[7px] font-black tracking-[-0.08em] text-[#090D16]">
-                    ZERO
-                  </span>
-                </div>
-
-                <p className="mt-3 font-mono text-[6px] uppercase tracking-[0.12em] text-white/30">
-                  FM.LIVE
-                </p>
-
-                <div className="mt-3 flex items-end gap-[2px]">
-                  {[8, 14, 20, 12, 18, 9].map(
-                    (height, index) => (
-                      <span
-                        key={index}
-                        className="w-[2px] rounded-full bg-[#FFD400]/75"
-                        style={{
-                          height: `${height}px`,
-                        }}
-                      />
-                    )
-                  )}
-                </div>
-              </div>
             </div>
 
             {/* FEATURES */}
 
             <div className="mt-5 grid grid-cols-2 gap-2">
+
               {/* LIVE */}
 
               <button
@@ -1153,20 +1152,20 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 onClick={() =>
                   scrollTo("live")
                 }
-                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
+                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition group-hover:bg-[#FFD400]/[0.13]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition duration-300 group-hover:scale-110 group-hover:bg-[#FFD400]/[0.13]">
                     <RadioIcon className="h-5 w-5" />
                   </div>
 
                   <div>
                     <p className="text-[10px] font-bold text-white">
-                      Live Radio
+                      {t("player.liveRadio")}
                     </p>
 
                     <p className="mt-1 text-[8px] leading-4 text-white/35">
-                      24/7 Streaming
+                      {t("mobileApp.streaming247")}
                     </p>
                   </div>
                 </div>
@@ -1179,20 +1178,20 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 onClick={() =>
                   scrollTo("request")
                 }
-                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
+                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition group-hover:bg-[#FFD400]/[0.13]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition duration-300 group-hover:scale-110 group-hover:bg-[#FFD400]/[0.13]">
                     <MusicIcon className="h-5 w-5" />
                   </div>
 
                   <div>
                     <p className="text-[10px] font-bold text-white">
-                      Request Songs
+                      {t("features.requestSongs")}
                     </p>
 
                     <p className="mt-1 text-[8px] leading-4 text-white/35">
-                      Your Favorite Tracks
+                      {t("mobileApp.favoriteTracks")}
                     </p>
                   </div>
                 </div>
@@ -1205,20 +1204,20 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 onClick={() =>
                   scrollTo("music")
                 }
-                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
+                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition group-hover:bg-[#FFD400]/[0.13]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition duration-300 group-hover:scale-110 group-hover:bg-[#FFD400]/[0.13]">
                     <ListIcon className="h-5 w-5" />
                   </div>
 
                   <div>
                     <p className="text-[10px] font-bold text-white">
-                      Music Library
+                      {t("mobileApp.musicLibrary")}
                     </p>
 
                     <p className="mt-1 text-[8px] leading-4 text-white/35">
-                      Sinhala · Tamil · English
+                      {t("mobileApp.languages")}
                     </p>
                   </div>
                 </div>
@@ -1231,20 +1230,20 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
                 onClick={() =>
                   scrollTo("programs")
                 }
-                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
+                className="group rounded-lg border border-white/[0.08] bg-[#090D16] p-2.5 text-left transition duration-200 hover:-translate-y-0.5 hover:border-[#FFD400]/20 hover:bg-[#FFD400]/[0.025]"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition group-hover:bg-[#FFD400]/[0.13]">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#FFD400]/20 bg-[#FFD400]/[0.08] text-[#FFD400] transition duration-300 group-hover:scale-110 group-hover:bg-[#FFD400]/[0.13]">
                     <CalendarIcon className="h-5 w-5" />
                   </div>
 
                   <div>
                     <p className="text-[10px] font-bold text-white">
-                      Programs
+                      {t("nav.programs")}
                     </p>
 
                     <p className="mt-1 text-[8px] leading-4 text-white/35">
-                      Stay Up to Date
+                      {t("mobileApp.stayUpToDate")}
                     </p>
                   </div>
                 </div>
@@ -1267,11 +1266,11 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-emerald-400">
-                    Zero FM Streaming
+                    {t("mobileApp.zeroStreaming")}
                   </p>
 
                   <p className="mt-1 text-[8px] text-white/35">
-                    High Quality Audio
+                    {t("mobileApp.highQuality")}
                   </p>
                 </div>
               </div>
@@ -1295,6 +1294,7 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
             {/* APP BUTTONS */}
 
             <div className="mt-5 grid grid-cols-2 gap-2.5">
+
               {/* APP STORE */}
 
               <a
@@ -1320,11 +1320,11 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
                 <div>
                   <p className="text-[7px] text-white/35">
-                    Download on the
+                    {t("mobileApp.downloadOn")}
                   </p>
 
                   <p className="mt-0.5 text-sm font-semibold text-white">
-                    App Store
+                    {t("mobileApp.appStore")}
                   </p>
                 </div>
               </a>
@@ -1347,11 +1347,11 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
                 <div>
                   <p className="text-[7px] text-white/35">
-                    Get it on
+                    {t("mobileApp.getItOn")}
                   </p>
 
                   <p className="mt-0.5 text-sm font-semibold text-white">
-                    Google Play
+                    {t("mobileApp.googlePlay")}
                   </p>
                 </div>
               </a>
@@ -1366,15 +1366,15 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
 
       <div className="mx-auto mt-30 flex w-full max-w-[1380px] flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#FFD400]" />
+          <span className="h-2 w-2 rounded-full bg-[#FFD400]" />
 
-          <span className="font-mono text-[7px] uppercase tracking-[0.18em] text-white/25">
-            Zero FM · Colombo 104.2 FM
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40 sm:text-[12px]">
+            {t("player.footerStation")}
           </span>
         </div>
 
-        <span className="font-mono text-[7px] uppercase tracking-[0.18em] text-white/20">
-          Nationwide Digital Stream · 24/7
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/35 sm:text-[12px]">
+          {t("player.footerStream")}
         </span>
       </div>
 
@@ -1410,6 +1410,73 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
           animation-play-state: running;
         }
 
+        /* -------------------------------------------------------------- */
+        /* Player motion                                                  */
+        /* -------------------------------------------------------------- */
+
+        .artwork-breathe {
+          animation: zeroFmBreathe 4s ease-in-out infinite;
+        }
+
+        @keyframes zeroFmBreathe {
+          0%,
+          100% {
+            scale: 1;
+          }
+
+          50% {
+            scale: 1.015;
+          }
+        }
+
+        .play-ring {
+          animation: zeroFmRing 1.8s ease-out infinite;
+        }
+
+        @keyframes zeroFmRing {
+          from {
+            opacity: 0.55;
+            scale: 1;
+          }
+
+          to {
+            opacity: 0;
+            scale: 1.6;
+          }
+        }
+
+        .track-fade {
+          animation: zeroFmTrackIn 0.6s ease;
+        }
+
+        @keyframes zeroFmTrackIn {
+          from {
+            opacity: 0;
+            translate: 0 6px;
+          }
+        }
+
+        .settings-pop {
+          animation: zeroFmPop 0.18s ease-out;
+        }
+
+        @keyframes zeroFmPop {
+          from {
+            opacity: 0;
+            translate: 0 6px;
+            scale: 0.97;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .artwork-breathe,
+          .play-ring,
+          .track-fade,
+          .settings-pop {
+            animation: none;
+          }
+        }
+
         @keyframes zeroFmWave {
           0%,
           100% {
@@ -1425,70 +1492,75 @@ className="relative h-full overflow-hidden rounded-[20px] border border-white/[0
         /* Volume                                                         */
         /* -------------------------------------------------------------- */
 
-        .volume-slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 13px;
-          height: 13px;
-          border-radius: 9999px;
-          background: #ffd400;
-          border: 2px solid #0f1523;
-          box-shadow:
-            0 0 0 1px rgba(255, 212, 0, 0.2),
-            0 0 8px rgba(255, 212, 0, 0.12);
-          cursor: pointer;
-        }
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: 0;
+  border-radius: 9999px;
+  background: #ffd400;
+  border: 2px solid #0f1523;
+  box-shadow:
+    0 0 0 1px rgba(255, 212, 0, 0.2),
+    0 0 8px rgba(255, 212, 0, 0.12);
+  cursor: pointer;
+}
 
-        .volume-slider::-moz-range-thumb {
-          width: 13px;
-          height: 13px;
-          border-radius: 9999px;
-          background: #ffd400;
-          border: 2px solid #0f1523;
-          box-shadow:
-            0 0 0 1px rgba(255, 212, 0, 0.2),
-            0 0 8px rgba(255, 212, 0, 0.12);
-          cursor: pointer;
-        }
+.volume-slider {
+  background: transparent;
+}
 
-        .volume-slider::-webkit-slider-runnable-track {
-          height: 5px;
-          border-radius: 9999px;
-        }
+.volume-slider::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    #ffd400 0%,
+    #ffd400 var(--volume),
+    rgba(255, 255, 255, 0.1) var(--volume),
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
 
-        .volume-slider::-moz-range-track {
-          height: 5px;
-          border-radius: 9999px;
-        }
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4px;
+  border-radius: 9999px;
+  background: #ffd400;
+  border: 2px solid #0f1523;
+  box-shadow:
+    0 0 0 1px rgba(255, 212, 0, 0.2),
+    0 0 8px rgba(255, 212, 0, 0.12);
+  cursor: pointer;
+}
 
-        /* -------------------------------------------------------------- */
-        /* Program Scroll                                                  */
-        /* -------------------------------------------------------------- */
+.volume-slider::-moz-range-track {
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+}
 
-        .program-scroll {
-          scrollbar-width: thin;
-          scrollbar-color:
-            rgba(255, 212, 0, 0.3)
-            rgba(255, 255, 255, 0.03);
-        }
+.volume-slider::-moz-range-progress {
+  height: 5px;
+  border-radius: 9999px;
+  background: #ffd400;
+}
 
-        .program-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .program-scroll::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.025);
-          border-radius: 9999px;
-        }
-
-        .program-scroll::-webkit-scrollbar-thumb {
-          background: rgba(255, 212, 0, 0.3);
-          border-radius: 9999px;
-        }
-
-        .program-scroll::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 212, 0, 0.48);
-        }
-
+.volume-slider::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: #ffd400;
+  border: 2px solid #0f1523;
+  box-shadow:
+    0 0 0 1px rgba(255, 212, 0, 0.2),
+    0 0 8px rgba(255, 212, 0, 0.12);
+  cursor: pointer;
+}
         /* -------------------------------------------------------------- */
         /* Mobile                                                         */
         /* -------------------------------------------------------------- */

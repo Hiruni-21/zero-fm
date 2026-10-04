@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import CategoryModal from "./CategoryModal";
-import type { SongLanguage } from "./MusicBrowserModal";
+import { getSongLanguage, type SongLanguage } from "./MusicBrowserModal";
+import { preloadRequestableTracks } from "../lib/request-tracks";
 import { useLanguage, type SiteLanguage } from "./LanguageContext";
 
 type Category = {
@@ -50,6 +52,40 @@ export default function CategoryExplorer({
 
   const [isExploreModalOpen, setIsExploreModalOpen] = useState(false);
 
+  // How many requestable songs each language has, shown on the cards
+  const [songCounts, setSongCounts] =
+    useState<Partial<Record<SongLanguage, number>>>({});
+
+  // Load the song catalogue in the background so Explore opens instantly.
+  useEffect(() => {
+    const load = () => {
+      preloadRequestableTracks()
+        .then((tracks) => {
+          const counts: Partial<Record<SongLanguage, number>> = {};
+
+          tracks.forEach((track) => {
+            const songLanguage = getSongLanguage(track);
+            if (songLanguage !== "unknown") {
+              counts[songLanguage] = (counts[songLanguage] || 0) + 1;
+            }
+          });
+
+          setSongCounts(counts);
+        })
+        .catch(() => {
+        // The modal shows the error and a retry button if this fails.
+      });
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(load, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const id = window.setTimeout(load, 500);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const activeCategory = categories.find(
     (category) => category.language === selectedLanguage
   );
@@ -64,6 +100,27 @@ export default function CategoryExplorer({
     setSelectedLanguage(null);
   };
 
+  // Cards tilt slightly towards the mouse
+  const handleTilt = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType !== "mouse") return;
+
+    const card = event.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+
+    card.style.setProperty("--tilt-x", `${(-y * 7).toFixed(2)}deg`);
+    card.style.setProperty("--tilt-y", `${(x * 9).toFixed(2)}deg`);
+    card.style.setProperty("--glare-x", `${((x + 0.5) * 100).toFixed(1)}%`);
+    card.style.setProperty("--glare-y", `${((y + 0.5) * 100).toFixed(1)}%`);
+  };
+
+  const resetTilt = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const card = event.currentTarget;
+    card.style.setProperty("--tilt-x", "0deg");
+    card.style.setProperty("--tilt-y", "0deg");
+  };
+
   const getAriaLabel = (categoryTitle: string) => {
     if (activeSiteLanguage === "sinhala") {
       return `${categoryTitle} ගවේෂණය කරන්න`;
@@ -76,7 +133,7 @@ export default function CategoryExplorer({
 
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 [perspective:900px] sm:grid-cols-3">
         {categories.map((category) => (
           <button
             key={category.title}
@@ -84,15 +141,39 @@ export default function CategoryExplorer({
             aria-haspopup="dialog"
             aria-label={getAriaLabel(category.title)}
             onClick={() => openExploreModal(category.language)}
-            className="group relative aspect-[1.32/1] cursor-pointer overflow-hidden rounded-xl border border-white/[0.08] bg-[#111622] text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD400]"
+            onPointerMove={handleTilt}
+            onPointerLeave={resetTilt}
+            style={{
+              transform:
+                "rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg))",
+            }}
+            className="group relative aspect-[1.32/1] cursor-pointer overflow-hidden rounded-xl border border-white/[0.08] bg-[#111622] text-center transition-[transform,border-color,box-shadow] duration-300 ease-out hover:border-[#FFD400]/35 hover:shadow-[0_18px_40px_rgba(0,0,0,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD400] motion-reduce:!transform-none"
           >
             <img
               src={category.image}
               alt={category.imageAlt}
-              className="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-[1.08]"
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-[#070B13]/95 via-[#070B13]/25 to-transparent" />
+
+            {/* Light that follows the mouse */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{
+                background:
+                  "radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(255,255,255,0.14), transparent 55%)",
+              }}
+            />
+
+            {songCounts[category.language] ? (
+              <span className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-[#070B13]/70 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.08em] text-white/80 backdrop-blur transition duration-300 group-hover:border-[#FFD400]/50 group-hover:text-[#FFD400]">
+                {t("categories.songCount", {
+                  n: songCounts[category.language] ?? 0,
+                })}
+              </span>
+            ) : null}
 
             <span className="absolute inset-x-0 bottom-0 flex flex-col items-center p-3">
               <span className="flex items-baseline gap-1 text-white">
