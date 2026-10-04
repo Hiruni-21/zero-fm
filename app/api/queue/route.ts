@@ -51,11 +51,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const listenerIp =
-    request.headers.get("cf-connecting-ip") ||
-    forwardedFor?.split(",")[0]?.trim();
-
   try {
     const response = await fetch(REQUEST_URL, {
       method: "POST",
@@ -63,7 +58,11 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        ...(listenerIp ? { "X-Forwarded-For": listenerIp } : {}),
+        // Radio.co sits behind Cloudflare, which turns away server requests
+        // that don't look like they come from its request widget.
+        "User-Agent": "Mozilla/5.0 (compatible; ZeroFM/1.0; +https://zero-fm.wedagehiruni123.workers.dev)",
+        Origin: "https://embed.radio.co",
+        Referer: "https://embed.radio.co/",
       },
       body: JSON.stringify({ track_id: trackId }),
     });
@@ -74,7 +73,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    console.error("Radio.co request failed:", response.status, text);
+    console.error("Radio.co request failed:", response.status, text.slice(0, 300));
 
     if (response.status === 429) {
       return NextResponse.json(
@@ -93,6 +92,7 @@ export async function POST(request: Request) {
         error:
           readRadioMessage(text) ||
           "Radio.co couldn't accept this request. Please try another song.",
+        radioStatus: response.status,
       },
       { status: 502 },
     );
