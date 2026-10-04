@@ -1,6 +1,6 @@
 # Deploys Zero FM to Cloudflare Workers.
 #
-#   push to dev  -> preview environment (its own URL, the live site is untouched)
+#   push to dev  -> preview version (its own URL, the live site is untouched)
 #   push to main -> production (the live site)
 #
 # Needs two GitHub repository secrets:
@@ -43,10 +43,13 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      # vinext builds the site and deploys it with Cloudflare's tools
+      # vinext builds the site and deploys it with Cloudflare's tools.
+      # --no-promote uploads a new version and prints its preview URL
+      # without switching the live site over to it. (--preview would
+      # deploy to the same "zero-fm" worker and replace the live site.)
       - name: Deploy preview (dev branch)
         if: github.ref_name == 'dev'
-        run: npm run deploy:vinext -- --preview
+        run: npm run deploy:vinext -- --no-promote
 
       - name: Deploy live site (main branch)
         if: github.ref_name == 'main'
