@@ -6,14 +6,12 @@ export async function GET() {
   const url = `https://public.radio.co/api/v2/${STATION_ID}/track/current`;
 
   try {
+    // Share one Radio.co lookup between all listeners for 10 seconds.
     const response = await fetch(url, {
-      cache: "no-store",
+      next: { revalidate: 10 },
     });
 
     const text = await response.text();
-
-    console.log("Radio.co status:", response.status);
-    console.log("Radio.co response:", text);
 
     if (!response.ok) {
       return NextResponse.json(

@@ -20,14 +20,14 @@ export async function GET() {
   const url = `https://public.radio.co/stations/${STATION_ID}/requests/tracks`;
 
   try {
+    // The catalogue rarely changes, so reuse it for a minute instead of
+    // asking Radio.co again on every Explore click.
     const response = await fetch(url, {
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     const text = await response.text();
 
-    console.log("Radio.co tracks status:", response.status);
-    console.log("Radio.co tracks response:", text);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -54,9 +54,17 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({
-      data: json.tracks || [],
-    });
+    return NextResponse.json(
+      {
+        data: json.tracks || [],
+      },
+      {
+        headers: {
+          "Cache-Control":
+            "public, max-age=60, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     console.error("Radio.co tracks error:", error);
 

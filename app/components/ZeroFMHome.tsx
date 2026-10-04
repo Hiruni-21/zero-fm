@@ -7,9 +7,20 @@ import {
 } from "./LanguageContext";
 
 import MobileMenu from "./MobileMenu";
+import CategoryModal from "./CategoryModal";
+import PageEffects from "./PageEffects";
+import {
+  selectSection,
+  useActiveSection,
+} from "../lib/active-section";
+import { requestPlay } from "../lib/ui-events";
 import CategoryExplorer from "./CategoryExplorer";
 import RadioPlayer from "./RadioPlayer";
 import RequestSong from "./RequestSong";
+import {
+  fetchNowPlaying,
+  NOW_PLAYING_POLL_MS,
+} from "../lib/now-playing";
 
 
 const ZERO_FM_LOGO =
@@ -682,6 +693,21 @@ type SearchSong = {
   } | null;
 };
 
+type HomeTrackData = {
+  title?: string;
+  track_title?: string;
+  track_artist?: string;
+  artist?: string;
+  artwork_urls?: {
+    standard?: string;
+    large?: string;
+  };
+};
+
+type HomeNowPlayingResponse = {
+  data?: HomeTrackData;
+};
+
 type SiteLanguage =
   | "english"
   | "sinhala"
@@ -756,8 +782,8 @@ const SITE_TRANSLATIONS: Record<
     contact: "Contact",
     downloadApp: "Download App",
     musicConnects: "Music Connects Us",
-    goodMusic: "GOOD MUSIC.",
-    brighterDays: "BRIGHTER DAYS.",
+    goodMusic: "Good Music",
+    brighterDays: "Brighter Days",
     digitalCommunity:
       "Sri Lanka's Digital Music Community",
     listenLive: "Listen Live",
@@ -1018,371 +1044,32 @@ const SITE_TRANSLATIONS: Record<
       "Singlish தட்டச்சும் ஆதரிக்கப்படுகிறது",
   },
 };
+/*
+ * Search icon popup: the same song list as Explore, with every song and
+ * language filters. Picking a song sends it to the Radio.co queue through
+ * /api/queue, exactly like Explore and the request form.
+ */
 function SearchOverlay({
   open,
   onClose,
-  language,
 }: {
   open: boolean;
   onClose: () => void;
-  language: SiteLanguage;
 }) {
-  const [query, setQuery] =
-    React.useState("");
+  const { t } = useLanguage();
 
-  const [songs, setSongs] =
-    React.useState<SearchSong[]>([]);
-
-  const [loading, setLoading] =
-    React.useState(false);
-
-  const t = (key: TranslationKey) =>
-    SITE_TRANSLATIONS[language][key];
-
-  React.useEffect(() => {
-    if (!open) return;
-
-    let cancelled = false;
-
-    const loadSongs = async () => {
-      try {
-        setLoading(true);
-
-        const response =
-          await fetch("/api/tracks", {
-            cache: "no-store",
-          });
-
-        if (!response.ok) {
-          throw new Error(
-            "Failed to load Radio.co songs"
-          );
-        }
-
-        const result =
-          await response.json();
-
-        if (!cancelled) {
-          setSongs(
-            Array.isArray(result.data)
-              ? result.data
-              : []
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Song search error:",
-          error
-        );
-
-        if (!cancelled) {
-          setSongs([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadSongs();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open]);
-
-  React.useEffect(() => {
-    if (!open) {
-      setQuery("");
-    }
-  }, [open]);
-
-  if (!open) {
-    return null;
-  }
-
-  const results =
-    query.trim().length === 0
-      ? []
-      : songs
-          .map((song) => ({
-            song,
-            score: getSearchScore(
-              song,
-              query
-            ),
-          }))
-          .filter(
-            (item) => item.score > 0
-          )
-          .sort((a, b) => {
-            if (
-              b.score !== a.score
-            ) {
-              return (
-                b.score -
-                a.score
-              );
-            }
-
-            return a.song.title.localeCompare(
-              b.song.title
-            );
-          })
-          .slice(0, 30)
-          .map(
-            (item) => item.song
-          );
-
-  const handleSongClick = (
-    song: SearchSong
-  ) => {
-    onClose();
-
-    window.dispatchEvent(
-      new CustomEvent(
-        "zero-fm-song-selected",
-        {
-          detail: {
-            id: song.id,
-            title: song.title,
-            artist: song.artist,
-            artwork:
-              song.artwork
-                ?.large_url ||
-              song.artwork?.url ||
-              null,
-          },
-        }
-      )
-    );
-
-    window.setTimeout(() => {
-      document
-        .querySelector("#request")
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-    }, 100);
-  };
+  if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[300] flex items-start justify-center bg-black/70 px-5 pt-24 backdrop-blur-sm"
-      onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
-          onClose();
-        }
+    <CategoryModal
+      category={{
+        title: t("requestWidget.title"),
+        language: "all",
       }}
-    >
-      <div className="w-full max-w-[620px] overflow-hidden rounded-2xl border border-white/[0.1] bg-[#0F1523] shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
-        <div className="flex items-center gap-3 border-b border-white/[0.08] px-5 py-4">
-          <Icon
-            name="search"
-            className="size-5 shrink-0 text-[#FFD400]"
-          />
-
-          <input
-            autoFocus
-            type="text"
-            value={query}
-            onChange={(event) =>
-              setQuery(
-                event.target.value
-              )
-            }
-            placeholder={t(
-              "searchSongsArtists"
-            )}
-            className="min-w-0 flex-1 bg-transparent font-body text-sm text-white outline-none placeholder:text-[#64748B]"
-          />
-
-          {query && (
-            <button
-              type="button"
-              onClick={() =>
-                setQuery("")
-              }
-              className="text-xs text-[#64748B] transition hover:text-white"
-              aria-label="Clear search"
-            >
-              {t("clear")}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close search"
-            className="flex size-8 items-center justify-center rounded-full text-lg text-[#94A3B8] transition hover:bg-white/[0.06] hover:text-white"
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="max-h-[500px] overflow-y-auto">
-          {!query.trim() ? (
-            <div className="px-6 py-12 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#FFD400]/10">
-                <Icon
-                  name="music"
-                  className="size-5 text-[#FFD400]"
-                />
-              </div>
-
-              <p className="mt-4 font-display text-sm font-semibold text-white">
-                {t(
-                  "searchZeroSongs"
-                )}
-              </p>
-
-              <p className="mt-1 text-[10px] leading-5 text-[#64748B]">
-                {t(
-                  "englishSinhalaSinglish"
-                )}
-                <br />
-                {t(
-                  "searchExample"
-                )}
-              </p>
-            </div>
-          ) : loading ? (
-            <div className="px-6 py-12 text-center">
-              <p className="text-xs text-[#94A3B8]">
-                {t(
-                  "loadingSongs"
-                )}
-              </p>
-            </div>
-          ) : results.length > 0 ? (
-            <div className="p-3">
-              <p className="px-3 pb-2 font-mono text-[8px] uppercase tracking-[0.14em] text-[#64748B]">
-                {results.length}{" "}
-                {results.length === 1
-                  ? t("result")
-                  : t("results")}
-              </p>
-
-              <div className="flex flex-col gap-1">
-                {results.map(
-                  (song) => {
-                    const artwork =
-                      song.artwork
-                        ?.large_url ||
-                      song.artwork?.url ||
-                      null;
-
-                    return (
-                      <button
-                        key={`${song.id}-${song.title}-${song.artist}`}
-                        type="button"
-                        onClick={() =>
-                          handleSongClick(
-                            song
-                          )
-                        }
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/[0.05]"
-                      >
-                        <div className="size-11 shrink-0 overflow-hidden rounded-lg bg-[#121826]">
-                          {artwork ? (
-                            <img
-                              src={artwork}
-                              alt=""
-                              className="size-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex size-full items-center justify-center">
-                              <Icon
-                                name="music"
-                                className="size-4 text-[#FFD400]"
-                              />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-display text-[12px] font-semibold text-white">
-                            {song.title}
-                          </p>
-
-                          <p className="mt-0.5 truncate font-body text-[10px] text-[#8F9CAE]">
-                            {song.artist}
-                          </p>
-                        </div>
-
-                        <span className="text-sm text-[#FFD400]">
-                          →
-                        </span>
-                      </button>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="px-6 py-12 text-center">
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-white/[0.04]">
-                <Icon
-                  name="search"
-                  className="size-5 text-[#64748B]"
-                />
-              </div>
-
-              <p className="mt-4 font-display text-sm font-semibold text-white">
-                {t(
-                  "noSongsFound"
-                )}
-              </p>
-
-              <p className="mt-1 text-[10px] text-[#64748B]">
-                {t(
-                  "tryAnotherSpelling"
-                )}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+      onClose={onClose}
+    />
   );
 }
-
-const features: {
-  title: TranslationKey;
-  icon: IconName;
-  href: string;
-}[] = [
-  {
-    title: "liveRadioStreaming",
-    icon: "radio",
-    href: "#live",
-  },
-  {
-    title: "requestSongs",
-    icon: "music",
-    href: "#request",
-  },
-  {
-    title: "viewProgramSchedule",
-    icon: "pin",
-    href: "#programs",
-  },
-  {
-    title: "worksOnTheGo",
-    icon: "mobile",
-    href: "#app",
-  },
-  {
-    title: "joinOurCommunity",
-    icon: "community",
-    href: "#about",
-  },
-];
 
 const communityCards = (
   language: SiteLanguage
@@ -1445,9 +1132,24 @@ export default function ZeroFMHome() {
   const [searchOpen, setSearchOpen] =
     React.useState(false);
 
-  const [siteLanguage, setSiteLanguage] =
-    React.useState<SiteLanguage>(
-      "english"
+  const closeSearch = React.useCallback(
+    () => setSearchOpen(false),
+    []
+  );
+
+  // Highlights the navbar link for the section on screen
+  const activeNav = useActiveSection();
+
+  // One shared language for the whole page, so every section
+  // (player, schedule, request form, explorer) switches together.
+  const {
+    language: siteLanguage,
+    setLanguage: setSiteLanguage,
+  } = useLanguage();
+
+  const [homeTrack, setHomeTrack] =
+    React.useState<HomeTrackData | null>(
+      null
     );
 
   const t = (key: TranslationKey) =>
@@ -1456,34 +1158,38 @@ export default function ZeroFMHome() {
     ][key];
 
   React.useEffect(() => {
-    const handleKeyDown = (
-      event: KeyboardEvent
-    ) => {
-      if (
-        (event.ctrlKey ||
-          event.metaKey) &&
-        event.key.toLowerCase() ===
-          "k"
-      ) {
-        event.preventDefault();
-        setSearchOpen(true);
-      }
+    let cancelled = false;
 
-      if (event.key === "Escape") {
-        setSearchOpen(false);
+    const fetchHomeNowPlaying = async () => {
+      try {
+        const result =
+          await fetchNowPlaying<HomeNowPlayingResponse>();
+
+        if (!cancelled) {
+          setHomeTrack(result.data ?? null);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error(
+            "Failed to fetch home now playing:",
+            error
+          );
+        }
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
+    void fetchHomeNowPlaying();
+
+    const interval = window.setInterval(
+      () => {
+        void fetchHomeNowPlaying();
+      },
+      NOW_PLAYING_POLL_MS
     );
 
     return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
+      cancelled = true;
+      window.clearInterval(interval);
     };
   }, []);
 
@@ -1517,12 +1223,11 @@ export default function ZeroFMHome() {
         }
       `}</style>
 
+      <PageEffects />
+
       <SearchOverlay
         open={searchOpen}
-        onClose={() =>
-          setSearchOpen(false)
-        }
-        language={siteLanguage}
+        onClose={closeSearch}
       />
 
       <header className="fixed left-0 right-0 top-0 z-[100] h-[72px] w-full border-b border-white/[0.08] bg-[#0A0E17]">
@@ -1541,51 +1246,65 @@ export default function ZeroFMHome() {
             />
           </a>
 
-          <nav
-            className="font-body ml-auto hidden items-center gap-6 xl:flex"
-            aria-label="Main navigation"
-          >
-            {[
-              ["home", "#home"],
-              ["live", "#live"],
-              ["programs", "#programs"],
-              ["request", "#request"],
-              ["about", "#about"],
-              ["contact", "#contact"],
-            ].map(
-              ([label, href], index) => (
-                <a
-                  key={label}
-                  href={href}
-                  className={`relative py-2 text-[12px] transition hover:text-[#FFD400] ${
-                    index === 0
-                      ? "text-white after:absolute after:inset-x-0 after:-bottom-[11px] after:h-0.5 after:bg-[#FFD400]"
-                      : "text-[#94A3B8]"
-                  }`}
-                >
-                  {t(
-                    label as TranslationKey
-                  )}
-                </a>
-              )
-            )}
-          </nav>
+<nav
+  className="font-body ml-auto hidden items-center gap-6 xl:flex"
+  aria-label="Main navigation"
+>
+  {[
+    ["home", "#home"],
+    ["live", "#live"],
+    ["programs", "#programs"],
+    ["request", "#request"],
+    ["about", "#about"],
+    ["contact", "#contact"],
+  ].map(([label, href]) => {
+    const isActive =
+      activeNav === label;
 
+    return (
+      <a
+        key={label}
+        href={href}
+        onClick={() =>
+          selectSection(label)
+        }
+        aria-current={
+          isActive ? "true" : undefined
+        }
+        className={`relative py-2 text-[12px] transition hover:text-[#FFD400] ${
+          isActive
+            ? "text-white"
+            : "text-[#94A3B8]"
+        }`}
+      >
+        {t(
+          label as TranslationKey
+        )}
+
+        <span
+          className={`absolute inset-x-0 -bottom-[11px] h-0.5 origin-center bg-[#FFD400] transition-transform duration-300 ${
+            isActive
+              ? "scale-x-100"
+              : "scale-x-0"
+          }`}
+        />
+      </a>
+    );
+  })}
+</nav>
           <div className="ml-auto hidden items-center gap-3 xl:flex">
             <button
-              type="button"
-              onClick={() =>
-                setSearchOpen(true)
-              }
-              aria-label="Search Zero FM"
-              title="Search"
-              className="flex size-8 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-white/[0.05] hover:text-[#FFD400]"
-            >
-              <Icon
-                name="search"
-                className="size-4"
-              />
-            </button>
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-label="Search Zero FM"
+                title="Search"
+                className="flex size-8 items-center justify-center rounded-full text-[#94A3B8] transition hover:bg-white/[0.05] hover:text-[#FFD400]"
+                >
+                <Icon
+                    name="search"
+                    className="size-4"
+                />
+                </button>
 
             <SocialLinks />
 
@@ -1607,25 +1326,81 @@ export default function ZeroFMHome() {
           </div>
         </div>
       </header>
-            <section
-        id="home"
-        className="scroll-mt-[72px] border-b border-white/[0.07] bg-[#090D16]"
-      >
-        <div className="mx-auto grid max-w-[1440px] items-center gap-8 px-5 py-10 sm:px-8 sm:py-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10 lg:px-12 lg:py-14">
+            {/* =========================================================
+    HERO SECTION — FIGMA BACKGROUND
+    Adds the deep navy gradient and subtle yellow circles.
+    ========================================================= */}
+<section
+  id="home"
+  className="relative isolate scroll-mt-[72px] overflow-hidden border-b border-white/[0.07] bg-[#0A0F1A]"
+>
+  {/* Background gradient */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute inset-0 -z-10"
+    style={{
+      background:
+        "linear-gradient(180deg, #0A0F1A 0%, #0D1424 50%, #080C14 100%)",
+    }}
+  />
+
+  {/* Decorative circle — upper left */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -left-[190px] -top-[130px] -z-10 h-[500px] w-[800px] rounded-full border border-[#FFD400]/20"
+    style={{
+      boxShadow: "0 0 16px rgba(255, 212, 0, 0.08)",
+    }}
+  />
+
+  {/* Decorative circle — upper right */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute -right-[40px] -top-[100px] -z-10 h-[700px] w-[700px] rounded-full border border-[#FFD400]/20"
+    style={{
+      boxShadow: "0 0 16px rgba(255, 212, 0, 0.08)",
+    }}
+  />
+
+  {/* Decorative circle — lower section */}
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute left-[25%] top-[320px] -z-10 h-[450px] w-[1012px] rounded-full border border-[#FFD400]/15"
+  />
+
+  {/* Keep the existing hero content below this point */}
+        <div className="mx-auto grid w-full max-w-[1440px] items-center gap-8 px-6 py-10 sm:px-8 sm:py-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:px-6 lg:py-14">
           <div className="relative z-10">
-            <p className="mb-2 font-display text-[18px] font-semibold italic text-[#FFD400] sm:text-xl">
-              {t("musicConnects")}
-            </p>
+            
 
-            <h1 className="font-display text-[44px] font-bold leading-[0.94] sm:text-[58px] lg:text-[64px]">
-              {t("goodMusic")}
-              <br />
-              <span className="text-[#FFD400]">
-                {t("brighterDays")}
-              </span>
-            </h1>
+            {/* =========================================================
+    HERO TITLE — SPACE GROTESK + HANDWRITTEN FONT
+    ========================================================= */}
+<h1
+  className="m-0 text-[64px] font-bold leading-[0.86] tracking-[-0.045em] text-white sm:text-[70px] lg:text-[76px]"
+  style={{
+    fontFamily: '"Space Grotesk", sans-serif',
+  }}
+>
+  {/* Main white heading */}
+  <span className="block">
+    {t("goodMusic")}
+  </span>
 
-            <p className="mt-5 font-mono text-[8px] font-medium uppercase tracking-[0.19em] text-[#94A3B8] sm:text-[9px]">
+  {/* Yellow handwritten heading */}
+  <span
+    className="mt-1 block w-fit -rotate-2 whitespace-nowrap pb-3 text-[68px] font-normal leading-[1] tracking-normal sm:pb-4 sm:text-[82px] lg:text-[96px]"
+    style={{
+      fontFamily: '"Covered By Your Grace", cursive',
+      color: "#FFD400",
+      textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
+    }}
+  >
+    {t("brighterDays")}
+  </span>
+</h1>
+
+            <p className="mt-4 font-mono text-[8px] font-medium uppercase tracking-[0.19em] text-[#94A3B8] sm:text-[9px]">
               {t("digitalCommunity")}
             </p>
 
@@ -1637,7 +1412,7 @@ export default function ZeroFMHome() {
                     "sinhala"
                   )
                 }
-                className={`rounded-full px-2 py-1 transition ${
+                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
                   siteLanguage ===
                   "sinhala"
                     ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
@@ -1654,7 +1429,7 @@ export default function ZeroFMHome() {
                     "tamil"
                   )
                 }
-                className={`rounded-full px-2 py-1 transition ${
+                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
                   siteLanguage === "tamil"
                     ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
                     : "text-[#94A3B8] hover:text-white"
@@ -1670,7 +1445,7 @@ export default function ZeroFMHome() {
                     "english"
                   )
                 }
-                className={`rounded-full px-2 py-1 transition ${
+                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
                   siteLanguage ===
                   "english"
                     ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
@@ -1684,21 +1459,26 @@ export default function ZeroFMHome() {
             <div className="mt-5 flex flex-wrap gap-2.5">
               <a
                 href="#live"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#FFD400] px-5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16]"
+                onClick={(event) => {
+                  // Scroll to the player and start the stream
+                  event.preventDefault();
+                  requestPlay();
+                }}
+                className="group inline-flex h-11 items-center gap-2 rounded-full bg-[#FFD400] px-5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] shadow-[0_0_0_rgba(255,212,0,0)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ffe45c] hover:shadow-[0_12px_30px_rgba(255,212,0,0.25)]"
               >
-                <span className="flex size-6 items-center justify-center rounded-full bg-[#090D16] text-[8px] text-[#FFD400]">
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#090D16] text-[8px] text-[#FFD400] transition-transform duration-300 group-hover:scale-110">
                   ▶
                 </span>
 
                 {t("listenLive")}
               </a>
 
-              <a
+              {/*<a
                 href="#contact"
                 className="inline-flex h-11 items-center rounded-full border border-white/15 px-5 text-[10px] font-bold uppercase tracking-[0.06em] text-white/85"
               >
                 {t("contactStudio")}
-              </a>
+              </a>*/}
             </div>
 
             <p className="font-body mt-4 text-[7px] uppercase tracking-[0.17em] text-[#64748B]">
@@ -1709,29 +1489,53 @@ export default function ZeroFMHome() {
           </div>
 
           <div className="relative min-w-0">
-            <div className="overflow-hidden rounded-2xl border border-white/[0.09] bg-[#0F1523] p-2 shadow-[0_22px_70px_rgba(0,0,0,0.3)] sm:p-3">
-              <div className="relative aspect-[2.18/1] overflow-hidden rounded-xl bg-[#111622]">
+            <div className="relative overflow-visible rounded-[28px] border border-white/[0.10] bg-[#101626]/90 p-3 pt-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-4">
+              <div className="group/hero relative aspect-[2.18/1] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111622]">
                 <img
                   src={
                     ZERO_FM_HERO_PHOTO
                   }
                   alt="Woman enjoying music with headphones"
-                  className="absolute inset-0 size-full object-cover"
+                  className="absolute inset-0 size-full object-cover transition-transform duration-[1200ms] ease-out group-hover/hero:scale-[1.04]"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-r from-[#090D16]/80 via-[#090D16]/35 to-transparent" />
 
-                <div className="absolute inset-0 flex flex-col justify-center p-5 sm:p-8">
-                  <p className="font-mono text-[8px] uppercase tracking-[0.15em] text-[#94A3B8]">
-                    {t("onAirNow")}
-                  </p>
+                {/* =========================================================
+    IMAGE OVERLAY TEXT — FIGMA TYPOGRAPHY
+    Small mono label + two handwritten lines.
+    ========================================================= */}
+<div className="absolute inset-0 flex flex-col items-start justify-center p-5 sm:p-6">
+  {/* Small ON AIR NOW label */}
+  <p
+    className="text-[9px] font-semibold uppercase leading-[13.5px] tracking-[2.16px] text-[#8F9CAE]"
+    style={{
+      fontFamily: '"JetBrains Mono", monospace',
+    }}
+  >
+    {t("onAirNow")}
+  </p>
 
-                  <p className="mt-2 font-display text-2xl font-bold leading-tight sm:text-4xl">
-                    {t(
-                      "feelGoodVibes"
-                    )}
-                  </p>
-                </div>
+  {/* White handwritten line */}
+  <p
+    className="mt-2 text-[36px] font-normal leading-[40px] text-white"
+    style={{
+      fontFamily: '"Covered By Your Grace", cursive',
+    }}
+  >
+    {t("feelGoodVibes").split(" ").slice(0, 2).join(" ")}
+  </p>
+
+  {/* Yellow handwritten line */}
+  <p
+    className="-mt-1 text-[42px] font-normal leading-[46px] text-[#FFD400] sm:text-[48px] sm:leading-[48px]"
+    style={{
+      fontFamily: '"Covered By Your Grace", cursive',
+    }}
+  >
+    {t("feelGoodVibes").split(" ").slice(2).join(" ")}
+  </p>
+</div>
 
                 <span className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#090D16]/75 px-3 py-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-white">
                   <span className="size-1.5 rounded-full bg-[#34D399]" />
@@ -1739,89 +1543,128 @@ export default function ZeroFMHome() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-2 py-3 sm:px-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <img
-                    src={ZERO_FM_LOGO}
-                    alt="Zero FM"
-                    className="size-9 shrink-0 rounded-lg bg-[#111622] object-contain p-1"
-                  />
 
-                  <div className="min-w-0">
-                    <p className="font-mono text-[7px] uppercase tracking-[0.1em] text-[#34D399]">
-                      {t("liveNow")}
-                    </p>
+<div className="grid grid-cols-[1fr_auto] items-center gap-3 px-2 py-3 sm:px-3">
+  <div className="flex min-w-0 items-center gap-3">
+    <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-[#111622]">
+      {homeTrack?.artwork_urls?.standard ||
+      homeTrack?.artwork_urls?.large ? (
+        <img
+          src={
+            homeTrack.artwork_urls.standard ||
+            homeTrack.artwork_urls.large ||
+            ""
+          }
+          alt=""
+          className="size-full object-cover"
+        />
+      ) : (
+        <img
+          src={ZERO_FM_LOGO}
+          alt="Zero FM"
+          className="size-full object-contain p-1"
+        />
+      )}
+    </div>
 
-                    <p className="truncate font-display text-[10px] font-semibold text-white sm:text-xs">
-                      {`${t(
-                        "goodMusic"
-                      ).replace(
-                        ".",
-                        ""
-                      )} ${t(
-                        "brighterDays"
-                      ).replace(
-                        ".",
-                        ""
-                      )}`}
-                    </p>
+    <div className="min-w-0">
+        <p className="flex items-center gap-2 font-mono text-[7px] uppercase tracking-[0.1em] text-[#34D399]">
+            <span className="size-1.5 shrink-0 rounded-full bg-[#34D399]" />
+            {t("liveNow")}
+        </p>
 
-                    <p className="truncate font-mono text-[9px] text-[#8F9CAE]">
-                      {t(
-                        "nationwideDigitalStream"
-                      )}
-                    </p>
-                  </div>
-                </div>
+        <p className="truncate font-display text-[10px] font-semibold text-white sm:text-xs">
+            {homeTrack?.track_title ||
+            homeTrack?.title ||
+            "Zero FM Live"}
+        </p>
 
-                <a
-                  href="#live"
-                  aria-label="Open live player"
-                  className="flex size-9 items-center justify-center rounded-full bg-[#FFD400] text-[11px] text-[#090D16]"
-                >
-                  ▶
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <p className="truncate font-mono text-[9px] text-[#8F9CAE]">
+            {homeTrack?.track_artist ||
+            homeTrack?.artist ||
+            "Zero FM"}
+        </p>
+    </div>
+</div>
 
-      <RadioPlayer />
+  <a
+    href="#live"
+    aria-label="Open live player"
+    onClick={(event) => {
+      event.preventDefault();
+      requestPlay();
+    }}
+    className="flex size-9 items-center justify-center rounded-full bg-[#FFD400] text-[11px] text-[#090D16] transition duration-300 hover:scale-110 hover:bg-[#FFE45C] hover:shadow-[0_0_20px_rgba(255,212,0,0.35)]"
+  >
+    ▶
+  </a>
+</div>
 
-      <section className="border-b border-white/[0.07] bg-[#090D16]">
-        <div className="mx-auto grid max-w-[1360px] gap-3 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_0.28fr] lg:px-10 lg:py-6">
+
+
+</div>
+</div>
+</div>
+
+</section>
+
+<RadioPlayer />
+
+      <section
+        id="music"
+        className="scroll-mt-[72px] border-b border-white/[0.07] bg-[#090D16]"
+      >
+        <div className="mx-auto grid max-w-[1440px] gap-3 px-5 pt-6 pb-28 sm:px-8 lg:grid-cols-[1fr_0.28fr] lg:px-12 lg:pt-6 lg:pb-32">
           <CategoryExplorer
             language={siteLanguage}
           />
 
           <aside className="rounded-xl border border-white/[0.08] bg-[#0F1523] p-3">
             <div className="flex flex-col gap-2">
-              {features.map(
-                (feature) => (
-                  <a
-                    key={t(
-                      feature.title
-                    )}
-                    href={feature.href}
-                    className="flex items-center gap-3 text-[10px] font-medium text-white/85 transition hover:text-[#FFD400]"
-                  >
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#121826] text-[#FFD400]">
-                      <Icon
-                        name={
-                          feature.icon
-                        }
-                        className="size-3"
-                      />
-                    </span>
+              {[
+                {
+                  title: "liveRadioStreaming" as const,
+                  href: "#live",
+                  icon: "radio" as const,
+                },
+                {
+                  title: "requestSongs" as const,
+                  href: "#request",
+                  icon: "music" as const,
+                },
+                {
+                  title: "viewProgramSchedule" as const,
+                  href: "#programs",
+                  icon: "pin" as const,
+                },
+                {
+                  title: "worksOnTheGo" as const,
+                  href: "#app",
+                  icon: "mobile" as const,
+                },
+                {
+                  title: "joinOurCommunity" as const,
+                  href: "#about",
+                  icon: "community" as const,
+                },
+              ].map((feature) => (
+                <a
+                  key={feature.title}
+                  href={feature.href}
+                  className="group flex items-center gap-3 text-[10px] font-medium text-white/85 transition hover:translate-x-1 hover:text-[#FFD400]"
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#121826] text-[#FFD400] transition-colors duration-300 group-hover:bg-[#FFD400] group-hover:text-[#090D16]">
+                    <Icon
+                      name={feature.icon}
+                      className="size-3"
+                    />
+                  </span>
 
-                    {t(
-                      feature.title
-                    )}
-                  </a>
-                )
-              )}
-            </div>
+                  {t(feature.title)}
+                </a>
+              ))}
+
+</div>
 
             <p className="mt-3 text-right font-display text-[13px] font-semibold italic leading-tight text-[#FFD400]">
               {t(
@@ -1840,8 +1683,8 @@ export default function ZeroFMHome() {
         id="about"
         className="scroll-mt-[72px] border-b border-white/[0.07] bg-[#070B13]"
       >
-        <div className="mx-auto max-w-[1360px] px-5 py-6 sm:px-8 lg:px-10 lg:py-6">
-          <div className="grid gap-6 lg:grid-cols-[0.7fr_1.7fr] lg:items-center">
+        <div className="mx-auto max-w-[1440px] px-5 py-6 sm:px-8 lg:px-12 lg:py-16">
+          <div className="grid items-center gap-8 lg:grid-cols-[0.85fr_2.15fr]">
             <div>
               <h2 className="font-display text-xl font-bold">
                 {t(
@@ -1879,12 +1722,12 @@ export default function ZeroFMHome() {
                         " "
                       )
                     }`}
-                    className="group relative aspect-[1.42/1] overflow-hidden rounded-lg border border-white/[0.08] bg-[#111622]"
+                    className="group relative aspect-[1.42/1] overflow-hidden rounded-lg border border-white/[0.08] bg-[#111622] transition duration-300 hover:-translate-y-1 hover:border-[#FFD400]/35 hover:shadow-[0_16px_36px_rgba(0,0,0,0.45)]"
                   >
                     <img
                       src={card.image}
                       alt="Zero FM listeners enjoying music"
-                      className="absolute inset-0 size-full object-cover"
+                      className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.07]"
                     />
 
                     <div className="absolute inset-0 bg-gradient-to-t from-[#070B13]/90 via-transparent to-[#070B13]/10" />
@@ -2029,13 +1872,18 @@ export default function ZeroFMHome() {
                   )}
                 </a>
 
-                <span>
+                {/* Tap to call / open WhatsApp. Update both numbers here. */}
+                <a href="tel:+94112000000">
                   Hotline: +94 11 200 0000
-                </span>
+                </a>
 
-                <span>
+                <a
+                  href="https://wa.me/94770000000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   WhatsApp Studio: +94 77 000 0000
-                </span>
+                </a>
 
                 <a href="#contact">
                   {t(

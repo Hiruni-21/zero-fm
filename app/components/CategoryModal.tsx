@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import MusicBrowserModal from "./MusicBrowserModal";
-import type { SongLanguage } from "./MusicBrowserModal";
+import type { BrowserLanguage } from "./MusicBrowserModal";
 
 export type CategoryModalData = {
   title: string;
-  language: SongLanguage;
+  language: BrowserLanguage;
 };
 
 type CategoryModalProps = {

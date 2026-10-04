@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
+import { selectSection, useActiveSection } from "../lib/active-section";
 
 const navItems: [string, string][] = [
   ["nav.home", "#home"],
@@ -16,9 +17,34 @@ const navItems: [string, string][] = [
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useLanguage();
+  const activeSection = useActiveSection();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close when tapping outside the menu or pressing Escape
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
   return (
-    <div className="relative lg:hidden">
+    <div ref={menuRef} className="relative lg:hidden">
       <button
         type="button"
         className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white"
@@ -41,16 +67,33 @@ export default function MobileMenu() {
             if (event.key === "Escape") setIsOpen(false);
           }}
         >
-          {navItems.map(([key, href]) => (
-            <a
-              key={href}
-              href={href}
-              onClick={() => setIsOpen(false)}
-              className="font-body block rounded-lg px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/65 transition hover:bg-white/5 hover:text-[#FFD400]"
-            >
-              {t(key)}
-            </a>
-          ))}
+          {navItems.map(([key, href]) => {
+            const id = href.slice(1);
+            const isActive = activeSection === id;
+
+            return (
+              <a
+                key={href}
+                href={href}
+                aria-current={isActive ? "true" : undefined}
+                onClick={() => {
+                  selectSection(id);
+                  setIsOpen(false);
+                }}
+                className={`zf-nav-link flex items-center justify-between rounded-lg px-4 py-3 transition hover:bg-white/5 hover:text-[#FFD400] ${
+                  isActive
+                    ? "bg-[#FFD400]/[0.06] text-[#FFD400]"
+                    : "text-white/65"
+                }`}
+              >
+                {t(key)}
+
+                {isActive && (
+                  <span className="size-1.5 rounded-full bg-[#FFD400]" />
+                )}
+              </a>
+            );
+          })}
         </nav>
       )}
     </div>

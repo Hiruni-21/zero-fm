@@ -1,54 +1,191 @@
+/* =========================================================
+   ZERO FM — FIGMA FONT IMPORTS
+   Keep these imports at the very top of the file.
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
+/* =========================================================
+   ZERO FM — BRAND COLORS & TYPOGRAPHY VARIABLES
+   ========================================================= */
 :root {
-  --background: #090d16;
+  /* Backgrounds */
+  --background: #0a0f1a;
   --foreground: #ffffff;
   --surface-secondary: #070b13;
-  --surface-card: #0f1523;
+  --surface-card: #101626;
   --surface-dark: #111622;
+
+  /* Brand colors */
   --accent: #ffd400;
   --text-secondary: #94a3b8;
   --text-muted: #8f9cae;
   --online: #34d399;
+
+  /* Figma font families */
+  --font-space-grotesk: "Space Grotesk", sans-serif;
+  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
+  --font-covered-grace: "Covered By Your Grace", cursive;
+
+  /* Reusable typography sizes */
+  --zf-text-xs: 0.625rem;   /* 10px */
+  --zf-text-sm: 0.75rem;    /* 12px */
+  --zf-text-base: 0.875rem; /* 14px */
+  --zf-text-lg: 1.125rem;   /* 18px */
+  --zf-text-xl: 1.5rem;     /* 24px */
+
+  /* Responsive hero heading size */
+  --zf-text-hero: clamp(2.5rem, 5.2vw, 4.75rem);
 }
 
+/* =========================================================
+   ZERO FM — TAILWIND THEME MAPPING
+   Use these with classes such as font-display, font-body,
+   font-mono, and bg-background.
+   ========================================================= */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-display: var(--font-space-grotesk);
-  --font-body: var(--font-hanken-grotesk);
+  --font-body: var(--font-plus-jakarta);
   --font-mono: var(--font-jetbrains-mono);
+
+  --color-accent: var(--accent);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-card: var(--surface-card);
+  --color-surface-dark: var(--surface-dark);
+}
+
+/* =========================================================
+   ZERO FM — GLOBAL BASE STYLES
+   ========================================================= */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-hanken-grotesk);
+  font-family: var(--font-plus-jakarta);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Multilingual Font Support */
+/* =========================================================
+   ZERO FM — REUSABLE FIGMA TYPOGRAPHY CLASSES
+   Apply these throughout the homepage components.
+   ========================================================= */
+
+/* Main headings */
+.zf-heading {
+  font-family: var(--font-space-grotesk);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+/* Section headings */
+.zf-section-title {
+  font-family: var(--font-space-grotesk);
+  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+/* Handwritten yellow text */
+.zf-handwritten {
+  font-family: var(--font-covered-grace);
+  font-weight: 400;
+  color: var(--accent);
+  line-height: 1;
+}
+
+/* Small uppercase labels and metadata */
+.zf-label {
+  font-family: var(--font-jetbrains-mono);
+  font-size: var(--zf-text-xs);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Paragraphs and supporting text */
+.zf-body-text {
+  font-family: var(--font-plus-jakarta);
+  font-size: var(--zf-text-base);
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+/* Navigation links */
+.zf-nav-link {
+  font-family: var(--font-jetbrains-mono);
+  font-size: var(--zf-text-xs);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Button labels */
+.zf-button-text {
+  font-family: var(--font-plus-jakarta);
+  font-size: var(--zf-text-sm);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   ZERO FM — MULTILINGUAL FONT SUPPORT
+   Preserve dedicated Sinhala and Tamil fonts.
+   ========================================================= */
 html[data-site-language="sinhala"],
 html[data-site-language="sinhala"] body,
 [data-site-language="sinhala"] {
-  font-family: "Noto Sans Sinhala", var(--font-hanken-grotesk), system-ui, sans-serif;
+  font-family: "Noto Sans Sinhala", var(--font-plus-jakarta), system-ui, sans-serif;
 }
 
 html[data-site-language="tamil"],
 html[data-site-language="tamil"] body,
 [data-site-language="tamil"] {
-  font-family: "Noto Sans Tamil", var(--font-hanken-grotesk), system-ui, sans-serif;
+  font-family: "Noto Sans Tamil", var(--font-plus-jakarta), system-ui, sans-serif;
 }
 
+/* Override Latin font families for Sinhala text */
 [data-site-language="sinhala"] .font-display,
-[data-site-language="sinhala"] .font-body {
-  font-family: "Noto Sans Sinhala", var(--font-hanken-grotesk), system-ui, sans-serif !important;
+[data-site-language="sinhala"] .font-body,
+[data-site-language="sinhala"] .zf-heading,
+[data-site-language="sinhala"] .zf-section-title,
+[data-site-language="sinhala"] .zf-handwritten,
+[data-site-language="sinhala"] .zf-label,
+[data-site-language="sinhala"] .zf-body-text,
+[data-site-language="sinhala"] .zf-nav-link,
+[data-site-language="sinhala"] .zf-button-text {
+  font-family: "Noto Sans Sinhala", var(--font-plus-jakarta), system-ui, sans-serif !important;
 }
 
+/* Override Latin font families for Tamil text */
 [data-site-language="tamil"] .font-display,
-[data-site-language="tamil"] .font-body {
-  font-family: "Noto Sans Tamil", var(--font-hanken-grotesk), system-ui, sans-serif !important;
+[data-site-language="tamil"] .font-body,
+[data-site-language="tamil"] .zf-heading,
+[data-site-language="tamil"] .zf-section-title,
+[data-site-language="tamil"] .zf-handwritten,
+[data-site-language="tamil"] .zf-label,
+[data-site-language="tamil"] .zf-body-text,
+[data-site-language="tamil"] .zf-nav-link,
+[data-site-language="tamil"] .zf-button-text {
+  font-family: "Noto Sans Tamil", var(--font-plus-jakarta), system-ui, sans-serif !important;
 }
 
+/* =========================================================
+   ZERO FM — SCHEDULE SCROLLBAR
+   ========================================================= */
 .schedule-scrollbar {
   scrollbar-color: #475569 #0a0f19;
   scrollbar-width: thin;
@@ -71,6 +208,9 @@ html[data-site-language="tamil"] body,
   background: #ffd400;
 }
 
+/* =========================================================
+   ZERO FM — CATEGORY MODAL ANIMATIONS
+   ========================================================= */
 .category-modal-backdrop {
   animation: category-backdrop-in 180ms ease-out both;
 }
@@ -80,18 +220,100 @@ html[data-site-language="tamil"] body,
 }
 
 @keyframes category-backdrop-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes category-panel-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
+/* =========================================================
+   ZERO FM — ACCESSIBILITY
+   Respect reduced-motion preferences.
+   ========================================================= */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .category-modal-backdrop,
   .category-modal-panel {
     animation-duration: 1ms;
   }
+}
+/* =========================================================
+   ZERO FM — GLOBAL FIGMA FONT OVERRIDES
+   Applies typography across the entire website.
+   No need to edit every component individually.
+   ========================================================= */
+
+/* Default font for the whole website */
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+/* All headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+/* Existing Tailwind font utility classes */
+.font-display {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.font-body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Buttons */
+button,
+input[type="button"],
+input[type="submit"] {
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+/* Navigation and small uppercase labels */
+nav a {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Preserve handwritten styling where explicitly used */
+.zf-handwritten {
+  font-family: "Covered By Your Grace", cursive;
+}
+
+/* Preserve Sinhala font support */
+html[data-site-language="sinhala"],
+html[data-site-language="sinhala"] body {
+  font-family: "Noto Sans Sinhala", sans-serif;
+}
+
+/* Preserve Tamil font support */
+html[data-site-language="tamil"],
+html[data-site-language="tamil"] body {
+  font-family: "Noto Sans Tamil", sans-serif;
 }

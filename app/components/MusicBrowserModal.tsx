@@ -1,41 +1,36 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
+import {
+  getCachedTracks,
+  preloadRequestableTracks,
+  type RequestableTrack,
+} from "../lib/request-tracks";
+
+export { preloadRequestableTracks };
 
 
 export type SongLanguage = "sinhala" | "tamil" | "english";
 
-type RequestableTrack = {
-  id: number;
-  title: string;
-  artist: string;
-
-  artwork?: {
-    url?: string | null;
-    large_url?: string | null;
-  } | null;
-
-  language?: string | null;
-  genre?: string | null;
-  category?: string | null;
-  categories?: string[] | null;
-  genres?: string[] | null;
-  tags?: string[] | null;
-};
-
-type TracksResponse = {
-  data?: RequestableTrack[];
-  error?: string;
-};
 
 type View = "browse" | "confirm" | "success";
 
+// "all" is the search icon's popup: every song, with language filters
+export type BrowserLanguage = SongLanguage | "all";
+
 type MusicBrowserModalProps = {
   title: string;
-  language: SongLanguage;
+  language: BrowserLanguage;
   onClose: () => void;
 };
+
+const LANGUAGE_FILTERS: BrowserLanguage[] = [
+  "all",
+  "sinhala",
+  "tamil",
+  "english",
+];
 
 const languageLabels: Record<SongLanguage, string> = {
   sinhala: "Sinhala",
@@ -573,7 +568,22 @@ function matchesSongOverride(
    LANGUAGE CLASSIFICATION
    ========================================================= */
 
-function getSongLanguage(
+// Working out a song's language is slow-ish, so each song is only
+// checked once and the answer is reused by Explore, search and the cards.
+const languageCache = new WeakMap<RequestableTrack, SongLanguage | "unknown">();
+
+export function getSongLanguage(
+  track: RequestableTrack,
+): SongLanguage | "unknown" {
+  const cached = languageCache.get(track);
+  if (cached) return cached;
+
+  const result = detectSongLanguage(track);
+  languageCache.set(track, result);
+  return result;
+}
+
+function detectSongLanguage(
   track: RequestableTrack,
 ): SongLanguage | "unknown" {
   /* Exact song overrides must run before generic heuristics. */
@@ -783,6 +793,63 @@ function trackArtwork(
 
 
 /* =========================================================
+   ARTWORK LOOKUP QUEUE
+   Songs without Radio.co artwork are looked up on iTunes. iTunes
+   blocks sites that send too many lookups at once, which made some
+   covers fail, so lookups run a few at a time and each answer is
+   remembered for the rest of the visit.
+   ========================================================= */
+
+const artworkLookups = new Map<string, Promise<string | null>>();
+const MAX_PARALLEL_LOOKUPS = 3;
+let runningLookups = 0;
+const waitingLookups: (() => void)[] = [];
+
+function runNextLookup() {
+  if (runningLookups >= MAX_PARALLEL_LOOKUPS) return;
+  const next = waitingLookups.shift();
+  if (next) next();
+}
+
+function lookupArtwork(artist: string, title: string) {
+  const key = `${artist}|${title}`.toLowerCase();
+  const existing = artworkLookups.get(key);
+  if (existing) return existing;
+
+  const lookup = new Promise<string | null>((resolve) => {
+    waitingLookups.push(async () => {
+      runningLookups += 1;
+
+      try {
+        const params = new URLSearchParams({ artist, title });
+        const response = await fetch(`/api/artwork?${params.toString()}`, {
+          cache: "force-cache",
+        });
+        const data: { artwork?: string | null } = response.ok
+          ? await response.json()
+          : {};
+        resolve(data.artwork || null);
+      } catch {
+        resolve(null);
+      } finally {
+        runningLookups -= 1;
+        runNextLookup();
+      }
+    });
+
+    runNextLookup();
+  });
+
+  // A failed lookup can be tried again next time the list opens
+  lookup.then((artwork) => {
+    if (!artwork) artworkLookups.delete(key);
+  });
+
+  artworkLookups.set(key, lookup);
+  return lookup;
+}
+
+/* =========================================================
    ARTWORK WITH FALLBACK
    ========================================================= */
 
@@ -817,37 +884,17 @@ function ArtworkImage({
     const findArtwork = async () => {
       setIsLoadingFallback(true);
 
-      try {
-        const params = new URLSearchParams({
-          artist: track.artist,
-          title: track.title,
-        });
+      const found = await lookupArtwork(track.artist, track.title);
 
-        const response = await fetch(
-          `/api/artwork?${params.toString()}`,
-          { cache: "force-cache" },
-        );
+      if (!active) return;
 
-        if (!response.ok) {
-          throw new Error("Artwork lookup failed");
-        }
-
-        const data: { artwork?: string | null } = await response.json();
-
-        if (active && data.artwork) {
-          setArtwork(data.artwork);
-        } else if (active) {
-          setFallbackFailed(true);
-        }
-      } catch {
-        if (active) {
-          setFallbackFailed(true);
-        }
-      } finally {
-        if (active) {
-          setIsLoadingFallback(false);
-        }
+      if (found) {
+        setArtwork(found);
+      } else {
+        setFallbackFailed(true);
       }
+
+      setIsLoadingFallback(false);
     };
 
     findArtwork();
@@ -860,10 +907,7 @@ function ArtworkImage({
   if (isLoadingFallback && !artwork) {
     return (
       <div
-        className={
-          className ||
-          "flex size-full items-center justify-center bg-[#111622]"
-        }
+        className="flex size-full items-center justify-center bg-[#111622]"
         aria-label="Loading artwork"
       >
         <div className="size-5 animate-spin rounded-full border-2 border-[#FFD400]/20 border-t-[#FFD400]" />
@@ -887,11 +931,9 @@ function ArtworkImage({
   }
 
   return (
+    // Always centred, whatever size the artwork box is
     <div
-      className={
-        className ||
-        "flex size-full items-center justify-center bg-[#111622] text-[#FFD400]"
-      }
+      className="flex size-full items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,212,0,0.08),transparent_70%)] text-[#FFD400]"
       aria-label="Artwork unavailable"
     >
       <MusicNote />
@@ -980,10 +1022,12 @@ export default function MusicBrowserModal({
 }: MusicBrowserModalProps) {
   const { t } = useLanguage();
   const [tracks, setTracks] =
-    useState<RequestableTrack[]>([]);
+    useState<RequestableTrack[]>(
+      () => getCachedTracks() ?? [],
+    );
 
   const [isLoading, setIsLoading] =
-    useState(true);
+    useState(() => !getCachedTracks());
 
   const [loadError, setLoadError] =
     useState("");
@@ -999,9 +1043,18 @@ export default function MusicBrowserModal({
   const [view, setView] =
     useState<View>("browse");
 
-
   const [reloadKey, setReloadKey] =
     useState(0);
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [submitError, setSubmitError] =
+    useState("");
+
+  // Language chip picked in the "all songs" popup
+  const [filterLanguage, setFilterLanguage] =
+    useState<BrowserLanguage>(language);
 
   /* =======================================================
      FETCH TRACKS
@@ -1011,33 +1064,25 @@ export default function MusicBrowserModal({
     let active = true;
 
     const fetchTracks = async () => {
+      // Retry (reloadKey > 0) always asks the server again.
+      const forceRefresh = reloadKey > 0;
+      const cached = forceRefresh ? null : getCachedTracks();
+
+      if (cached) {
+        setTracks(cached);
+        setIsLoading(false);
+        setLoadError("");
+        return;
+      }
+
       setIsLoading(true);
       setLoadError("");
 
       try {
-        const response = await fetch(
-          "/api/tracks",
-          {
-            cache: "no-store",
-          },
-        );
-
-        const result: TracksResponse =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result.error ||
-              "Unable to load requestable songs.",
-          );
-        }
+        const result = await preloadRequestableTracks(forceRefresh);
 
         if (active) {
-          setTracks(
-            Array.isArray(result.data)
-              ? result.data
-              : [],
-          );
+          setTracks(result);
         }
       } catch (error) {
         if (active) {
@@ -1075,15 +1120,11 @@ export default function MusicBrowserModal({
 
       if (view === "confirm") {
         setSelectedTrack(null);
+        setSubmitError("");
         setView("browse");
         return;
       }
 
-      if (view === "confirm") {
-    setSelectedTrack(null);
-    setView("browse");
-    return;
-      }
 
       onClose();
     };
@@ -1106,32 +1147,67 @@ export default function MusicBrowserModal({
      ======================================================= */
 
   const classifiedTracks = useMemo(() => {
+    // The "All" list doesn't need languages, so skip the work there
+    if (filterLanguage === "all") return [];
+
     return tracks.map((track) => ({
       track,
       language:
         getSongLanguage(track),
     }));
-  }, [tracks]);
+  }, [tracks, filterLanguage]);
 
   /* =======================================================
      FILTER SELECTED LANGUAGE
      ======================================================= */
 
   const languageTracks = useMemo(() => {
+    if (filterLanguage === "all") {
+      return tracks;
+    }
+
     return classifiedTracks
       .filter(
         (item) =>
-          item.language === language,
+          item.language === filterLanguage,
       )
       .map((item) => item.track);
   }, [
     classifiedTracks,
-    language,
+    filterLanguage,
+    tracks,
   ]);
 
   /* =======================================================
      SEARCH
      ======================================================= */
+
+  // Draw the list in pages so the popup opens instantly even with
+  // thousands of songs; more rows appear as you scroll down.
+  const PAGE_SIZE = 40;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loadMoreRef = useRef<HTMLLIElement | null>(null);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, filterLanguage]);
+
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((count) => count + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "300px" },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  });
 
   const filteredTracks = useMemo(() => {
     const query = normalize(search);
@@ -1166,16 +1242,54 @@ export default function MusicBrowserModal({
 
   const cancelConfirmation = () => {
     setSelectedTrack(null);
+    setSubmitError("");
     setView("browse");
   };
 
-const submitRequest = () => {
-  if (!selectedTrack) {
-    return;
-  }
+const submitRequest = async () => {
+  if (!selectedTrack || isSubmitting) return;
 
-  setView("success");
+  setIsSubmitting(true);
+  setSubmitError("");
+
+  try {
+    // Sends the request to the Radio.co queue through this site's server.
+    const response = await fetch("/api/queue", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ trackId: selectedTrack.id }),
+    });
+
+    const result = (await response.json().catch(() => null)) as {
+      success?: boolean;
+      error?: string;
+    } | null;
+
+    if (!response.ok || !result?.success) {
+      setSubmitError(
+        result?.error ||
+          t("modal.sendError"),
+      );
+      return;
+    }
+
+    setSearch("");
+    setView("success");
+  } catch {
+    setSubmitError(
+      t("modal.sendError"),
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
 };
+
+const requestAnother = () => {
+  setSelectedTrack(null);
+  setSubmitError("");
+  setView("browse");
+};
+
   /* =======================================================
      CLOSE
      ======================================================= */
@@ -1183,12 +1297,30 @@ const submitRequest = () => {
   const handleClose = () => {
   setSelectedTrack(null);
   setSearch("");
+  setSubmitError("");
   setView("browse");
 
   onClose();
 };
 
-  const localizedLangName = t(`lang.${language}`);
+  const isAllSongs = language === "all";
+
+  const localizedLangName =
+    filterLanguage === "all"
+      ? ""
+      : t(`lang.${filterLanguage}`);
+
+  // Language shown on the confirm screen for the picked song
+  const selectedLanguage = selectedTrack
+    ? getSongLanguage(selectedTrack)
+    : "unknown";
+
+  const selectedLangName =
+    language !== "all"
+      ? t(`lang.${language}`)
+      : selectedLanguage !== "unknown"
+        ? t(`lang.${selectedLanguage}`)
+        : "Zero FM";
 
   /* =======================================================
      RENDER
@@ -1204,8 +1336,9 @@ const submitRequest = () => {
         <div className="min-w-0">
 
           <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-[#FFD400]">
-            Zero FM ·{" "}
-            {localizedLangName} {t("categories.music")}
+            {isAllSongs
+              ? t("requestWidget.tag")
+              : `Zero FM · ${localizedLangName} ${t("categories.music")}`}
           </p>
 
           <h2
@@ -1216,7 +1349,9 @@ const submitRequest = () => {
               ? title
               : view === "confirm"
                 ? t("modal.confirmRequest")
-                : t("modal.radioCoRequest")}
+                : view === "success"
+                  ? t("modal.requestSent")
+                  : t("modal.radioCoRequest")}
           </h2>
 
         </div>
@@ -1254,8 +1389,16 @@ const submitRequest = () => {
                   event.target.value,
                 )
               }
-              placeholder={t("modal.searchSongs", { lang: localizedLangName })}
-              aria-label={t("modal.searchAria", { lang: localizedLangName })}
+              placeholder={
+                localizedLangName
+                  ? t("modal.searchSongs", { lang: localizedLangName })
+                  : t("modal.searchAll")
+              }
+              aria-label={
+                localizedLangName
+                  ? t("modal.searchAria", { lang: localizedLangName })
+                  : t("modal.searchAll")
+              }
               className="font-body min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#64748B]"
             />
 
@@ -1276,8 +1419,40 @@ const submitRequest = () => {
 
           {/* INFO */}
 
+          {isAllSongs && (
+            <div
+              className="mb-3 flex shrink-0 flex-wrap gap-1.5"
+              role="group"
+              aria-label={t("modal.filterLanguage")}
+            >
+              {LANGUAGE_FILTERS.map((option) => {
+                const active = filterLanguage === option;
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setFilterLanguage(option)}
+                    className={`rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] transition ${
+                      active
+                        ? "border-[#FFD400]/50 bg-[#FFD400] text-[#090D16]"
+                        : "border-white/[0.1] text-[#94A3B8] hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+                    }`}
+                  >
+                    {option === "all"
+                      ? t("modal.allLanguages")
+                      : t(`lang.${option}`)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           <p className="mb-3 shrink-0 text-[9px] leading-4 text-[#64748B]">
-            {t("modal.showingCatalogue", { lang: localizedLangName })}
+            {localizedLangName
+              ? t("modal.showingCatalogue", { lang: localizedLangName })
+              : t("modal.showingAll")}
           </p>
 
           {/* COUNT */}
@@ -1367,7 +1542,9 @@ const submitRequest = () => {
                 </div>
 
                 <p className="text-sm text-[#C3CBD7]">
-                  {t("modal.noSongsFound", { lang: localizedLangName })}
+                  {localizedLangName
+                    ? t("modal.noSongsFound", { lang: localizedLangName })
+                    : t("modal.noSongsAll")}
                 </p>
 
                 <p className="mt-2 max-w-md text-xs leading-5 text-[#64748B]">
@@ -1384,7 +1561,7 @@ const submitRequest = () => {
 
               <ul className="divide-y divide-white/[0.06]">
 
-                {filteredTracks.map(
+                {filteredTracks.slice(0, visibleCount).map(
                   (track) => {
                     return (
                       <li
@@ -1450,6 +1627,16 @@ const submitRequest = () => {
                   },
                 )}
 
+                {visibleCount < filteredTracks.length && (
+                  <li
+                    ref={loadMoreRef}
+                    aria-hidden="true"
+                    className="flex justify-center py-4"
+                  >
+                    <span className="size-4 animate-spin rounded-full border-2 border-[#FFD400]/20 border-t-[#FFD400]" />
+                  </li>
+                )}
+
               </ul>
 
             )}
@@ -1486,7 +1673,7 @@ const submitRequest = () => {
               <div className="min-w-0 text-center sm:text-left">
 
                 <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-[#FFD400]">
-                  {localizedLangName}{" "}
+                  {selectedLangName}{" "}
                   {t("categories.music")}
                 </p>
 
@@ -1510,6 +1697,15 @@ const submitRequest = () => {
 
             </div>
 
+            {submitError && (
+              <p
+                role="alert"
+                className="mb-3 rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-200"
+              >
+                {submitError}
+              </p>
+            )}
+
             {/* ACTIONS */}
 
             <div className="flex shrink-0 flex-col-reverse justify-end gap-2 border-t border-white/[0.08] pt-4 sm:flex-row">
@@ -1527,10 +1723,15 @@ const submitRequest = () => {
               <button
                     type="button"
                     onClick={submitRequest}
-                    className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#FFD400] px-7 font-body text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c]"
+                    disabled={isSubmitting}
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#FFD400] px-7 font-body text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c] disabled:cursor-wait disabled:opacity-70"
                     >
-                    <CheckIcon />
-                    ADD TO QUEUE
+                    {isSubmitting ? (
+                      <span className="size-4 animate-spin rounded-full border-2 border-[#090D16]/25 border-t-[#090D16]" />
+                    ) : (
+                      <CheckIcon />
+                    )}
+                    {isSubmitting ? t("modal.adding") : t("modal.addToQueue")}
                     </button>
 
             </div>
@@ -1538,77 +1739,54 @@ const submitRequest = () => {
           </div>
         )}
 
+
       {/* =====================================================
-          RADIO.CO REQUEST
+          SUCCESS
       ====================================================== */}
 
-{view === "success" && selectedTrack && (
-  <div className="flex min-h-0 flex-1 flex-col">
+      {view === "success" &&
+        selectedTrack && (
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 py-8 text-center">
 
-    <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
-      <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-[#FFD400]">
-        Request Received
-      </p>
+            <span className="flex size-16 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] [&>svg]:size-8">
+              <CheckIcon />
+            </span>
 
-      <button
-        type="button"
-        onClick={() => {
-          setSelectedTrack(null);
-          setView("browse");
-        }}
-        className="font-body text-[10px] font-semibold uppercase tracking-[0.06em] text-[#FFD400] hover:text-white"
-      >
-        Go Back
-      </button>
-    </div>
+            <div>
+              <h3 className="font-display text-2xl font-bold text-white">
+                {t("request.queued")}
+              </h3>
 
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-white/[0.08] bg-[#2e2e2e]">
+              <p className="font-body mt-2 text-sm text-[#8F9CAE]">
+                {selectedTrack.title} · {selectedTrack.artist}
+              </p>
 
-      <div className="flex shrink-0 items-center justify-between border-b border-black/20 px-4 py-4 sm:px-5">
-        <h3 className="font-display text-base font-semibold text-white">
-          Request Received
-        </h3>
+              <p className="mt-3 text-xs text-[#64748B]">
+                {t("modal.keepListening")}
+              </p>
+            </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setSelectedTrack(null);
-            setView("browse");
-          }}
-          className="flex items-center gap-1 font-body text-xs font-medium text-[#FFD400] transition hover:text-white"
-        >
-          <span aria-hidden="true">↶</span>
-          Go Back
-        </button>
-      </div>
+            <div className="mt-2 flex flex-col-reverse gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={requestAnother}
+                className="h-11 rounded-lg border border-white/[0.12] px-6 font-body text-[10px] font-semibold uppercase tracking-[0.06em] text-white/80 transition hover:border-white/25 hover:text-white"
+              >
+                {t("modal.requestAnother")}
+              </button>
 
-      <div className="flex min-h-[280px] flex-1 flex-col items-center justify-center px-6 py-8 text-center">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="h-11 rounded-lg bg-[#FFD400] px-7 font-body text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c]"
+              >
+                {t("modal.done")}
+              </button>
+            </div>
 
-        <div className="flex size-24 items-center justify-center overflow-hidden bg-[#FFD400] sm:size-28">
-          <ArtworkImage
-            track={selectedTrack}
-            alt={`${selectedTrack.title} artwork`}
-            className="size-full object-cover"
-          />
-        </div>
+          </div>
+        )}
 
-        <h4 className="mt-5 font-display text-lg font-semibold text-white sm:text-xl">
-          {selectedTrack.title}
-        </h4>
-
-        <p className="font-body mt-2 text-sm text-[#C5C5C5]">
-          {selectedTrack.artist}
-        </p>
-
-        <p className="mt-4 max-w-md font-body text-sm leading-6 text-[#E2E2E2]">
-          Your request has been added to the queue.
-        </p>
-
-      </div>
-    </div>
-
-  </div>
-)}
     </div>
   );
 }
