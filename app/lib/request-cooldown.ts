@@ -1,12 +1,13 @@
 /*
  * Gentle limits on song requests from one browser, so a single listener
- * can't fill the queue: one request every 5 minutes, and at most 10 a day.
+ * can't fill the queue: one request every 30 minutes and at most 5 a day, matching the
+ * station's Radio.co request settings.
  * Shared by the request form and the music library. Stored in localStorage,
  * so it's a courtesy limit, not a security check.
  */
 
-export const REQUEST_COOLDOWN_MS = 5 * 60 * 1000;
-export const DAILY_REQUEST_LIMIT = 10;
+export const REQUEST_COOLDOWN_MS = 30 * 60 * 1000;
+export const DAILY_REQUEST_LIMIT = 5;
 
 const LAST_KEY = "zero-fm:last-request-at";
 const DAY_KEY = "zero-fm:requests-today";
