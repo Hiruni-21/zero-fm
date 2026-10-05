@@ -6,9 +6,10 @@ export async function GET() {
   const url = `https://public.radio.co/api/v2/${STATION_ID}/track/current`;
 
   try {
-    // Share one Radio.co lookup between all listeners for 10 seconds.
+    // Always ask Radio.co directly. A cached answer kept showing the
+    // previous song for up to half a minute after the new one started.
     const response = await fetch(url, {
-      next: { revalidate: 10 },
+      cache: "no-store",
     });
 
     const text = await response.text();

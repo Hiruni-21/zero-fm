@@ -6,7 +6,8 @@
  * part polling on its own.
  */
 
-const FRESH_FOR_MS = 10_000;
+// Short enough that a new song shows up within a few seconds of starting
+const FRESH_FOR_MS = 4_000;
 
 let lastResult: unknown = null;
 let lastFetchedAt = 0;
@@ -39,4 +40,4 @@ export function fetchNowPlaying<T>(): Promise<T> {
   return pending as Promise<T>;
 }
 
-export const NOW_PLAYING_POLL_MS = 15_000;
+export const NOW_PLAYING_POLL_MS = 5_000;
