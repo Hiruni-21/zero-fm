@@ -3,6 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
 import {
+  DAILY_REQUEST_LIMIT,
+  dailyLimitReached,
+  markRequestSent,
+  requestCooldownMinutes,
+} from "../lib/request-cooldown";
+import {
   getCachedTracks,
   preloadRequestableTracks,
   type RequestableTrack,
@@ -401,13 +407,39 @@ const TAMIL_TITLE_WORDS = [
    HELPERS
    ========================================================= */
 
+// The artist and word lists are checked against every song, so their
+// cleaned-up forms and patterns are worked out once and remembered. This
+// keeps sorting the whole library fast, especially on phones.
+const normalizeCache = new Map<string, string>();
+
 function normalize(value: string) {
-  return value
-    .toLocaleLowerCase()
-    .normalize("NFKC")
-    .replace(/[’'".,_\-()[\]{}:/\\]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  let result = normalizeCache.get(value);
+  if (result === undefined) {
+    result = value
+      .toLocaleLowerCase()
+      .normalize("NFKC")
+      .replace(/[’'".,_\-()[\]{}:/\\]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (normalizeCache.size > 20_000) normalizeCache.clear();
+    normalizeCache.set(value, result);
+  }
+  return result;
+}
+
+const phrasePatterns = new Map<string, RegExp>();
+
+function phrasePattern(normalizedPhrase: string) {
+  let pattern = phrasePatterns.get(normalizedPhrase);
+  if (!pattern) {
+    const escaped = normalizedPhrase.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&",
+    );
+    pattern = new RegExp(`(?:^|\\s)${escaped}(?:$|\\s)`, "u");
+    phrasePatterns.set(normalizedPhrase, pattern);
+  }
+  return pattern;
 }
 
 function tokenize(value: string) {
@@ -439,15 +471,7 @@ function containsPhrase(
     return false;
   }
 
-  const escaped = normalizedPhrase.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&",
-  );
-
-  return new RegExp(
-    `(?:^|\\s)${escaped}(?:$|\\s)`,
-    "u",
-  ).test(normalizedText);
+  return phrasePattern(normalizedPhrase).test(normalizedText);
 }
 
 /* =========================================================
@@ -1249,6 +1273,17 @@ export default function MusicBrowserModal({
 const submitRequest = async () => {
   if (!selectedTrack || isSubmitting) return;
 
+  if (dailyLimitReached()) {
+    setSubmitError(t("request.dailyLimit", { limit: DAILY_REQUEST_LIMIT }));
+    return;
+  }
+
+  const waitMinutes = requestCooldownMinutes();
+  if (waitMinutes > 0) {
+    setSubmitError(t("request.cooldown", { minutes: waitMinutes }));
+    return;
+  }
+
   setIsSubmitting(true);
   setSubmitError("");
 
@@ -1273,6 +1308,7 @@ const submitRequest = async () => {
       return;
     }
 
+    markRequestSent();
     setSearch("");
     setView("success");
   } catch {

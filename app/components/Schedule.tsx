@@ -174,16 +174,33 @@ export default function Schedule() {
 
     const scheduleInterval = setInterval(fetchSchedule, 5 * 60_000);
 
-    const timeInterval = setInterval(() => {
-      if (mounted) {
-        setCurrentMinutes(getCurrentMinutesInColombo());
+    // Update the clock right as each minute starts, so it changes at the
+    // same moment as the phone's or computer's own clock.
+    let clockTimer: ReturnType<typeof setTimeout>;
+    const tickClock = () => {
+      if (!mounted) return;
+      setCurrentMinutes(getCurrentMinutesInColombo());
+      const now = new Date();
+      const msToNextMinute =
+        60_000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+      clockTimer = setTimeout(tickClock, msToNextMinute + 50);
+    };
+    tickClock();
+
+    // Coming back to a background tab: catch up straight away
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        clearTimeout(clockTimer);
+        tickClock();
       }
-    }, 30_000);
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       mounted = false;
       clearInterval(scheduleInterval);
-      clearInterval(timeInterval);
+      clearTimeout(clockTimer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
