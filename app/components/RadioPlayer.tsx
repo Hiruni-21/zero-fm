@@ -349,12 +349,26 @@ export default function RadioPlayer() {
   /* Playback                                                                 */
   /* ------------------------------------------------------------------------ */
 
+  // A live stream can't really be paused: the browser keeps the old audio
+  // and resumes from where it stopped, so the player falls further behind
+  // the broadcast each time. Stopping drops the connection instead, and
+  // playing always reconnects to what's on air right now.
+  const stopStream = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+  };
+
   const togglePlay = async () => {
-    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
 
     try {
       if (isPlaying) {
-        audioRef.current.pause();
+        stopStream();
         setIsPlaying(false);
         return;
       }
@@ -362,7 +376,9 @@ export default function RadioPlayer() {
       setError("");
       setIsBuffering(true);
 
-      await audioRef.current.play();
+      // A fresh address so neither the browser nor a cache serves old audio
+      audio.src = `${RADIO_STREAM_URL}?t=${Date.now()}`;
+      await audio.play();
 
       setIsPlaying(true);
     } catch (error) {
@@ -392,6 +408,9 @@ export default function RadioPlayer() {
   };
 
   const handleAudioError = () => {
+    // Stopping clears the stream address; that isn't a real error
+    if (!audioRef.current?.getAttribute("src")) return;
+
     setIsPlaying(false);
     setIsBuffering(false);
 
@@ -529,7 +548,7 @@ export default function RadioPlayer() {
       const left = sleepEndsAt - Date.now();
 
       if (left <= 0) {
-        audioRef.current?.pause();
+        stopStream();
         setSleepEndsAt(null);
         setSleepChoice(null);
         showToast(t("player.sleepEnded"));
@@ -648,7 +667,6 @@ export default function RadioPlayer() {
 
       <audio
         ref={audioRef}
-        src={RADIO_STREAM_URL}
         preload="none"
         onPlay={handlePlay}
         onPlaying={() => setIsBuffering(false)}
