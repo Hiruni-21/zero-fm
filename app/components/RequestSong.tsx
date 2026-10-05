@@ -8,6 +8,12 @@ import {
 } from "react";
 
 import { useLanguage } from "./LanguageContext";
+import {
+  DAILY_REQUEST_LIMIT,
+  dailyLimitReached,
+  markRequestSent,
+  requestCooldownMinutes,
+} from "../lib/request-cooldown";
 import { OPEN_FULL_SCHEDULE_EVENT } from "./Schedule";
 import {
   preloadRequestableTracks,
@@ -291,6 +297,25 @@ export default function RequestSong() {
       return;
     }
 
+    if (dailyLimitReached()) {
+      setFeedback({
+        type: "error",
+        message: t("request.dailyLimit", { limit: DAILY_REQUEST_LIMIT }),
+      });
+
+      return;
+    }
+
+    const waitMinutes = requestCooldownMinutes();
+    if (waitMinutes > 0) {
+      setFeedback({
+        type: "error",
+        message: t("request.cooldown", { minutes: waitMinutes }),
+      });
+
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -326,6 +351,8 @@ export default function RequestSong() {
             t("request.errorGeneric")
         );
       }
+
+      markRequestSent();
 
       /*
        * Keep a record of who asked, in the server log.
