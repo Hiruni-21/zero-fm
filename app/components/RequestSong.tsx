@@ -720,17 +720,40 @@ export default function RequestSong() {
           {/* =====================================================
               RIGHT - PROGRAMS
           ===================================================== */}
-<div className="relative flex min-h-[280px] flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.09] bg-[#111622] p-5 sm:min-h-[300px] sm:p-7">
+<div
+  onClick={() =>
+    window.dispatchEvent(
+      new Event(OPEN_FULL_SCHEDULE_EVENT)
+    )
+  }
+  className="programs-card group/programs relative flex min-h-[280px] cursor-pointer flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.09] bg-[#111622] p-5 transition duration-300 hover:-translate-y-1 hover:border-[#FFD400]/40 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35),0_0_30px_rgba(255,212,0,0.08)] active:translate-y-0 active:scale-[0.99] sm:min-h-[300px] sm:p-7"
+>
 
-  {/* BACKGROUND IMAGE */}
-  <img
-    src="/images/cinematic-podcast-studio.png"
-    alt=""
-    className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-  />
+  {/* BACKGROUND IMAGE (drifts slowly, zooms in on hover) */}
+  <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <img
+      src="/images/cinematic-podcast-studio.png"
+      alt=""
+      className="programs-drift h-full w-full object-cover opacity-40 transition-[opacity,transform] duration-700 group-hover/programs:scale-110 group-hover/programs:opacity-60"
+    />
+  </div>
 
   {/* DARK OVERLAY */}
-  <div className="pointer-events-none absolute inset-0 bg-[#111622]/70" />
+  <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#111622]/85 via-[#111622]/65 to-[#111622]/40 transition-opacity duration-500 group-hover/programs:opacity-80" />
+
+  {/* ON AIR BARS */}
+  <span
+    aria-hidden="true"
+    className="pointer-events-none absolute right-5 top-5 z-10 flex h-5 items-end gap-[3px] sm:right-7 sm:top-7"
+  >
+    {[0, 1, 2, 3].map((bar) => (
+      <span
+        key={bar}
+        className="programs-bar w-[3px] rounded-full bg-[#FFD400]"
+        style={{ animationDelay: `${bar * 0.15}s` }}
+      />
+    ))}
+  </span>
 
   {/* EXISTING CONTENT */}
   <div className="relative z-10">
@@ -740,7 +763,7 @@ export default function RequestSong() {
       )}
     </p>
 
-    <h3 className="mt-4 font-display text-[34px] font-bold leading-[0.98] sm:text-[40px]">
+    <h3 className="mt-4 font-display text-[34px] font-bold leading-[0.98] transition-transform duration-500 group-hover/programs:translate-x-1 sm:text-[40px]">
       {t(
         "request.todaysProgramsLine1"
       )}
@@ -759,12 +782,14 @@ export default function RequestSong() {
 
   <button
     type="button"
-    onClick={() =>
+    onClick={(event) => {
+      // The whole card opens the schedule; don't open it twice
+      event.stopPropagation();
       window.dispatchEvent(
         new Event(OPEN_FULL_SCHEDULE_EVENT)
-      )
-    }
-    className="group relative z-10 mt-6 inline-flex h-9 w-fit items-center gap-2 rounded-lg border border-white/[0.12] px-4 font-mono text-[8px] font-medium uppercase tracking-[0.08em] text-white/75 transition hover:border-[#FFD400]/50 hover:text-[#FFD400]"
+      );
+    }}
+    className="group relative z-10 mt-6 inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-white/[0.12] bg-[#090D16]/40 px-4 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/80 transition duration-300 hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16] group-hover/programs:border-[#FFD400]/60 group-hover/programs:text-[#FFD400] hover:!text-[#090D16]"
   >
     {t(
       "request.viewFullSchedule"
@@ -781,6 +806,40 @@ export default function RequestSong() {
         </div>
       </div>
       <style jsx global>{`
+        .programs-drift {
+          animation: programsDrift 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes programsDrift {
+          from {
+            object-position: 40% 50%;
+          }
+          to {
+            object-position: 60% 50%;
+          }
+        }
+
+        .programs-bar {
+          height: 30%;
+          animation: programsBar 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes programsBar {
+          from {
+            height: 25%;
+          }
+          to {
+            height: 100%;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .programs-drift,
+          .programs-bar {
+            animation: none;
+          }
+        }
+
         .request-shake {
           animation: requestShake 0.4s ease;
         }
