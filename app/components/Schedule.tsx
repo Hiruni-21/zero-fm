@@ -287,7 +287,7 @@ export default function Schedule() {
   return (
     <section
       id="programs"
-      className="grid h-full min-h-0 min-w-0 scroll-mt-24 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-3 overflow-hidden p-4 sm:p-5"
+      className="grid h-full min-h-0 min-w-0 scroll-mt-24 grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-3 overflow-hidden p-4 sm:p-5"
     >
       {/* =====================================================
           HEADER
@@ -308,7 +308,7 @@ export default function Schedule() {
         </div>
 
         <div className="shrink-0 text-right">
-          <p className="font-mono text-[18px] font-semibold leading-none text-white">
+          <p suppressHydrationWarning className="font-mono text-[18px] font-semibold leading-none text-white">
             {formatClock(currentMinutes)}
           </p>
 
@@ -387,7 +387,9 @@ export default function Schedule() {
       {/* =====================================================
           FULL DAY LIST
       ====================================================== */}
-      <div className="min-h-0 overflow-hidden rounded-xl border border-white/[0.06] bg-[#0D1420]/60">
+      {/* On phones the list is shown in full and scrolls with the page, so a
+          swipe over it never gets caught inside a small scroll box */}
+      <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0D1420]/60 lg:min-h-0">
         {loading ? (
           <div className="space-y-4 p-4">
             {[1, 2, 3, 4, 5].map((row) => (
@@ -406,11 +408,11 @@ export default function Schedule() {
         ) : (
           <div
             ref={listRef}
-            className="schedule-scrollbar relative h-full overflow-y-auto overscroll-contain"
+            className="schedule-scrollbar relative lg:h-full lg:overflow-y-auto lg:overscroll-contain"
           >
             {groups.map((group) => (
               <div key={`${group.part}-${group.items[0].index}`}>
-                <p className="sticky top-0 z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#64748B] backdrop-blur">
+                <p className="z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#64748B] backdrop-blur lg:sticky lg:top-0">
                   {t(`schedule.${group.part}`)}
                 </p>
 

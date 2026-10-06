@@ -30,6 +30,38 @@ const ZERO_FM_NAV_FOOTER_LOGO = "/images/zero-fm-logo.png";
 
 const ZERO_FM_HERO_PHOTO = "/images/hero-zero-fm.png";
 
+// Sinhala and Tamil letters are unreadable at the tiny label sizes used for
+// English, so in those languages every tiny label gets one readable size.
+// (A plain style tag: styled-jsx drops these escaped class names.)
+const SMALL_TEXT_BY_LANGUAGE_CSS = `
+[data-site-language="sinhala"] .text-\\[6px\\],
+[data-site-language="sinhala"] .sm\\:text-\\[6px\\],
+[data-site-language="sinhala"] .text-\\[7px\\],
+[data-site-language="sinhala"] .sm\\:text-\\[7px\\],
+[data-site-language="sinhala"] .text-\\[8px\\],
+[data-site-language="sinhala"] .sm\\:text-\\[8px\\],
+[data-site-language="sinhala"] .text-\\[9px\\],
+[data-site-language="sinhala"] .sm\\:text-\\[9px\\],
+[data-site-language="tamil"] .text-\\[6px\\],
+[data-site-language="tamil"] .sm\\:text-\\[6px\\],
+[data-site-language="tamil"] .text-\\[7px\\],
+[data-site-language="tamil"] .sm\\:text-\\[7px\\],
+[data-site-language="tamil"] .text-\\[8px\\],
+[data-site-language="tamil"] .sm\\:text-\\[8px\\],
+[data-site-language="tamil"] .text-\\[9px\\],
+[data-site-language="tamil"] .sm\\:text-\\[9px\\] {
+  font-size: 11px !important;
+  letter-spacing: 0.02em !important;
+}
+
+[data-site-language="sinhala"] .text-\\[10px\\],
+[data-site-language="sinhala"] .sm\\:text-\\[10px\\],
+[data-site-language="tamil"] .text-\\[10px\\],
+[data-site-language="tamil"] .sm\\:text-\\[10px\\] {
+  font-size: 12px !important;
+}
+`;
+
 const SOCIAL_LINKS = {
   facebook: "https://www.facebook.com/ZeroFMRadio",
   instagram: "https://www.instagram.com/",
@@ -1193,6 +1225,10 @@ export default function ZeroFMHome() {
     };
   }, []);
 
+  // Sinhala and Tamil words are much wider than English at the same size,
+  // so the big hero text gets smaller sizes and is allowed to wrap
+  const wideScript = siteLanguage !== "english";
+
   return (
     <main
       lang={
@@ -1215,6 +1251,15 @@ export default function ZeroFMHome() {
             "Noto Sans", sans-serif !important;
         }
 
+        .footer-links a {
+          width: fit-content;
+          transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+          color: #ffd400;
+        }
+
         [data-site-language="tamil"] .font-display,
         [data-site-language="tamil"] .font-body,
         [data-site-language="tamil"] .font-mono {
@@ -1222,6 +1267,12 @@ export default function ZeroFMHome() {
             "Noto Sans", sans-serif !important;
         }
       `}</style>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: SMALL_TEXT_BY_LANGUAGE_CSS,
+        }}
+      />
 
       <PageEffects />
 
@@ -1370,14 +1421,18 @@ export default function ZeroFMHome() {
 
   {/* Keep the existing hero content below this point */}
         <div className="mx-auto grid w-full max-w-[1440px] items-center gap-8 px-6 py-10 sm:px-8 sm:py-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 lg:px-6 lg:py-14">
-          <div className="relative z-10">
+          <div className="relative z-10 min-w-0">
             
 
             {/* =========================================================
     HERO TITLE — SPACE GROTESK + HANDWRITTEN FONT
     ========================================================= */}
 <h1
-  className="m-0 text-[64px] font-bold leading-[0.86] tracking-[-0.045em] text-white sm:text-[70px] lg:text-[76px]"
+  className={`m-0 font-bold text-white ${
+    wideScript
+      ? "text-[40px] leading-[1.15] sm:text-[52px] lg:text-[58px]"
+      : "text-[64px] leading-[0.86] tracking-[-0.045em] sm:text-[70px] lg:text-[76px]"
+  }`}
   style={{
     fontFamily: '"Space Grotesk", sans-serif',
   }}
@@ -1389,7 +1444,11 @@ export default function ZeroFMHome() {
 
   {/* Yellow handwritten heading */}
   <span
-    className="mt-1 block w-fit -rotate-2 whitespace-nowrap pb-3 text-[68px] font-normal leading-[1] tracking-normal sm:pb-4 sm:text-[82px] lg:text-[96px]"
+    className={`mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
+      wideScript
+        ? "w-fit text-[40px] leading-[1.2] sm:text-[52px] lg:text-[62px]"
+        : "w-fit whitespace-nowrap text-[68px] leading-[1] sm:text-[82px] lg:text-[96px]"
+    }`}
     style={{
       fontFamily: '"Covered By Your Grace", cursive',
       color: "#FFD400",
@@ -1490,7 +1549,7 @@ export default function ZeroFMHome() {
 
           <div className="relative min-w-0">
             <div className="relative overflow-visible rounded-[28px] border border-white/[0.10] bg-[#101626]/90 p-3 pt-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] sm:p-4">
-              <div className="group/hero relative aspect-[2.18/1] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111622]">
+              <div className="group/hero relative aspect-[16/10] sm:aspect-[2.18/1] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111622]">
                 <img
                   src={
                     ZERO_FM_HERO_PHOTO
@@ -1505,7 +1564,7 @@ export default function ZeroFMHome() {
     IMAGE OVERLAY TEXT — FIGMA TYPOGRAPHY
     Small mono label + two handwritten lines.
     ========================================================= */}
-<div className="absolute inset-0 flex flex-col items-start justify-center p-5 sm:p-6">
+<div className="absolute inset-0 flex min-w-0 flex-col items-start justify-center p-5 sm:p-6">
   {/* Small ON AIR NOW label */}
   <p
     className="text-[9px] font-semibold uppercase leading-[13.5px] tracking-[2.16px] text-[#8F9CAE]"
@@ -1518,7 +1577,11 @@ export default function ZeroFMHome() {
 
   {/* White handwritten line */}
   <p
-    className="mt-2 text-[36px] font-normal leading-[40px] text-white"
+    className={`mt-2 max-w-full font-normal text-white ${
+      wideScript
+        ? "text-[20px] leading-[1.3] sm:text-[28px] lg:text-[32px]"
+        : "text-[36px] leading-[40px]"
+    }`}
     style={{
       fontFamily: '"Covered By Your Grace", cursive',
     }}
@@ -1528,7 +1591,11 @@ export default function ZeroFMHome() {
 
   {/* Yellow handwritten line */}
   <p
-    className="-mt-1 text-[42px] font-normal leading-[46px] text-[#FFD400] sm:text-[48px] sm:leading-[48px]"
+    className={`max-w-full font-normal text-[#FFD400] ${
+      wideScript
+        ? "text-[22px] leading-[1.3] sm:text-[32px] lg:text-[36px]"
+        : "-mt-1 text-[42px] leading-[46px] sm:text-[48px] sm:leading-[48px]"
+    }`}
     style={{
       fontFamily: '"Covered By Your Grace", cursive',
     }}
@@ -1783,19 +1850,19 @@ export default function ZeroFMHome() {
                 />
               </a>
 
-              <p className="mt-3 font-mono text-[7px] font-semibold uppercase tracking-[0.09em] text-[#FFD400]">
+              <p className="mt-3 font-mono text-[11px] font-semibold uppercase tracking-[0.09em] text-[#FFD400]">
                 {t(
                   "colomboStream"
                 )}
               </p>
 
-              <p className="mt-3 max-w-[340px] text-[9px] leading-5 text-[#8F9CAE]">
+              <p className="mt-3 max-w-[360px] text-sm leading-6 text-[#8F9CAE]">
                 {t(
                   "broadcasting"
                 )}
               </p>
 
-              <p className="mt-3 flex items-center gap-2 font-mono text-[7px] uppercase tracking-[0.08em] text-[#34D399]">
+              <p className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#34D399]">
                 <span className="size-1.5 rounded-full bg-[#34D399]" />
 
                 {t(
@@ -1809,11 +1876,11 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t("platform")}
               </h3>
 
-              <div className="mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
+              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
                 <a href="#live">
                   {t(
                     "liveStream"
@@ -1839,11 +1906,11 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t("company")}
               </h3>
 
-              <div className="mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
+              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
                 <a href="#about">
                   {t(
                     "aboutZero"
@@ -1859,13 +1926,13 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t(
                   "supportConnect"
                 )}
               </h3>
 
-              <div className="mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
+              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
                 <a href="#contact">
                   {t(
                     "contactStudioBooth"
@@ -1873,16 +1940,16 @@ export default function ZeroFMHome() {
                 </a>
 
                 {/* Tap to call / open WhatsApp. Update both numbers here. */}
-                <a href="tel:+94112000000">
-                  Hotline: +94 11 200 0000
+                <a href="tel:+94727170170">
+                  Hotline: 072 717 0170
                 </a>
 
                 <a
-                  href="https://wa.me/94770000000"
+                  href="https://wa.me/94727170170"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  WhatsApp Studio: +94 77 000 0000
+                  WhatsApp Studio: 072 717 0170
                 </a>
 
                 <a href="#contact">
@@ -1894,7 +1961,7 @@ export default function ZeroFMHome() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 pt-4 font-mono text-[7px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 pt-5 font-mono text-[11px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
             <p>
               ©{" "}
               {new Date().getFullYear()}{" "}
@@ -1909,7 +1976,7 @@ export default function ZeroFMHome() {
                   : "All rights reserved."}
             </p>
 
-            <div className="flex gap-5">
+            <div className="footer-links flex gap-5">
               <a href="/privacy-policy">
                 {t("privacy")}
               </a>

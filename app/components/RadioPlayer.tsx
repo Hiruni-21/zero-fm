@@ -407,6 +407,48 @@ export default function RadioPlayer() {
     setIsBuffering(false);
   };
 
+  // The stream can stop on its own (network drop, or the browser suspending a
+  // background tab) without a pause event. Check that it's still moving, and
+  // show it as stopped if not, so the button never claims it's playing.
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    let lastTime = audioRef.current?.currentTime ?? 0;
+    let stuckSince = 0;
+
+    const check = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      const dead = audio.paused || audio.ended || Boolean(audio.error);
+      const moved = audio.currentTime !== lastTime;
+      lastTime = audio.currentTime;
+
+      if (moved) stuckSince = 0;
+      else if (!stuckSince) stuckSince = Date.now();
+
+      // Give a slow connection 20 seconds to recover before giving up
+      const stuck = stuckSince > 0 && Date.now() - stuckSince > 20_000;
+
+      if (dead || stuck) {
+        stopStream();
+        setIsPlaying(false);
+        setIsBuffering(false);
+      }
+    };
+
+    const interval = window.setInterval(check, 5000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [isPlaying]);
+
   const handleAudioError = () => {
     // Stopping clears the stream address; that isn't a real error
     if (!audioRef.current?.getAttribute("src")) return;
@@ -549,6 +591,9 @@ export default function RadioPlayer() {
 
       if (left <= 0) {
         stopStream();
+        // Show the stopped state too, even if the tab was in the background
+        setIsPlaying(false);
+        setIsBuffering(false);
         setSleepEndsAt(null);
         setSleepChoice(null);
         showToast(t("player.sleepEnded"));
@@ -646,7 +691,7 @@ export default function RadioPlayer() {
               {t("player.studio")}
             </p>
 
-            <h1 className="mt-1 truncate text-2xl font-bold tracking-[-0.035em] text-white sm:text-[30px]">
+            <h1 className="mt-1 text-2xl leading-tight sm:truncate font-bold tracking-[-0.035em] text-white sm:text-[30px]">
               {t("player.title")}
             </h1>
           </div>
@@ -672,6 +717,7 @@ export default function RadioPlayer() {
         onPlaying={() => setIsBuffering(false)}
         onWaiting={() => setIsBuffering(true)}
         onPause={handlePause}
+        onEnded={handlePause}
         onError={handleAudioError}
       />
 
@@ -929,8 +975,8 @@ export default function RadioPlayer() {
     }
   />
 </div>
-                <span className="hidden w-5 text-right font-mono text-[8px] text-white/30 sm:block">
-                  {volume}
+                <span className="mr-3 w-7 shrink-0 text-right font-mono text-xs tabular-nums text-white/70">
+                  {isMuted ? 0 : volume}
                 </span>
               </div>
 
