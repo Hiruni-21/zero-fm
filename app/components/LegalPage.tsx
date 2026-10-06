@@ -34,7 +34,7 @@ export default function LegalPage({
 
           <a
             href="/"
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.12] px-4 text-sm text-white/80 transition hover:border-[#FFD400]/60 hover:text-[#FFD400]"
+            className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-4 text-xs text-white/80 transition hover:border-[#FFD400]/60 hover:text-[#FFD400]"
           >
             <span aria-hidden="true">←</span>
             Back to home
@@ -42,51 +42,51 @@ export default function LegalPage({
         </div>
       </header>
 
-      <div className="mx-auto max-w-[960px] px-5 py-12 sm:px-8 sm:py-16">
+      <div className="mx-auto max-w-[880px] px-5 py-10 sm:px-8 sm:py-14">
         <div className="text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-[#0F1523] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] text-white/80">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-[#0F1523] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-white/80">
             <span className="size-1.5 rounded-full bg-[#FFD400]" />
             Zero FM.Live
           </span>
 
-          <h1 className="mt-5 font-display text-4xl font-bold uppercase tracking-[-0.02em] sm:text-5xl">
+          <h1 className="mt-4 font-display text-[28px] font-bold uppercase tracking-[-0.02em] sm:text-4xl">
             {title}
           </h1>
 
-          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[#64748B]">
+          <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-[#64748B]">
             Last updated {updated}
           </p>
         </div>
 
-        <div className="mt-10 flex flex-col gap-6">
+        <div className="mt-8 flex flex-col gap-4">
           {sections.map((section, index) => (
             <section
               key={section.title}
-              className="rounded-2xl border border-white/[0.08] bg-[#0F1523] p-6 transition-colors duration-300 hover:border-white/[0.14] sm:p-8"
+              className="rounded-2xl border border-white/[0.08] bg-[#0F1523] p-5 transition-colors duration-300 hover:border-white/[0.14] sm:p-8"
             >
-              <h2 className="flex items-baseline gap-3 border-b border-white/[0.08] pb-4 font-display text-lg font-bold uppercase sm:text-xl">
+              <h2 className="flex items-baseline gap-3 border-b border-white/[0.08] pb-4 font-display text-sm font-bold uppercase sm:text-base">
                 <span className="font-mono text-[#FFD400]">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 {section.title}
               </h2>
 
-              <div className="legal-body mt-5 flex flex-col gap-4 text-sm leading-7 text-[#C3CCD8] sm:text-base sm:leading-7">
+              <div className="legal-body mt-4 flex flex-col gap-3 text-xs leading-6 text-[#C3CCD8] sm:text-[13px]">
                 {section.body}
               </div>
             </section>
           ))}
         </div>
 
-        <div className="mt-12 rounded-2xl bg-[#FFD400] px-6 py-6 text-center shadow-[0_12px_40px_rgba(255,212,0,0.18)]">
-          <p className="font-display text-lg font-bold uppercase text-[#090D16] sm:text-2xl">
+        <div className="mt-10 rounded-2xl bg-[#FFD400] px-6 py-5 text-center shadow-[0_12px_40px_rgba(255,212,0,0.18)]">
+          <p className="font-display text-sm font-bold uppercase text-[#090D16] sm:text-lg">
             A community service to entertain our nation!
           </p>
         </div>
       </div>
 
       <footer className="border-t border-white/[0.08] bg-[#070B13]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 font-mono text-[11px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 font-mono text-[9px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <p>© {new Date().getFullYear()} Zero FM Broadcasting Network. All rights reserved.</p>
 
           <div className="flex gap-5">
