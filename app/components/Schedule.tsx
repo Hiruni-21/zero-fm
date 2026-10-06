@@ -412,7 +412,7 @@ export default function Schedule() {
           >
             {groups.map((group) => (
               <div key={`${group.part}-${group.items[0].index}`}>
-                <p className="z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#64748B] backdrop-blur lg:sticky lg:top-0">
+                <p className="z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#94A3B8] backdrop-blur lg:sticky lg:top-0">
                   {t(`schedule.${group.part}`)}
                 </p>
 
@@ -432,7 +432,7 @@ export default function Schedule() {
                         active
                           ? "bg-[#FFD400]/[0.05]"
                           : "hover:bg-white/[0.02]"
-                      } ${finished ? "opacity-45" : ""}`}
+                      } ${finished ? "opacity-70" : ""}`}
                     >
                       {active && (
                         <span className="absolute inset-y-0 left-0 w-[3px] bg-[#FFD400]" />
@@ -441,20 +441,20 @@ export default function Schedule() {
                       <div className="w-[52px] shrink-0">
                         <p
                           className={`font-mono text-[14px] font-semibold leading-none ${
-                            active ? "text-[#FFD400]" : "text-white/85"
+                            active ? "text-[#FFD400]" : "text-white"
                           }`}
                         >
                           {program.time}
                         </p>
 
-                        <p className="mt-1.5 font-mono text-[10px] leading-none text-[#64748B]">
+                        <p className="mt-1.5 font-mono text-[10px] leading-none text-[#94A3B8]">
                           {program.endTime}
                         </p>
                       </div>
 
                       <p
                         className={`min-w-0 flex-1 font-display text-[14px] font-semibold leading-snug ${
-                          active ? "text-[#FFD400]" : "text-white/90"
+                          active ? "text-[#FFD400]" : "text-white"
                         }`}
                       >
                         {program.program}

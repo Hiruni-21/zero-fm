@@ -1431,7 +1431,7 @@ export default function ZeroFMHome() {
   className={`m-0 font-bold text-white ${
     wideScript
       ? "text-[40px] leading-[1.15] sm:text-[52px] lg:text-[58px]"
-      : "text-[64px] leading-[0.86] tracking-[-0.045em] sm:text-[70px] lg:text-[76px]"
+      : "text-[52px] leading-[0.9] tracking-[-0.045em] min-[400px]:text-[64px] sm:text-[70px] lg:text-[76px]"
   }`}
   style={{
     fontFamily: '"Space Grotesk", sans-serif',
@@ -1447,7 +1447,7 @@ export default function ZeroFMHome() {
     className={`mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
       wideScript
         ? "w-fit text-[40px] leading-[1.2] sm:text-[52px] lg:text-[62px]"
-        : "w-fit whitespace-nowrap text-[68px] leading-[1] sm:text-[82px] lg:text-[96px]"
+        : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[82px] lg:text-[96px]"
     }`}
     style={{
       fontFamily: '"Covered By Your Grace", cursive',
@@ -1850,19 +1850,19 @@ export default function ZeroFMHome() {
                 />
               </a>
 
-              <p className="mt-3 font-mono text-[11px] font-semibold uppercase tracking-[0.09em] text-[#FFD400]">
+              <p className="mt-3 font-mono text-[7px] font-semibold uppercase tracking-[0.09em] text-[#FFD400]">
                 {t(
                   "colomboStream"
                 )}
               </p>
 
-              <p className="mt-3 max-w-[360px] text-sm leading-6 text-[#8F9CAE]">
+              <p className="mt-3 max-w-[340px] text-[9px] leading-5 text-[#8F9CAE]">
                 {t(
                   "broadcasting"
                 )}
               </p>
 
-              <p className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[#34D399]">
+              <p className="mt-3 flex items-center gap-2 font-mono text-[7px] uppercase tracking-[0.08em] text-[#34D399]">
                 <span className="size-1.5 rounded-full bg-[#34D399]" />
 
                 {t(
@@ -1876,11 +1876,11 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t("platform")}
               </h3>
 
-              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
+              <div className="footer-links mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
                 <a href="#live">
                   {t(
                     "liveStream"
@@ -1906,11 +1906,11 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t("company")}
               </h3>
 
-              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
+              <div className="footer-links mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
                 <a href="#about">
                   {t(
                     "aboutZero"
@@ -1926,13 +1926,13 @@ export default function ZeroFMHome() {
             </div>
 
             <div>
-              <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-white">
+              <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-white">
                 {t(
                   "supportConnect"
                 )}
               </h3>
 
-              <div className="footer-links mt-4 flex flex-col gap-3 text-sm text-[#8F9CAE]">
+              <div className="footer-links mt-3 flex flex-col gap-2.5 text-[9px] text-[#8F9CAE]">
                 <a href="#contact">
                   {t(
                     "contactStudioBooth"
@@ -1961,7 +1961,7 @@ export default function ZeroFMHome() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 pt-5 font-mono text-[11px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 pt-4 font-mono text-[7px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
             <p>
               ©{" "}
               {new Date().getFullYear()}{" "}
