@@ -291,29 +291,33 @@ export default function Schedule() {
       {/* =====================================================
           HEADER
       ====================================================== */}
-      <div className="flex items-end justify-between gap-3 border-b border-white/[0.08] pb-4">
-        <div className="min-w-0">
+      <div className="border-b border-white/[0.08] pb-4">
+        {/* Station name on the left, clock on the right */}
+        <div className="flex items-start justify-between gap-3">
           <p className="font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-[#FFD400]">
             ZERO FM
           </p>
 
-          <div className="mt-2 flex items-center gap-2.5">
-            <CalendarIcon />
+          <div className="shrink-0 text-right">
+            <p suppressHydrationWarning className="font-mono text-[18px] font-semibold leading-none text-white">
+              {formatClock(currentMinutes)}
+            </p>
 
-            <h3 className="font-display text-[20px] font-bold leading-[1.35] text-white sm:text-[22px]">
-              {t("schedule.todaysPrograms")}
-            </h3>
+            <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#8F9CAE]">
+              Asia / Colombo
+            </p>
           </div>
         </div>
 
-        <div className="shrink-0 text-right">
-          <p suppressHydrationWarning className="font-mono text-[18px] font-semibold leading-none text-white">
-            {formatClock(currentMinutes)}
-          </p>
+        {/* Heading gets the full width, so it doesn't squeeze on phones */}
+        <div className="mt-2 flex items-start gap-2.5">
+          <span className="mt-[0.4em] shrink-0">
+            <CalendarIcon />
+          </span>
 
-          <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#8F9CAE]">
-            Asia / Colombo
-          </p>
+          <h3 className="min-w-0 font-display text-[20px] font-bold leading-[1.4] text-white sm:text-[22px]">
+            {t("schedule.todaysPrograms")}
+          </h3>
         </div>
       </div>
 

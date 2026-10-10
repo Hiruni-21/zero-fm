@@ -293,7 +293,7 @@ export default function PageEffects() {
       {/* Scroll progress line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed left-0 right-0 top-[128px] z-[101] h-[2px] origin-left bg-[#FFD400]"
+        className="pointer-events-none fixed left-0 right-0 top-[128px] z-[99] h-[2px] origin-left bg-[#FFD400]"
         style={{ transform: `scaleX(${progress})` }}
       />
 
