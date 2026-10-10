@@ -55,7 +55,7 @@ export default function RecentlyPlayed() {
 
       <div className="flex items-end justify-between">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#FFD400]">
+          <p className="font-mono text-[12px] font-bold uppercase tracking-[0.3em] text-[#FFD400]">
             Zero FM
           </p>
 
@@ -64,7 +64,7 @@ export default function RecentlyPlayed() {
           </h2>
         </div>
 
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/30">
+        <span className="font-mono text-[12px] uppercase tracking-[0.2em] text-white/30">
           Live History
         </span>
       </div>
@@ -143,7 +143,7 @@ export default function RecentlyPlayed() {
 
                 {/* NUMBER */}
 
-                <span className="shrink-0 font-mono text-[10px] text-white/20">
+                <span className="shrink-0 font-mono text-[12px] text-white/20">
                   {String(index + 1).padStart(2, "0")}
                 </span>
               </div>

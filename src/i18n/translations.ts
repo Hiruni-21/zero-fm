@@ -2,6 +2,7 @@ export type SiteLanguage = "english" | "sinhala" | "tamil";
 
 export const translations = {
   english: {
+
     // Navigation
     "nav.home": "Home",
     "nav.live": "Live",
@@ -331,6 +332,7 @@ export const translations = {
   },
 
   sinhala: {
+
     // Navigation
     "nav.home": "මුල් පිටුව",
     "nav.live": "සජීවී",
@@ -359,7 +361,7 @@ export const translations = {
 
     // Live Player
     "player.studio": "Zero FM සජීවී ස්ටුඩියෝව",
-    "player.title": "සජීවී ප්ලේයරය සහ වැඩසටහන් කාලසටහන",
+    "player.title": "මියුරු ගීයක රස මිහිර විඳින්න",
     "player.location": "කොළඹ, ශ්‍රී ලංකාව (UTC+5:30)",
     "player.liveRadio": "සජීවී ගුවන්විදුලිය",
     "player.liveNow": "දැන් සජීවීව",
@@ -397,7 +399,7 @@ export const translations = {
 
     // Schedule
     "schedule.station": "Zero FM",
-    "schedule.todaysPrograms": "අද වැඩසටහන්",
+    "schedule.todaysPrograms": "ඔබ වෙනුවෙන් අද වැඩසටහන්",
     "schedule.timezone": "Asia / Colombo",
     "schedule.liveNow": "දැන් සජීවීව",
     "schedule.loadingProgram": "වැඩසටහන පූරණය වෙමින්...",
@@ -441,7 +443,7 @@ export const translations = {
     "features.moreFreedom": "වැඩි නිදහසක්.",
 
     // Category Explorer
-    "categories.music": "සංගීතය",
+    "categories.music": "ගීත",
     "categories.explore": "ගවේෂණය →",
     "categories.songCount": "ගීත {n}",
     "categories.aria": "{title} ගවේෂණය කරන්න",
@@ -497,8 +499,9 @@ export const translations = {
     "community.card3Line4": "දවස්",
 
     // Request Song
-    "request.title": "ගීතයක් ඉල්ලන්න",
-    "request.subtitle": "ඔබේ ප්‍රියතම ගීතය අසන්නට කැමතිද? අපට ඉල්ලීමක් එවන්න!",
+    "request.title": "ඔබේ මතකයේ රැඳුණු ඒ ගීතය, අපෙන් request කරන්න",
+    // Empty: in Sinhala this line is now the heading itself
+    "request.subtitle": "",
     "request.couldBeNext1": "මීළඟට ඔබේ ගීතය",
     "request.couldBeNext2": "විය හැකියි!",
     "request.nameLabel": "ඔබගේ නම",
@@ -514,10 +517,10 @@ export const translations = {
     "request.errorPhone": "වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න.",
     "request.success": "ඔබගේ ගීත ඉල්ලීම යවන ලදී. ස්තූතියි!",
     "request.errorGeneric": "ඔබගේ ගීත ඉල්ලීම යැවීමට නොහැකි විය.",
-    "request.broadcastLine": "විකාශන මාර්ගය",
-    "request.todaysPrograms": "අද\nවැඩසටහන්",
-    "request.todaysProgramsLine1": "අද",
-    "request.todaysProgramsLine2": "වැඩසටහන්",
+    "request.broadcastLine": "මතක මිහිර",
+    "request.todaysPrograms": "ඔබ වෙනුවෙන්\nඅද",
+    "request.todaysProgramsLine1": "ඔබ වෙනුවෙන්",
+    "request.todaysProgramsLine2": "අද",
     "request.greatMusicAllDay": "දවස පුරාම විශිෂ්ට සංගීතය",
     "request.viewFullSchedule": "සම්පූර්ණ කාලසටහන බලන්න",
 
@@ -531,7 +534,7 @@ export const translations = {
     "player.footerStream": "දිවයින පුරා ඩිජිටල් ප්‍රවාහය · 24/7",
     "mobileApp.streaming247": "පැය 24 පුරා විකාශනය",
     "mobileApp.favoriteTracks": "ඔබේ ප්‍රියතම ගීත",
-    "mobileApp.musicLibrary": "සංගීත පුස්තකාලය",
+    "mobileApp.musicLibrary": "හදවත Hit වෙන ගීත එකතුව",
     "mobileApp.languages": "සිංහල · දෙමළ · ඉංග්‍රීසි",
     "mobileApp.stayUpToDate": "යාවත්කාලීනව සිටින්න",
     "mobileApp.zeroStreaming": "Zero FM ප්‍රවාහය",
@@ -660,6 +663,7 @@ export const translations = {
   },
 
   tamil: {
+
     // Navigation
     "nav.home": "முகப்பு",
     "nav.live": "நேரலை",

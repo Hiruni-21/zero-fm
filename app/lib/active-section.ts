@@ -9,16 +9,15 @@ import { useSyncExternalStore } from "react";
 
 export const NAV_SECTIONS = [
   "home",
-  "live",
   "programs",
   "request",
-  "about",
   "contact",
 ] as const;
 
 export type NavSection = (typeof NAV_SECTIONS)[number];
 
-const HEADER_HEIGHT = 72;
+// Menu bar plus the mini player under it
+const HEADER_HEIGHT = 128;
 
 let active: NavSection = "home";
 // The section the visitor clicked. It stays highlighted while it's still

@@ -404,27 +404,48 @@ export default function RequestSong() {
   return (
     <section
       id="request"
-      className="scroll-mt-[72px] border-b border-white/[0.07] bg-[#090D16]"
+      className="relative scroll-mt-[72px] bg-[#05080F]"
     >
-      <div className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 md:py-16 lg:px-12 lg:py-20">
-        <div className="grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+      <div className="mx-auto max-w-[1440px] px-5 py-16 sm:px-8 md:py-20 lg:px-12 lg:py-28">
+        <div>
 
-          {/* =====================================================
-              LEFT - REQUEST FORM
-          ===================================================== */}
-          <div className="rounded-2xl border border-white/[0.09] bg-[#0F1523] p-5 sm:p-7">
-            <div className="grid gap-6 md:grid-cols-[0.72fr_1.28fr] md:items-center md:gap-8">
+          {/* Request card: studio photo behind a dark glass panel */}
+          <div className="zf-card relative overflow-hidden rounded-[28px] p-6 sm:p-10 lg:p-14">
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+              <img
+                src="/images/cinematic-podcast-studio.png"
+                alt=""
+                className="programs-drift size-full object-cover opacity-30"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#070B13] via-[#070B13]/85 to-[#070B13]/55" />
+              <div className="absolute -left-32 -top-32 size-96 rounded-full bg-[#FFD400]/[0.08] blur-[100px]" />
+            </div>
+
+            <div className="relative grid gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-center lg:gap-16">
 
               <div>
-                <h2 className="font-display text-[26px] font-bold leading-tight sm:text-3xl">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-[#FFD400]">
+                  {t("request.broadcastLine")}
+                </p>
+
+                {/* A long heading (a full sentence) gets a smaller size */}
+                <h2
+                  className={`mt-4 font-display font-bold tracking-[-0.02em] ${
+                    t("request.title").length > 24
+                      ? "text-[28px] leading-[1.35] sm:text-[34px] lg:text-[40px]"
+                      : "text-[36px] leading-[1.02] sm:text-[48px] lg:text-[56px]"
+                  }`}
+                >
                   {t("request.title")}
                 </h2>
 
-                <p className="mt-3 max-w-[230px] text-xs leading-5 text-[#8F9CAE]">
-                  {t("request.subtitle")}
-                </p>
+                {t("request.subtitle") && (
+                  <p className="mt-4 max-w-[380px] text-[14px] leading-6 text-[#A5B1C2]">
+                    {t("request.subtitle")}
+                  </p>
+                )}
 
-                <p className="mt-5 font-display text-lg font-semibold italic leading-tight text-[#FFD400]">
+                <p className="mt-6 font-display text-xl font-semibold italic leading-tight text-[#FFD400] sm:text-2xl">
                   {t("request.couldBeNext1")}
                   <br />
                   {t("request.couldBeNext2")}
@@ -439,9 +460,9 @@ export default function RequestSong() {
                 onSubmit={submitRequest}
               >
                 {/* NAME */}
-                <label className="group/field flex h-11 items-center gap-3 rounded-lg border border-white/[0.08] bg-[#090D16] px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
+                <label className="group/field flex h-12 items-center gap-3 rounded-xl border border-white/[0.1] bg-[#05080F]/70 backdrop-blur px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
                   <span
-                    className="font-mono text-[10px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
+                    className="font-mono text-[12px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
                     aria-hidden="true"
                   >
                     01
@@ -463,14 +484,14 @@ export default function RequestSong() {
                         event.target.value
                       )
                     }
-                    className="font-body w-full bg-transparent text-xs text-white outline-none placeholder:text-[#64748B]"
+                    className="font-body w-full bg-transparent text-[14px] text-white outline-none placeholder:text-[#64748B]"
                   />
                 </label>
 
                 {/* PHONE */}
-                <label className="group/field flex h-11 items-center gap-3 rounded-lg border border-white/[0.08] bg-[#090D16] px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
+                <label className="group/field flex h-12 items-center gap-3 rounded-xl border border-white/[0.1] bg-[#05080F]/70 backdrop-blur px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
                   <span
-                    className="font-mono text-[10px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
+                    className="font-mono text-[12px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
                     aria-hidden="true"
                   >
                     02
@@ -492,15 +513,15 @@ export default function RequestSong() {
                         event.target.value
                       )
                     }
-                    className="font-body w-full bg-transparent text-xs text-white outline-none placeholder:text-[#64748B]"
+                    className="font-body w-full bg-transparent text-[14px] text-white outline-none placeholder:text-[#64748B]"
                   />
                 </label>
 
                 {/* SONG */}
                 <div className="relative">
-                <label className="group/field flex h-11 items-center gap-3 rounded-lg border border-white/[0.08] bg-[#090D16] px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
+                <label className="group/field flex h-12 items-center gap-3 rounded-xl border border-white/[0.1] bg-[#05080F]/70 backdrop-blur px-3.5 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.16] focus-within:border-[#FFD400]/50 focus-within:shadow-[0_0_0_3px_rgba(255,212,0,0.08)]">
                   <span
-                    className="font-mono text-[10px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
+                    className="font-mono text-[12px] text-[#64748B] transition-colors group-focus-within/field:text-[#FFD400]"
                     aria-hidden="true"
                   >
                     03
@@ -575,7 +596,7 @@ export default function RequestSong() {
                         150
                       )
                     }
-                    className="font-body w-full bg-transparent text-xs text-white outline-none placeholder:text-[#64748B]"
+                    className="font-body w-full bg-transparent text-[14px] text-white outline-none placeholder:text-[#64748B]"
                   />
 
                   {pickedTrack && (
@@ -622,7 +643,7 @@ export default function RequestSong() {
                             <span className="font-body text-xs text-white">
                               {track.title}
                             </span>
-                            <span className="font-body text-[10px] text-[#8F9CAE]">
+                            <span className="font-body text-[12px] text-[#8F9CAE]">
                               {track.artist}
                             </span>
                           </button>
@@ -637,7 +658,7 @@ export default function RequestSong() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`font-body flex h-11 w-full items-center justify-center gap-2 rounded-lg text-[10px] font-bold uppercase tracking-[0.08em] text-[#090D16] transition duration-300 hover:shadow-[0_10px_28px_rgba(255,212,0,0.22)] disabled:cursor-wait disabled:opacity-60 ${
+                  className={`font-body flex h-11 w-full items-center justify-center gap-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.08em] text-[#090D16] transition duration-300 hover:shadow-[0_10px_28px_rgba(255,212,0,0.22)] disabled:cursor-wait disabled:opacity-60 ${
                     celebrateKey
                       ? "bg-[#34D399]"
                       : "bg-[#FFD400] hover:bg-[#ffe45c]"
@@ -717,92 +738,6 @@ export default function RequestSong() {
             </div>
           </div>
 
-          {/* =====================================================
-              RIGHT - PROGRAMS
-          ===================================================== */}
-<div
-  onClick={() =>
-    window.dispatchEvent(
-      new Event(OPEN_FULL_SCHEDULE_EVENT)
-    )
-  }
-  className="programs-card group/programs relative flex min-h-[280px] cursor-pointer flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.09] bg-[#111622] p-5 transition duration-300 hover:-translate-y-1 hover:border-[#FFD400]/40 hover:shadow-[0_18px_40px_rgba(0,0,0,0.35),0_0_30px_rgba(255,212,0,0.08)] active:translate-y-0 active:scale-[0.99] sm:min-h-[300px] sm:p-7"
->
-
-  {/* BACKGROUND IMAGE (drifts slowly, zooms in on hover) */}
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <img
-      src="/images/cinematic-podcast-studio.png"
-      alt=""
-      className="programs-drift h-full w-full object-cover opacity-40 transition-[opacity,transform] duration-700 group-hover/programs:scale-110 group-hover/programs:opacity-60"
-    />
-  </div>
-
-  {/* DARK OVERLAY */}
-  <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#111622]/85 via-[#111622]/65 to-[#111622]/40 transition-opacity duration-500 group-hover/programs:opacity-80" />
-
-  {/* ON AIR BARS */}
-  <span
-    aria-hidden="true"
-    className="pointer-events-none absolute right-5 top-5 z-10 flex h-5 items-end gap-[3px] sm:right-7 sm:top-7"
-  >
-    {[0, 1, 2, 3].map((bar) => (
-      <span
-        key={bar}
-        className="programs-bar w-[3px] rounded-full bg-[#FFD400]"
-        style={{ animationDelay: `${bar * 0.15}s` }}
-      />
-    ))}
-  </span>
-
-  {/* EXISTING CONTENT */}
-  <div className="relative z-10">
-    <p className="font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-[#FFD400]">
-      {t(
-        "request.broadcastLine"
-      )}
-    </p>
-
-    <h3 className="mt-4 font-display text-[34px] font-bold leading-[0.98] transition-transform duration-500 group-hover/programs:translate-x-1 sm:text-[40px]">
-      {t(
-        "request.todaysProgramsLine1"
-      )}
-      <br />
-      {t(
-        "request.todaysProgramsLine2"
-      )}
-    </h3>
-
-    <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.12em] text-[#8F9CAE]">
-      {t(
-        "request.greatMusicAllDay"
-      )}
-    </p>
-  </div>
-
-  <button
-    type="button"
-    onClick={(event) => {
-      // The whole card opens the schedule; don't open it twice
-      event.stopPropagation();
-      window.dispatchEvent(
-        new Event(OPEN_FULL_SCHEDULE_EVENT)
-      );
-    }}
-    className="group relative z-10 mt-6 inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-white/[0.12] bg-[#090D16]/40 px-4 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-white/80 transition duration-300 hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16] group-hover/programs:border-[#FFD400]/60 group-hover/programs:text-[#FFD400] hover:!text-[#090D16]"
-  >
-    {t(
-      "request.viewFullSchedule"
-    )}
-
-    <span
-      aria-hidden="true"
-      className="transition-transform duration-200 group-hover:translate-x-1"
-    >
-      →
-    </span>
-  </button>
-</div>
         </div>
       </div>
       <style jsx global>{`

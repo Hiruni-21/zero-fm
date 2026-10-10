@@ -1,9 +1,12 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
+import MiniPlayer from "./MiniPlayer";
 
 /*
  * Shared layout for the Privacy Policy and Terms & Conditions pages:
  * a simple header back to the home page, numbered section cards, the
- * yellow community banner and a short footer.
+ * yellow community banner and a short footer. The mini player sits under
+ * the header, and the links here use Link so the radio keeps playing.
  */
 
 export type LegalSection = {
@@ -24,25 +27,27 @@ export default function LegalPage({
     <main className="min-h-screen bg-[#090D16] text-white">
       <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0A0E17]">
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
-          <a href="/" aria-label="Zero FM home" className="flex shrink-0 items-center">
+          <Link href="/" aria-label="Zero FM home" className="flex shrink-0 items-center">
             <img
               src="/images/zero-fm-logo.png"
               alt="Zero FM Live"
               className="h-auto w-[120px] object-contain sm:w-[136px]"
             />
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/"
             className="inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-4 text-xs text-white/80 transition hover:border-[#FFD400]/60 hover:text-[#FFD400]"
           >
             <span aria-hidden="true">←</span>
             Back to home
-          </a>
+          </Link>
         </div>
       </header>
 
-      <div className="mx-auto max-w-[880px] px-5 py-10 sm:px-8 sm:py-14">
+      <MiniPlayer />
+
+      <div className="mx-auto max-w-[880px] px-5 pb-10 pt-24 sm:px-8 sm:pb-14 sm:pt-28">
         <div className="text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/[0.1] bg-[#0F1523] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-white/80">
             <span className="size-1.5 rounded-full bg-[#FFD400]" />
@@ -90,12 +95,12 @@ export default function LegalPage({
           <p>© {new Date().getFullYear()} Zero FM Broadcasting Network. All rights reserved.</p>
 
           <div className="flex gap-5">
-            <a href="/privacy-policy" className="transition hover:text-[#FFD400]">
+            <Link href="/privacy-policy" className="transition hover:text-[#FFD400]">
               Privacy Policy
-            </a>
-            <a href="/terms" className="transition hover:text-[#FFD400]">
+            </Link>
+            <Link href="/terms" className="transition hover:text-[#FFD400]">
               Terms &amp; Conditions
-            </a>
+            </Link>
           </div>
         </div>
       </footer>

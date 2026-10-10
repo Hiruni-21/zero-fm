@@ -286,22 +286,21 @@ export default function Schedule() {
 
   return (
     <section
-      id="programs"
-      className="grid h-full min-h-0 min-w-0 scroll-mt-24 grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-3 overflow-hidden p-4 sm:p-5"
+      className="grid h-full min-h-0 min-w-0 grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-3 overflow-hidden p-4 sm:p-5"
     >
       {/* =====================================================
           HEADER
       ====================================================== */}
       <div className="flex items-end justify-between gap-3 border-b border-white/[0.08] pb-4">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#FFD400]">
+          <p className="font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-[#FFD400]">
             ZERO FM
           </p>
 
           <div className="mt-2 flex items-center gap-2.5">
             <CalendarIcon />
 
-            <h3 className="truncate font-display text-[22px] font-bold leading-none text-white">
+            <h3 className="font-display text-[20px] font-bold leading-[1.35] text-white sm:text-[22px]">
               {t("schedule.todaysPrograms")}
             </h3>
           </div>
@@ -312,7 +311,7 @@ export default function Schedule() {
             {formatClock(currentMinutes)}
           </p>
 
-          <p className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-[#8F9CAE]">
+          <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#8F9CAE]">
             Asia / Colombo
           </p>
         </div>
@@ -327,7 +326,7 @@ export default function Schedule() {
             <div className="flex items-center gap-2">
               {currentProgram && <LiveDot />}
 
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#FFD400]">
+              <p className="font-mono text-[12px] font-bold uppercase tracking-[0.14em] text-[#FFD400]">
                 {t("schedule.liveNow")}
               </p>
             </div>
@@ -354,7 +353,7 @@ export default function Schedule() {
                 />
               </div>
 
-              <p className="mt-1.5 font-mono text-[10px] text-[#8F9CAE]">
+              <p className="mt-1.5 font-mono text-[12px] text-[#8F9CAE]">
                 {t("schedule.minutesLeft", {
                   minutes: String(liveProgress.minutesLeft),
                 })}
@@ -365,7 +364,7 @@ export default function Schedule() {
 
         <article className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-[#121826] px-4 py-3">
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8F9CAE]">
+            <p className="font-mono text-[12px] font-semibold uppercase tracking-[0.14em] text-[#8F9CAE]">
               {t("schedule.nextProgram")}
             </p>
 
@@ -412,7 +411,7 @@ export default function Schedule() {
           >
             {groups.map((group) => (
               <div key={`${group.part}-${group.items[0].index}`}>
-                <p className="z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#94A3B8] backdrop-blur lg:sticky lg:top-0">
+                <p className="z-10 border-b border-white/[0.05] bg-[#0D1420]/95 px-4 py-2 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#94A3B8] backdrop-blur lg:sticky lg:top-0">
                   {t(`schedule.${group.part}`)}
                 </p>
 
@@ -447,7 +446,7 @@ export default function Schedule() {
                           {program.time}
                         </p>
 
-                        <p className="mt-1.5 font-mono text-[10px] leading-none text-[#94A3B8]">
+                        <p className="mt-1.5 font-mono text-[12px] leading-none text-[#94A3B8]">
                           {program.endTime}
                         </p>
                       </div>
@@ -461,12 +460,12 @@ export default function Schedule() {
                       </p>
 
                       {active ? (
-                        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#34D399]/25 bg-[#34D399]/[0.08] px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-[#34D399]">
+                        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#34D399]/25 bg-[#34D399]/[0.08] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-[#34D399]">
                           <LiveDot />
                           {t("schedule.live")}
                         </span>
                       ) : next ? (
-                        <span className="shrink-0 rounded-full border border-[#FFD400]/20 bg-[#FFD400]/[0.06] px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-[#FFD400]">
+                        <span className="shrink-0 rounded-full border border-[#FFD400]/20 bg-[#FFD400]/[0.06] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-[#FFD400]">
                           {t("schedule.next")}
                         </span>
                       ) : null}
@@ -485,7 +484,7 @@ export default function Schedule() {
       <button
         type="button"
         onClick={() => setFullOpen(true)}
-        className="group flex h-10 items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-[#121826] font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-white/85 transition hover:border-[#FFD400]/40 hover:bg-[#FFD400]/[0.03] hover:text-[#FFD400]"
+        className="group flex h-10 items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-[#121826] font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-white/85 transition hover:border-[#FFD400]/40 hover:bg-[#FFD400]/[0.03] hover:text-[#FFD400]"
       >
         {t("schedule.viewFullSchedule")}
 
@@ -583,7 +582,7 @@ function FullScheduleModal({
         {/* HEADER */}
         <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] p-5 sm:p-6">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#FFD400]">
+            <p className="font-mono text-[12px] font-bold uppercase tracking-[0.22em] text-[#FFD400]">
               ZERO FM
             </p>
 
@@ -649,7 +648,7 @@ function FullScheduleModal({
                     {program.time}
                   </p>
 
-                  <p className="mt-1.5 font-mono text-[10px] text-[#64748B]">
+                  <p className="mt-1.5 font-mono text-[12px] text-[#64748B]">
                     {formatDuration(end - start)}
                   </p>
                 </div>
@@ -679,16 +678,16 @@ function FullScheduleModal({
 
                 <div className="shrink-0 self-center">
                   {active ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#34D399]/25 bg-[#34D399]/[0.08] px-2.5 py-1 font-mono text-[9px] font-semibold uppercase text-[#34D399]">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#34D399]/25 bg-[#34D399]/[0.08] px-2.5 py-1 font-mono text-[11px] font-semibold uppercase text-[#34D399]">
                       <LiveDot />
                       {t("schedule.live")}
                     </span>
                   ) : finished ? (
-                    <span className="font-mono text-[10px] uppercase text-[#64748B]">
+                    <span className="font-mono text-[12px] uppercase text-[#64748B]">
                       {t("schedule.finished")}
                     </span>
                   ) : (
-                    <span className="font-mono text-[10px] text-[#A8B2C2]">
+                    <span className="font-mono text-[12px] text-[#A8B2C2]">
                       {t("schedule.startsIn", {
                         time: formatDuration(startsIn),
                       })}
@@ -702,7 +701,7 @@ function FullScheduleModal({
 
         {/* FOOTER */}
         <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] p-4 sm:px-6">
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#64748B]">
+          <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-[#64748B]">
             Asia / Colombo · {formatClock(currentMinutes)}
           </p>
 

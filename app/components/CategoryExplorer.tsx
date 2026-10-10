@@ -133,6 +133,51 @@ export default function CategoryExplorer({
 
   return (
     <>
+      <div className="mb-6 flex min-w-0 items-center gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FFD400] text-[#090D16] shadow-[0_8px_30px_rgba(255,212,0,0.12)] sm:h-12 sm:w-12">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            className="h-5 w-5 sm:h-6 sm:w-6"
+            aria-hidden="true"
+          >
+            <path d="M9 18V5l10-2v13" />
+            <circle cx="6" cy="18" r="3" />
+            <circle cx="16" cy="16" r="3" />
+          </svg>
+        </div>
+
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-[#FFD400] sm:text-[11px]">
+            {t("mobileApp.languages")}
+          </p>
+
+          <h2 className="mt-2 font-display text-[28px] font-bold leading-[1.25] tracking-[-0.03em] text-white sm:text-[40px] lg:text-[48px]">
+            {/* An English "Hit" in the title gets the handwritten font */}
+            {t("mobileApp.musicLibrary")
+              .split(/(Hit)/)
+              .map((part, index) =>
+                part === "Hit" ? (
+                  <span
+                    key={index}
+                    className="mx-1 inline-block -rotate-3 text-[1.25em] font-normal tracking-normal text-white"
+                    style={{
+                      fontFamily: '"Covered By Your Grace", cursive',
+                      textShadow: "0 4px 14px rgba(255, 255, 255, 0.25)",
+                    }}
+                  >
+                    {part}
+                  </span>
+                ) : (
+                  part
+                )
+              )}
+          </h2>
+        </div>
+      </div>
+
       <div className="grid gap-3 [perspective:900px] sm:grid-cols-3">
         {categories.map((category) => (
           <button
@@ -168,7 +213,7 @@ export default function CategoryExplorer({
             />
 
             {songCounts[category.language] ? (
-              <span className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-[#070B13]/70 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.08em] text-white/80 backdrop-blur transition duration-300 group-hover:border-[#FFD400]/50 group-hover:text-[#FFD400]">
+              <span className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-[#070B13]/70 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-white/80 backdrop-blur transition duration-300 group-hover:border-[#FFD400]/50 group-hover:text-[#FFD400]">
                 {t("categories.songCount", {
                   n: songCounts[category.language] ?? 0,
                 })}
@@ -181,12 +226,12 @@ export default function CategoryExplorer({
                   {category.label}
                 </span>
 
-                <span className="font-mono text-[7px] uppercase tracking-[0.1em]">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em]">
                   {t("categories.music")}
                 </span>
               </span>
 
-              <span className="mt-2 rounded-full border border-white/20 px-3 py-1 font-mono text-[7px] uppercase tracking-[0.08em] text-white transition duration-300 group-hover:border-[#FFD400]/60 group-hover:bg-[#FFD400] group-hover:text-[#090D16]">
+              <span className="mt-2 rounded-full border border-white/20 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-white transition duration-300 group-hover:border-[#FFD400]/60 group-hover:bg-[#FFD400] group-hover:text-[#090D16]">
                 {t("categories.explore")}
               </span>
             </span>

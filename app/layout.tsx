@@ -6,6 +6,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/src/context/LanguageContext";
+import { LiveRadioProvider } from "./components/LiveRadio";
 
 const spaceGrotesk = Space_Grotesk({
   weight: "variable",
@@ -52,7 +53,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full flex flex-col font-body">
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          {/* The live radio sits here so it keeps playing on every page */}
+          <LiveRadioProvider>{children}</LiveRadioProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
