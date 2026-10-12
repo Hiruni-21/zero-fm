@@ -913,11 +913,11 @@ const SITE_TRANSLATIONS: Record<
     goodMusic: "Good Music",
     brighterDays: "Brighter Days",
     digitalCommunity:
-      "Sri Lanka's Digital Music Community",
+      "Sri Lanka's First Trilingual Radio Station",
     listenLive: "Listen Live",
     contactStudio: "Contact Studio",
     anytimeAnywhere:
-      "Anytime • Anywhere • For Everyone",
+      "Listen Worldwide",
     onAirNow: "On Air Now",
     feelGoodVibes: "Feel the Good Vibes",
     liveNow: "Live now",
@@ -991,12 +991,12 @@ const SITE_TRANSLATIONS: Record<
     goodMusic: "ගීතවත් දවසක්!",
     brighterDays: "දීප්තිමත් ආරම්භයක්",
     digitalCommunity:
-      "ශ්‍රී ලංකාවේ ප්‍රථම ත්‍රි භාෂා ඔන්ලයින් රේඩියෝ නාලිකාව",
+      "ශ්‍රී ලංකාවේ ප්‍රථම ත්‍රෛ භාෂා ඔන්ලයින් රේඩියෝ නාලිකාව",
     listenLive: "සජීවීව අසන්න",
     contactStudio:
       "ස්ටුඩියෝව අමතන්න",
     anytimeAnywhere:
-      "ඕනෑම වේලාවක • ඕනෑම තැනක • හැමෝටම",
+      "ලොවටම ඇහෙන්න අහන්න",
     onAirNow: "දැන් විකාශය වේ",
     feelGoodVibes:
       "හොඳ සංගීත රසය විඳින්න",
@@ -1527,7 +1527,14 @@ export default function ZeroFMHome() {
   </span>
 </h1>
 
-            <p className="mt-4 font-mono text-[10px] font-medium uppercase tracking-[0.19em] text-[#94A3B8] sm:text-[11px]">
+            {/* Letter spacing breaks Sinhala and Tamil letters apart, so only English gets it */}
+            <p
+              className={`mt-4 text-[#94A3B8] ${
+                siteLanguage === "english"
+                  ? "font-mono text-[10px] font-medium uppercase tracking-[0.19em] sm:text-[11px]"
+                  : "text-[13px] font-medium tracking-normal sm:text-[14px]"
+              }`}
+            >
               {t("digitalCommunity")}
             </p>
 
@@ -1583,7 +1590,13 @@ export default function ZeroFMHome() {
               </button>
             </div>
 
-            <p className="font-body mt-4 text-[10px] uppercase tracking-[0.17em] text-[#64748B]">
+            <p
+              className={`font-body mt-4 text-[#64748B] ${
+                siteLanguage === "english"
+                  ? "text-[10px] uppercase tracking-[0.17em]"
+                  : "text-[13px] tracking-normal"
+              }`}
+            >
               {t(
                 "anytimeAnywhere"
               )}
@@ -1738,11 +1751,6 @@ export default function ZeroFMHome() {
                   WhatsApp Studio: 072 717 0170
                 </a>
 
-                <a href="#request">
-                  {t(
-                    "contactStudioBooth"
-                  )}
-                </a>
               </div>
             </div>
           </div>

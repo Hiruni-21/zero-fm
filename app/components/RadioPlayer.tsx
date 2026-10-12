@@ -221,7 +221,55 @@ export default function RadioPlayer() {
     setIsMuted,
     toggleMute,
     setSleepTimer,
+    readBeat,
   } = useLiveRadio();
+
+  // Equaliser bars that follow the real music (on computers). Until the
+  // music can be read, the bars keep their own gentle motion.
+  const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const [beatLive, setBeatLive] = useState(false);
+  const readBeatRef = useRef(readBeat);
+  readBeatRef.current = readBeat;
+
+  useEffect(() => {
+    if (!isPlaying) {
+      setBeatLive(false);
+      return;
+    }
+
+    const levels = new Uint8Array(64);
+    const half = WAVEFORM.length / 2;
+    let live = false;
+    let frame = 0;
+
+    const draw = () => {
+      frame = window.requestAnimationFrame(draw);
+      if (!readBeatRef.current(levels)) return;
+
+      // Ignore the first silent moments while the stream warms up
+      if (!live) {
+        if (!levels.some((level) => level > 0)) return;
+        live = true;
+        setBeatLive(true);
+      }
+
+      barsRef.current.forEach((bar, index) => {
+        if (!bar) return;
+        // Bass in the middle, higher sounds towards both ends
+        const distance = Math.abs(index + 0.5 - half) / half;
+        const level = levels[1 + Math.floor(distance * 34)] / 255;
+        const scale = 0.12 + 0.88 * Math.pow(level, 1.35);
+        bar.style.transform = `scaleY(${scale.toFixed(3)})`;
+      });
+    };
+
+    frame = window.requestAnimationFrame(draw);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      // Hand the bars back to their own motion
+      barsRef.current.forEach((bar) => bar?.style.removeProperty("transform"));
+    };
+  }, [isPlaying]);
 
   const [settingsOpen, setSettingsOpen] =
     useState(false);
@@ -487,9 +535,6 @@ export default function RadioPlayer() {
                   {t("player.liveRadio")}
                 </span>
 
-                <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-white/35">
-                  {t("player.streamBitrate")}
-                </span>
               </div>
             </div>
 
@@ -499,27 +544,28 @@ export default function RadioPlayer() {
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
 
               <div className="flex h-[46px] items-center justify-center gap-[3px]">
-                {WAVEFORM.map(
-                  (height, index) => (
-                    <span
-                      key={index}
-                      className={`wave-bar w-[3px] rounded-full transition-colors duration-300 ${
-                        isPlaying
-                          ? "is-playing bg-[#FFD400] shadow-[0_0_8px_rgba(255,212,0,0.22)]"
-                          : "bg-white/20"
-                      }`}
-                      style={{
-                        height: `${height}px`,
-                        opacity: isPlaying
-                          ? 0.92
-                          : 0.22,
-                        animationDelay: `${index * 38}ms`,
-                        transformOrigin:
-                          "center",
-                      }}
-                    />
-                  )
-                )}
+                {WAVEFORM.map((height, index) => (
+                  <span
+                    key={index}
+                    ref={(bar) => {
+                      barsRef.current[index] = bar;
+                    }}
+                    className={`wave-bar w-[3px] rounded-full transition-colors duration-300 ${
+                      isPlaying
+                        ? `bg-[#FFD400] shadow-[0_0_8px_rgba(255,212,0,0.22)] ${
+                            beatLive ? "is-live" : "is-playing"
+                          }`
+                        : "bg-white/20"
+                    }`}
+                    style={{
+                      // Following the music, every bar can reach full height
+                      height: `${isPlaying && beatLive ? 46 : height}px`,
+                      opacity: isPlaying ? 0.92 : 0.22,
+                      animationDelay: `${index * 38}ms`,
+                      transformOrigin: "center",
+                    }}
+                  />
+                ))}
               </div>
             </div>
 
@@ -774,6 +820,12 @@ export default function RadioPlayer() {
 
         .wave-bar.is-playing {
           animation-play-state: running;
+        }
+
+        /* Moved by the music itself */
+        .wave-bar.is-live {
+          animation: none;
+          transition: transform 60ms linear;
         }
 
         /* -------------------------------------------------------------- */

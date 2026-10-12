@@ -53,6 +53,9 @@ type LiveRadio = {
   setIsMuted: (muted: boolean) => void;
   toggleMute: () => void;
   setSleepTimer: (minutes: number | null) => void;
+  // Fills `out` with how loud each pitch is right now (0-255, bass first).
+  // False when the music can't be read, so the bars use their own motion.
+  readBeat: (out: Uint8Array) => boolean;
 };
 
 const LiveRadioContext = createContext<LiveRadio | null>(null);
@@ -73,6 +76,14 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
   const retryTimerRef = useRef<number | null>(null);
   // The listener wants the radio on (false after Stop, a call, or giving up)
   const wantPlayingRef = useRef(false);
+
+  // Reading the beat for the equaliser bars. Only on computers: on phones
+  // the sound stays on the plain audio player, which keeps playing safely
+  // with the screen locked. If the stream ever refuses to be read, this is
+  // switched off and the radio simply plays as before.
+  const beatAllowedRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -137,6 +148,59 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
   /* Playback                                                                 */
   /* ------------------------------------------------------------------------ */
 
+  // Decide once whether this device reads the beat (a computer with a mouse,
+  // not an iPhone or iPad, and a browser that can do it)
+  useEffect(() => {
+    const audio = audioRef.current;
+    const appleTouch =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const computer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!audio || appleTouch || !computer || !("AudioContext" in window)) return;
+
+    beatAllowedRef.current = true;
+    // Ask Radio.co for permission to read the sound (it allows it)
+    audio.crossOrigin = "anonymous";
+  }, []);
+
+  // Called from the Play click, because browsers only start sound
+  // processing after a tap or click
+  const prepareBeat = () => {
+    if (!beatAllowedRef.current) return;
+    try {
+      if (!audioContextRef.current) audioContextRef.current = new AudioContext();
+      void audioContextRef.current.resume();
+    } catch {
+      beatAllowedRef.current = false;
+    }
+  };
+
+  // Once the stream really plays, route it through the beat reader. This is
+  // done only after it loaded with permission, so a refusal can never mute it.
+  const connectBeat = () => {
+    const audio = audioRef.current;
+    const context = audioContextRef.current;
+    if (!audio || !context || analyserRef.current || !beatAllowedRef.current) return;
+    try {
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.78;
+      context.createMediaElementSource(audio).connect(analyser);
+      analyser.connect(context.destination);
+      analyserRef.current = analyser;
+    } catch (error) {
+      console.warn("Equaliser can't read the music:", error);
+      beatAllowedRef.current = false;
+    }
+  };
+
+  const readBeat = (out: Uint8Array) => {
+    const analyser = analyserRef.current;
+    if (!analyser || !isPlaying) return false;
+    analyser.getByteFrequencyData(out as Uint8Array<ArrayBuffer>);
+    return true;
+  };
+
   // A live stream can't really be paused: the browser keeps the old audio
   // and resumes from where it stopped, so the player falls further behind
   // the broadcast each time. Stopping drops the connection instead, and
@@ -171,12 +235,17 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
       wantPlayingRef.current = true;
       retriesRef.current = 0;
 
+      prepareBeat();
+
       // A fresh address so neither the browser nor a cache serves old audio
       audio.src = `${RADIO_STREAM_URL}?t=${Date.now()}`;
       await audio.play();
 
       setIsPlaying(true);
     } catch (error) {
+      // It's already rejoining the plain way (see handleAudioError)
+      if (reconnectingRef.current || retryTimerRef.current !== null) return;
+
       setIsBuffering(false);
       console.error("Unable to play radio stream:", error);
       setIsPlaying(false);
@@ -258,6 +327,15 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
   const handleAudioError = () => {
     // Stopping clears the stream address; that isn't a real error
     if (!audioRef.current?.getAttribute("src")) return;
+
+    // The stream refused to be read before the beat reader was connected:
+    // stop asking, and play it the plain way straight away
+    const audio = audioRef.current;
+    if (audio && audio.crossOrigin && !analyserRef.current) {
+      beatAllowedRef.current = false;
+      audio.removeAttribute("crossorigin");
+      if (reconnect()) return;
+    }
 
     // A dropped connection gets a few tries to come back first
     if (reconnect(3000)) return;
@@ -435,6 +513,7 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
         setIsMuted,
         toggleMute,
         setSleepTimer,
+        readBeat,
       }}
     >
       {children}
@@ -443,7 +522,10 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
         ref={audioRef}
         preload="none"
         onPlay={handlePlay}
-        onPlaying={() => setIsBuffering(false)}
+        onPlaying={() => {
+          setIsBuffering(false);
+          connectBeat();
+        }}
         onWaiting={() => setIsBuffering(true)}
         onPause={handlePause}
         onEnded={handleEnded}
