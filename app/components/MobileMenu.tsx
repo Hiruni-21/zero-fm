@@ -6,12 +6,9 @@ import { selectSection, useActiveSection } from "../lib/active-section";
 
 const navItems: [string, string][] = [
   ["nav.home", "#home"],
-  ["nav.live", "#live"],
   ["nav.programs", "#programs"],
   ["nav.request", "#request"],
-  ["nav.about", "#about"],
   ["nav.contact", "#contact"],
-  ["nav.downloadApp", "#app"],
 ];
 
 export default function MobileMenu() {
@@ -44,10 +41,10 @@ export default function MobileMenu() {
   }, [isOpen]);
 
   return (
-    <div ref={menuRef} className="relative lg:hidden">
+    <div ref={menuRef} className="relative">
       <button
         type="button"
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 text-white sm:size-10"
         aria-label={isOpen ? t("mobileMenu.close") : t("mobileMenu.open")}
         aria-expanded={isOpen}
         aria-controls="mobile-navigation"

@@ -1371,7 +1371,7 @@ const requestAnother = () => {
 
         <div className="min-w-0">
 
-          <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-[#FFD400]">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#FFD400]">
             {isAllSongs
               ? t("requestWidget.tag")
               : `Zero FM · ${localizedLangName} ${t("categories.music")}`}
@@ -1470,7 +1470,7 @@ const requestAnother = () => {
                     type="button"
                     aria-pressed={active}
                     onClick={() => setFilterLanguage(option)}
-                    className={`rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] transition ${
+                    className={`rounded-full border px-3 py-1.5 font-mono text-[12px] uppercase tracking-[0.08em] transition ${
                       active
                         ? "border-[#FFD400]/50 bg-[#FFD400] text-[#090D16]"
                         : "border-white/[0.1] text-[#94A3B8] hover:border-[#FFD400]/40 hover:text-[#FFD400]"
@@ -1485,7 +1485,7 @@ const requestAnother = () => {
             </div>
           )}
 
-          <p className="mb-3 shrink-0 text-[9px] leading-4 text-[#64748B]">
+          <p className="mb-3 shrink-0 text-[11px] leading-4 text-[#64748B]">
             {localizedLangName
               ? t("modal.showingCatalogue", { lang: localizedLangName })
               : t("modal.showingAll")}
@@ -1493,7 +1493,7 @@ const requestAnother = () => {
 
           {/* COUNT */}
 
-          <div className="mb-2 grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center px-1 font-mono text-[8px] uppercase tracking-[0.1em] text-[#64748B]">
+          <div className="mb-2 grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center px-1 font-mono text-[10px] uppercase tracking-[0.1em] text-[#64748B]">
 
             <span>
               {t("modal.availableSongs")}
@@ -1557,7 +1557,7 @@ const requestAnother = () => {
                         key + 1,
                     )
                   }
-                  className="rounded-full border border-[#FFD400]/35 px-4 py-2 font-body text-[10px] font-semibold uppercase tracking-[0.06em] text-[#FFD400] transition hover:bg-[#FFD400]/[0.08]"
+                  className="rounded-full border border-[#FFD400]/35 px-4 py-2 font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-[#FFD400] transition hover:bg-[#FFD400]/[0.08]"
                 >
                   {t("modal.retry")}
                 </button>
@@ -1708,7 +1708,7 @@ const requestAnother = () => {
 
               <div className="min-w-0 text-center sm:text-left">
 
-                <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-[#FFD400]">
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[#FFD400]">
                   {selectedLangName}{" "}
                   {t("categories.music")}
                 </p>
@@ -1751,7 +1751,7 @@ const requestAnother = () => {
                 onClick={
                   cancelConfirmation
                 }
-                className="h-11 rounded-lg border border-white/[0.12] px-6 font-body text-[10px] font-semibold uppercase tracking-[0.06em] text-white/80 transition hover:border-white/25 hover:text-white"
+                className="h-11 rounded-lg border border-white/[0.12] px-6 font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-white/80 transition hover:border-white/25 hover:text-white"
               >
                 {t("modal.backToSongs")}
               </button>
@@ -1760,7 +1760,7 @@ const requestAnother = () => {
                     type="button"
                     onClick={submitRequest}
                     disabled={isSubmitting}
-                    className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#FFD400] px-7 font-body text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c] disabled:cursor-wait disabled:opacity-70"
+                    className="flex h-11 items-center justify-center gap-2 rounded-lg bg-[#FFD400] px-7 font-body text-[12px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c] disabled:cursor-wait disabled:opacity-70"
                     >
                     {isSubmitting ? (
                       <span className="size-4 animate-spin rounded-full border-2 border-[#090D16]/25 border-t-[#090D16]" />
@@ -1806,7 +1806,7 @@ const requestAnother = () => {
               <button
                 type="button"
                 onClick={requestAnother}
-                className="h-11 rounded-lg border border-white/[0.12] px-6 font-body text-[10px] font-semibold uppercase tracking-[0.06em] text-white/80 transition hover:border-white/25 hover:text-white"
+                className="h-11 rounded-lg border border-white/[0.12] px-6 font-body text-[12px] font-semibold uppercase tracking-[0.06em] text-white/80 transition hover:border-white/25 hover:text-white"
               >
                 {t("modal.requestAnother")}
               </button>
@@ -1814,7 +1814,7 @@ const requestAnother = () => {
               <button
                 type="button"
                 onClick={handleClose}
-                className="h-11 rounded-lg bg-[#FFD400] px-7 font-body text-[10px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c]"
+                className="h-11 rounded-lg bg-[#FFD400] px-7 font-body text-[12px] font-bold uppercase tracking-[0.06em] text-[#090D16] transition hover:bg-[#ffe45c]"
               >
                 {t("modal.done")}
               </button>
