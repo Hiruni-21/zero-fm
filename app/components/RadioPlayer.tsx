@@ -239,6 +239,9 @@ export default function RadioPlayer() {
 
     const levels = new Uint8Array(64);
     const half = WAVEFORM.length / 2;
+    // Each bar's usual loudness, so a beat shows as a jump above it
+    // (busy pop songs are loud everywhere, which made the bars sit still)
+    const usual = new Float32Array(WAVEFORM.length);
     let live = false;
     let frame = 0;
 
@@ -258,7 +261,9 @@ export default function RadioPlayer() {
         // Bass in the middle, higher sounds towards both ends
         const distance = Math.abs(index + 0.5 - half) / half;
         const level = levels[1 + Math.floor(distance * 34)] / 255;
-        const scale = 0.12 + 0.88 * Math.pow(level, 1.35);
+        usual[index] += (level - usual[index]) * 0.04;
+        const jump = Math.max(0, level - usual[index]) * 3.2;
+        const scale = Math.min(1, 0.16 + Math.pow(level, 2.2) * 0.4 + jump);
         bar.style.transform = `scaleY(${scale.toFixed(3)})`;
       });
     };

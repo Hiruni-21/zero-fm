@@ -184,7 +184,7 @@ export function LiveRadioProvider({ children }: { children: ReactNode }) {
     try {
       const analyser = context.createAnalyser();
       analyser.fftSize = 128;
-      analyser.smoothingTimeConstant = 0.78;
+      analyser.smoothingTimeConstant = 0.6;
       context.createMediaElementSource(audio).connect(analyser);
       analyser.connect(context.destination);
       analyserRef.current = analyser;
