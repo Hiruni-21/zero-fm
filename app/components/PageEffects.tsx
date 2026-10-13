@@ -84,11 +84,13 @@ export default function PageEffects() {
   }, []);
 
   // Fade sections up as they come into view. They start a little before
-  // they reach the screen, so you never scroll onto an empty gap
+  // they reach the screen, so you never scroll onto an empty gap.
+  // Phones and tablets skip this: everything is simply there as you scroll
   useEffect(() => {
     if (
       typeof IntersectionObserver === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
     ) {
       return;
     }

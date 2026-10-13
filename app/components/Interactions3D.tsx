@@ -33,10 +33,12 @@ export default function Interactions3D() {
     const mouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const cleanups: (() => void)[] = [];
 
-    /* Headings flip up into place ---------------------------------------- */
-    const headings = Array.from(
-      document.querySelectorAll<HTMLElement>(HEADING_SELECTOR)
-    ).filter((el) => el.getBoundingClientRect().top > window.innerHeight);
+    /* Headings flip up into place (computers only, phones show them straight away) */
+    const headings = mouse
+      ? Array.from(
+          document.querySelectorAll<HTMLElement>(HEADING_SELECTOR)
+        ).filter((el) => el.getBoundingClientRect().top > window.innerHeight)
+      : [];
 
     headings.forEach((el) => el.classList.add("zf-h3d"));
     const headingObserver = new IntersectionObserver(
