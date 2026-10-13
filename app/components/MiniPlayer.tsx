@@ -132,6 +132,8 @@ export default function MiniPlayer({ top = "top-[72px]" }: { top?: string }) {
               radio.setVolume(Number(event.target.value));
               radio.setIsMuted(false);
             }}
+            // Let go of the slider after a mouse drag, so arrow keys scroll the page again
+            onPointerUp={(event) => event.currentTarget.blur()}
             aria-label={t("player.volumeAria")}
             className="volume-slider hidden h-[13px] w-28 cursor-pointer appearance-none sm:block lg:w-36"
             style={

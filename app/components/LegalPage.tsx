@@ -29,7 +29,7 @@ export default function LegalPage({
         <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
           <Link href="/" aria-label="Zero FM home" className="flex shrink-0 items-center">
             <img
-              src="/images/zero-fm-logo.png"
+              src="/images/zero-fm-logo.webp"
               alt="Zero FM Live"
               className="h-auto w-[120px] object-contain sm:w-[136px]"
             />

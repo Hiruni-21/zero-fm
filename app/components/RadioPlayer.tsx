@@ -284,7 +284,7 @@ export default function RadioPlayer() {
   const latest = useRef({ togglePlay, volume, isMuted });
   latest.current = { togglePlay, volume, isMuted };
 
-  // Keyboard shortcuts: Space / K play-pause, M mute, arrows change volume
+  // Keyboard shortcuts: Space / K play-pause, M mute (arrow keys scroll the page)
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
@@ -303,7 +303,7 @@ export default function RadioPlayer() {
       // Don't react while a popup is open
       if (document.querySelector('[aria-modal="true"]')) return;
 
-      const { volume: currentVolume, isMuted: muted } = latest.current;
+      const { isMuted: muted } = latest.current;
 
       if (event.key === " " || event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -311,15 +311,6 @@ export default function RadioPlayer() {
       } else if (event.key.toLowerCase() === "m") {
         setIsMuted(!muted);
         showToast(muted ? t("player.unmuted") : t("player.muted"));
-      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        event.preventDefault();
-        const next = Math.min(
-          100,
-          Math.max(0, currentVolume + (event.key === "ArrowUp" ? 5 : -5))
-        );
-        setVolume(next);
-        setIsMuted(false);
-        showToast(t("player.volumeToast", { n: next }));
       }
     };
 
@@ -606,6 +597,8 @@ export default function RadioPlayer() {
     onChange={(event) =>
       setVolume(Number(event.target.value))
     }
+    // Let go of the slider after a mouse drag, so arrow keys scroll the page again
+    onPointerUp={(event) => event.currentTarget.blur()}
     aria-label={t("player.volumeAria")}
     className="volume-slider block h-[13px] w-full cursor-pointer appearance-none"
     style={
@@ -721,7 +714,6 @@ export default function RadioPlayer() {
                       {[
                         ["Space", t("player.shortcutPlay")],
                         ["M", t("player.shortcutMute")],
-                        ["↑ ↓", t("player.shortcutVolume")],
                       ].map(([key, label]) => (
                         <li
                           key={key}

@@ -242,7 +242,7 @@ export const translations = {
     "search.close": "Close search",
 
     // Footer
-    "footer.colomboStream": "Colombo 104.2 FM • Nationwide Digital Stream",
+    "footer.colomboStream": "Sri Lanka's First Trilingual Radio Station",
     "footer.broadcasting": "Broadcasting progressive electronic, alternative club sounds and curated underground frequencies.",
     "footer.transmitting": "Transmitting 24/7 Digital Audio",
     "footer.platform": "Platform",
@@ -326,7 +326,7 @@ export const translations = {
     terms: "Terms & Conditions",
     broadcasting: "Broadcasting progressive electronic, alternative club sounds and curated underground frequencies.",
     transmitting: "Transmitting 24/7 Digital Audio",
-    colomboStream: "Colombo 104.2 FM • Nationwide Digital Stream",
+    colomboStream: "Sri Lanka's First Trilingual Radio Station",
     searchExample: "Example: manike, mage hithe, yohani",
     singlishHint: "Singlish typing is supported",
   },
@@ -573,7 +573,7 @@ export const translations = {
     "search.close": "සෙවුම වසන්න",
 
     // Footer
-    "footer.colomboStream": "කොළඹ 104.2 FM • දිවයින පුරා ඩිජිටල් ප්‍රවාහය",
+    "footer.colomboStream": "ලොවටම ඇසෙන්න අසන්න",
     "footer.broadcasting": "ප්‍රගතිශීලී ඉලෙක්ට්‍රොනික, විකල්ප ක්ලබ් සංගීත සහ තෝරාගත් භූගත ශබ්ද රැසක් විකාශය කරයි.",
     "footer.transmitting": "පැය 24 පුරා සතියේ දින 7ම ඩිජිටල් ශ්‍රව්‍ය විකාශය වේ",
     "footer.platform": "වේදිකාව",
@@ -657,7 +657,7 @@ export const translations = {
     terms: "නියම සහ කොන්දේසි",
     broadcasting: "ප්‍රගතිශීලී ඉලෙක්ට්‍රොනික, විකල්ප ක්ලබ් සංගීත සහ තෝරාගත් භූගත ශබ්ද රැසක් විකාශය කරයි.",
     transmitting: "පැය 24 පුරා සතියේ දින 7ම ඩිජිටල් ශ්‍රව්‍ය විකාශය වේ",
-    colomboStream: "කොළඹ 104.2 FM • දිවයින පුරා ඩිජිටල් ප්‍රවාහය",
+    colomboStream: "ලොවටම ඇසෙන්න අසන්න",
     searchExample: "උදාහරණය: manike, mage hithe, yohani",
     singlishHint: "Singlish ලෙස ටයිප් කිරීමත් සහාය වේ",
   },
@@ -903,7 +903,7 @@ export const translations = {
     "search.close": "தேடலை மூடவும்",
 
     // Footer
-    "footer.colomboStream": "கொழும்பு 104.2 FM • நாடு முழுவதும் டிஜிட்டல் ஒளிபரப்பு",
+    "footer.colomboStream": "இலங்கையின் முதல் மும்மொழி வானொலி நிலையம்",
     "footer.broadcasting": "முன்னேற்றமான எலக்ட்ரானிக், மாற்று கிளப் இசை மற்றும் தேர்ந்தெடுக்கப்பட்ட அண்டர்கிரவுண்ட் ஒலிகளை ஒலிபரப்புகிறது.",
     "footer.transmitting": "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
     "footer.platform": "தளம்",
@@ -987,7 +987,7 @@ export const translations = {
     terms: "விதிமுறைகள் மற்றும் நிபந்தனைகள்",
     broadcasting: "முன்னேற்றமான எலக்ட்ரானிக், மாற்று கிளப் இசை மற்றும் தேர்ந்தெடுக்கப்பட்ட அண்டர்கிரவுண்ட் ஒலிகளை ஒலிபரப்புகிறது.",
     transmitting: "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
-    colomboStream: "கொழும்பு 104.2 FM • நாடு முழுவதும் டிஜிட்டல் ஒளிபரப்பு",
+    colomboStream: "இலங்கையின் முதல் மும்மொழி வானொலி நிலையம்",
     searchExample: "உதாரணம்: manike, mage hithe, yohani",
     singlishHint: "Singlish தட்டச்சும் ஆதரிக்கப்படுகிறது",
   },

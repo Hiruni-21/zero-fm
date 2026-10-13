@@ -11,10 +11,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
  */
 
 const POSTERS = [
-  { src: "/images/programs/cover-lanthaya.jpg", alt: "Cover Lanthaya, every Monday at 6.30 PM" },
-  { src: "/images/programs/time-capsule.jpg", alt: "Time Capsule, every Tuesday at 8.30 PM" },
-  { src: "/images/programs/hitlist.jpg", alt: "Hitlist, every Wednesday at 6.30 PM" },
-  { src: "/images/programs/mixxer.jpg", alt: "Mixxer, every Friday at 6.30 PM" },
+  { src: "/images/programs/cover-lanthaya.webp", alt: "Cover Lanthaya, every Monday at 6.30 PM" },
+  { src: "/images/programs/time-capsule.webp", alt: "Time Capsule, every Tuesday at 8.30 PM" },
+  { src: "/images/programs/hitlist.webp", alt: "Hitlist, every Wednesday at 6.30 PM" },
+  { src: "/images/programs/mixxer.webp", alt: "Mixxer, every Friday at 6.30 PM" },
 ];
 
 const AUTO_PLAY_MS = 4500;

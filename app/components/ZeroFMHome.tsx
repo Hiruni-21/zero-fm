@@ -27,7 +27,7 @@ import MiniPlayer from "./MiniPlayer";
 const ZERO_FM_LOGO =
   "https://static.wixstatic.com/media/273b94_1a0a6b9795b2404b9a6280ce4bb96514~mv2.png/v1/fill/w_190,h_98,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/brown.png";
 
-const ZERO_FM_NAV_FOOTER_LOGO = "/images/zero-fm-logo.png";
+const ZERO_FM_NAV_FOOTER_LOGO = "/images/zero-fm-logo.webp";
 
 
 // Sinhala and Tamil letters are unreadable at the tiny label sizes used for
@@ -970,7 +970,7 @@ const SITE_TRANSLATIONS: Record<
     transmitting:
       "Transmitting 24/7 Digital Audio",
     colomboStream:
-      "Colombo 104.2 FM • Nationwide Digital Stream",
+      "Sri Lanka's First Trilingual Radio Station",
     searchExample:
       "Example: manike, mage hithe, yohani",
     singlishHint:
@@ -1167,7 +1167,7 @@ const SITE_TRANSLATIONS: Record<
     transmitting:
       "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
     colomboStream:
-      "கொழும்பு 104.2 FM • நாடு முழுவதும் டிஜிட்டல் ஒளிபரப்பு",
+      "இலங்கையின் முதல் மும்மொழி வானொலி நிலையம்",
     searchExample:
       "உதாரணம்: manike, mage hithe, yohani",
     singlishHint:
@@ -1679,13 +1679,26 @@ export default function ZeroFMHome() {
                 />
               </a>
 
-              <p className="mt-5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#FFD400]">
+              {/* Letter spacing breaks Sinhala and Tamil letters apart, so only English gets it */}
+              <p
+                className={`mt-5 font-semibold text-[#FFD400] ${
+                  siteLanguage === "english"
+                    ? "font-mono text-[11px] uppercase tracking-[0.16em]"
+                    : "text-[13px] tracking-normal"
+                }`}
+              >
                 {t(
                   "colomboStream"
                 )}
               </p>
 
-              <p className="mt-3 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[#34D399]">
+              <p
+                className={`mt-3 flex items-center gap-2 text-[#34D399] ${
+                  siteLanguage === "english"
+                    ? "font-mono text-[11px] uppercase tracking-[0.12em]"
+                    : "text-[12px] tracking-normal"
+                }`}
+              >
                 <span className="size-1.5 animate-pulse rounded-full bg-[#34D399]" />
 
                 {t(

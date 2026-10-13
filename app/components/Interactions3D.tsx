@@ -33,10 +33,12 @@ export default function Interactions3D() {
     const mouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const cleanups: (() => void)[] = [];
 
-    /* Headings flip up into place ---------------------------------------- */
-    const headings = Array.from(
-      document.querySelectorAll<HTMLElement>(HEADING_SELECTOR)
-    ).filter((el) => el.getBoundingClientRect().top > window.innerHeight);
+    /* Headings flip up into place (computers only, phones show them straight away) */
+    const headings = mouse
+      ? Array.from(
+          document.querySelectorAll<HTMLElement>(HEADING_SELECTOR)
+        ).filter((el) => el.getBoundingClientRect().top > window.innerHeight)
+      : [];
 
     headings.forEach((el) => el.classList.add("zf-h3d"));
     const headingObserver = new IntersectionObserver(
@@ -47,7 +49,7 @@ export default function Interactions3D() {
           headingObserver.unobserve(entry.target);
         });
       },
-      { threshold: 0.4 }
+      { rootMargin: "0px 0px -10% 0px", threshold: 0 }
     );
     headings.forEach((el) => headingObserver.observe(el));
 
@@ -148,8 +150,8 @@ export default function Interactions3D() {
           opacity: 1;
           transform: none;
           transition:
-            opacity 700ms ease-out,
-            transform 1000ms cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity 400ms ease-out,
+            transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
         }
       `}</style>
     </>

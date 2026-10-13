@@ -413,7 +413,7 @@ export default function RequestSong() {
           <div className="zf-card relative overflow-hidden rounded-[28px] p-6 sm:p-10 lg:p-14">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0">
               <img
-                src="/images/cinematic-podcast-studio.png"
+                src="/images/request-studio.webp"
                 alt=""
                 className="programs-drift size-full object-cover opacity-30"
               />
