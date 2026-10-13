@@ -83,7 +83,8 @@ export default function PageEffects() {
     };
   }, []);
 
-  // Fade sections up as they come into view
+  // Fade sections up as they come into view. They start a little before
+  // they reach the screen, so you never scroll onto an empty gap
   useEffect(() => {
     if (
       typeof IntersectionObserver === "undefined" ||
@@ -105,11 +106,11 @@ export default function PageEffects() {
             window.setTimeout(() => {
               el.classList.remove("zf-reveal", "zf-revealed");
               el.style.removeProperty("--zf-reveal-delay");
-            }, 1500);
+            }, 1000);
           }
         });
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
+      { rootMargin: "0px 0px 12% 0px", threshold: 0 }
     );
 
     const elements = Array.from(
@@ -124,7 +125,7 @@ export default function PageEffects() {
         ? Array.from(el.parentElement.children)
         : [];
 
-      const delay = Math.min(Math.max(siblings.indexOf(el), 0), 4) * 110;
+      const delay = Math.min(Math.max(siblings.indexOf(el), 0), 3) * 60;
 
       el.style.setProperty("--zf-reveal-delay", `${delay}ms`);
       el.classList.add("zf-reveal");
@@ -172,9 +173,9 @@ export default function PageEffects() {
         /* Sections tip up into place in 3D as they scroll into view */
         .zf-reveal {
           opacity: 0;
-          transform: perspective(1400px) translateY(70px) rotateX(16deg) scale(0.94);
+          transform: perspective(1400px) translateY(40px) rotateX(10deg) scale(0.97);
           transform-origin: 50% 100%;
-          transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+          transition: opacity 0.45s ease-out, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
           transition-delay: var(--zf-reveal-delay, 0ms);
         }
 

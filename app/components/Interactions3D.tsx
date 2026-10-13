@@ -47,7 +47,7 @@ export default function Interactions3D() {
           headingObserver.unobserve(entry.target);
         });
       },
-      { threshold: 0.4 }
+      { rootMargin: "0px 0px -10% 0px", threshold: 0 }
     );
     headings.forEach((el) => headingObserver.observe(el));
 
@@ -148,8 +148,8 @@ export default function Interactions3D() {
           opacity: 1;
           transform: none;
           transition:
-            opacity 700ms ease-out,
-            transform 1000ms cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity 400ms ease-out,
+            transform 650ms cubic-bezier(0.2, 0.8, 0.2, 1);
         }
       `}</style>
     </>
