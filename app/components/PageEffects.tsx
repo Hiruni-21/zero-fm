@@ -7,6 +7,7 @@ import { TOAST_EVENT, type ToastDetail } from "../lib/ui-events";
  * Page-wide interactions that sit on top of the existing design:
  * - thin yellow scroll progress line under the navbar
  * - navbar shadow once the page is scrolled
+ * - smooth gliding mouse-wheel scroll on computers
  * - sections fade up as they scroll into view
  * - press feedback on buttons and links
  * - back-to-top button
@@ -80,6 +81,82 @@ export default function PageEffects() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       document.documentElement.removeAttribute("data-scrolled");
+    };
+  }, []);
+
+  // Smooth mouse-wheel scrolling on computers: each wheel turn glides the
+  // page instead of jumping it. Phones keep their own native scrolling
+  useEffect(() => {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+
+    let target = window.scrollY;
+    let current = window.scrollY;
+    let lastSet = current;
+    let frame = 0;
+    let last = 0;
+
+    const maxScroll = () =>
+      document.documentElement.scrollHeight - window.innerHeight;
+
+    // Let boxes that scroll on their own (popups, long lists) handle the wheel
+    const insideScroller = (el: Element | null, dy: number) => {
+      for (; el && el !== document.body; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (!/(auto|scroll)/.test(style.overflowY)) continue;
+        if (el.scrollHeight <= el.clientHeight + 1) continue;
+        if (dy < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const step = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      // Someone else moved the page (menu link, scrollbar): stop and follow
+      if (Math.abs(window.scrollY - lastSet) > 3) {
+        target = current = lastSet = window.scrollY;
+        frame = 0;
+        return;
+      }
+
+      current += (target - current) * (1 - Math.exp(-dt * 9));
+      if (Math.abs(target - current) < 0.5) current = target;
+      lastSet = Math.round(current);
+      window.scrollTo({ top: current, behavior: "instant" });
+
+      frame = current === target ? 0 : window.requestAnimationFrame(step);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.defaultPrevented || event.ctrlKey) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      if (insideScroller(event.target as Element | null, event.deltaY)) return;
+
+      event.preventDefault();
+      const unit =
+        event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+
+      if (!frame) {
+        target = current = lastSet = window.scrollY;
+        last = performance.now();
+        frame = window.requestAnimationFrame(step);
+      }
+      target = Math.max(0, Math.min(maxScroll(), target + event.deltaY * unit));
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 

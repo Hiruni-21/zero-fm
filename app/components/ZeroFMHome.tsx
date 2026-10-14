@@ -1455,7 +1455,7 @@ export default function ZeroFMHome() {
 <section
   id="home"
   ref={heroRef}
-  className="relative -mt-[128px] h-[240vh] scroll-mt-0 bg-[#05080F] sm:h-[270vh]"
+  className="relative -mt-[128px] h-[210vh] scroll-mt-0 bg-[#05080F] sm:h-[225vh]"
 >
   <div className="sticky top-0 h-[100svh] overflow-hidden">
     <div
@@ -1620,14 +1620,18 @@ export default function ZeroFMHome() {
 {/* Weekly show posters, in a 3D carousel, on the same gold dust sky as the top */}
 <section
   id="shows"
-  className="relative scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] bg-[#05080F] pb-16 pt-6 sm:pb-20"
+  className="relative z-[1] -mt-[30vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(6vh+1.5rem)] sm:pb-20"
 >
+  {/* Posters rise over the last of the gold ring dust: the top of this
+      section is see-through, so there is no empty gap after the ring */}
   <div
     aria-hidden="true"
     className="pointer-events-none absolute inset-0"
     style={{
       background:
         "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,212,0,0.05) 0%, rgba(255,212,0,0) 70%), radial-gradient(ellipse 75% 50% at 50% 50%, #0E1730 0%, #05080F 100%)",
+      maskImage: "linear-gradient(to bottom, transparent, #000 30vh)",
+      WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 30vh)",
     }}
   />
 
