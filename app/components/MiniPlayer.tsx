@@ -54,7 +54,7 @@ export default function MiniPlayer({ top = "top-[72px]" }: { top?: string }) {
                   state.isPlaying ? "animate-pulse bg-[#34D399]" : "bg-red-400"
                 }`}
               />
-              {state.isBuffering ? t("player.connecting") : t("player.liveNow")}
+              {state.isBuffering ? t("player.connecting") : t("player.miniLiveNow")}
             </p>
             <p className="truncate text-[14px] font-semibold text-white">
               {state.title}

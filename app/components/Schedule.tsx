@@ -23,6 +23,15 @@ type DayPart = "lateNight" | "morning" | "afternoon" | "evening" | "night";
 
 const DAY_MINUTES = 24 * 60;
 
+// Program names come from the schedule in English; some have their own Tamil name
+const TAMIL_PROGRAM_NAMES: Record<string, string> = {
+  "Zero Hits": "Zero மெட்டிசைப்பாடல்கள்",
+};
+
+function programName(name: string, language: string) {
+  return language === "tamil" ? TAMIL_PROGRAM_NAMES[name] ?? name : name;
+}
+
 function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
@@ -114,7 +123,7 @@ function LiveDot() {
 }
 
 export default function Schedule() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [schedule, setSchedule] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -345,7 +354,7 @@ export default function Schedule() {
           <p className="mt-2 truncate font-display text-[19px] font-semibold leading-tight text-white">
             {loading
               ? t("schedule.loadingProgram")
-              : currentProgram?.program || t("schedule.noLiveProgram")}
+              : (currentProgram && programName(currentProgram.program, language)) || t("schedule.noLiveProgram")}
           </p>
 
           {liveProgress && (
@@ -375,7 +384,7 @@ export default function Schedule() {
             <p className="mt-1 truncate font-display text-[15px] font-semibold text-white">
               {loading
                 ? t("schedule.loadingProgram")
-                : nextProgram?.program || t("schedule.noUpcomingProgram")}
+                : (nextProgram && programName(nextProgram.program, language)) || t("schedule.noUpcomingProgram")}
             </p>
           </div>
 
@@ -460,7 +469,7 @@ export default function Schedule() {
                           active ? "text-[#FFD400]" : "text-white"
                         }`}
                       >
-                        {program.program}
+                        {programName(program.program, language)}
                       </p>
 
                       {active ? (
@@ -528,7 +537,7 @@ function FullScheduleModal({
   currentProgramIndex: number;
   onClose: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [visible, setVisible] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const liveRef = useRef<HTMLLIElement>(null);
@@ -663,7 +672,7 @@ function FullScheduleModal({
                       active ? "text-[#FFD400]" : "text-white"
                     }`}
                   >
-                    {program.program}
+                    {programName(program.program, language)}
                   </p>
 
                   <p className="mt-1 font-mono text-[11px] text-[#8F9CAE]">

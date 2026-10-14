@@ -1085,23 +1085,23 @@ const SITE_TRANSLATIONS: Record<
     getApp: "செயலி",
     musicConnects:
       "இசை நம்மை இணைக்கிறது",
-    goodMusic: "நல்ல இசை.",
+    goodMusic: "இசையோடு உங்கள்",
     brighterDays:
-      "பிரகாசமான நாட்கள்.",
+      "இனிய நாள் தொடங்கட்டும்",
     digitalCommunity:
-      "இலங்கையின் டிஜிட்டல் இசை சமூகம்",
+      "இலங்கையின் முதல் மும்மொழி வானொலி தளம்",
     listenLive:
       "நேரலையாக கேளுங்கள்",
     contactStudio:
       "ஸ்டுடியோவைத் தொடர்பு கொள்ளுங்கள்",
     anytimeAnywhere:
-      "எப்போது வேண்டுமானாலும் • எங்கு வேண்டுமானாலும் • அனைவருக்கும்",
+      "உலகெங்கும் ஓங்கி ஒலித்திடும்",
     onAirNow:
       "தற்போது ஒலிபரப்பு",
     feelGoodVibes:
       "நல்ல இசை உணர்வுகளை அனுபவிக்கவும்",
     liveNow:
-      "இப்போது நேரலை",
+      "நேரலை ஒளிபரப்பு",
     nationwideDigitalStream:
       "நாடு முழுவதும் டிஜிட்டல் ஒளிபரப்பு",
     searchSongsArtists:
@@ -1167,7 +1167,7 @@ const SITE_TRANSLATIONS: Record<
     transmitting:
       "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
     colomboStream:
-      "இலங்கையின் முதல் மும்மொழி வானொலி நிலையம்",
+      "இலங்கையின் முதல் மும்மொழி வானொலி தளம்",
     searchExample:
       "உதாரணம்: manike, mage hithe, yohani",
     singlishHint:
@@ -1256,7 +1256,7 @@ export default function ZeroFMHome() {
 
       const logo = heroLogoRef.current;
       if (logo) {
-        const show = Math.min(Math.max((p - 0.3) / 0.12, 0), 1) * (1 - Math.min(Math.max((p - 0.62) / 0.1, 0), 1));
+        const show = Math.min(Math.max((p - 0.3) / 0.12, 0), 1) * (1 - Math.min(Math.max((p - 0.6) / 0.1, 0), 1));
         logo.style.opacity = String(show);
         logo.style.transform = `scale(${0.85 + show * 0.15})`;
       }
@@ -1282,6 +1282,24 @@ export default function ZeroFMHome() {
   // Sinhala and Tamil words are much wider than English at the same size,
   // so the big hero text gets smaller sizes and is allowed to wrap
   const wideScript = siteLanguage !== "english";
+
+  // The Sinhala handwritten font only loads when someone picks Sinhala.
+  // Until it is ready the line shows in the normal Sinhala font.
+  const [hiruFontReady, setHiruFontReady] = React.useState(false);
+
+  React.useEffect(() => {
+    if (siteLanguage !== "sinhala" || hiruFontReady) return;
+    let cancelled = false;
+    document.fonts
+      .load('1em "Zero Hiru"')
+      .then((faces) => {
+        if (!cancelled && faces.length > 0) setHiruFontReady(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [siteLanguage, hiruFontReady]);
 
   return (
     <main
@@ -1455,7 +1473,7 @@ export default function ZeroFMHome() {
 <section
   id="home"
   ref={heroRef}
-  className="relative -mt-[128px] h-[210vh] scroll-mt-0 bg-[#05080F] sm:h-[225vh]"
+  className="relative -mt-[128px] h-[200vh] scroll-mt-0 bg-[#05080F] sm:h-[210vh]"
 >
   <div className="sticky top-0 h-[100svh] overflow-hidden">
     <div
@@ -1518,12 +1536,33 @@ export default function ZeroFMHome() {
         : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[82px] lg:text-[96px]"
     }`}
     style={{
-      fontFamily: '"Covered By Your Grace", cursive',
+      // Each language gets its own decorative font for the gold line, like English
+      fontFamily:
+        siteLanguage === "sinhala"
+          ? '"Noto Sans Sinhala", sans-serif'
+          : siteLanguage === "tamil"
+            ? '"Kavivanar", "Noto Sans Tamil", cursive'
+            : '"Covered By Your Grace", cursive',
       color: "#FFD400",
       textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
     }}
   >
-    {t("brighterDays")}
+    {siteLanguage === "sinhala" && hiruFontReady ? (
+      <>
+        {/* amsHiru is an old style font that draws Sinhala from English keys,
+            so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
+            together if the Sinhala wording ever changes. */}
+        <span
+          aria-hidden="true"
+          style={{ fontFamily: '"Zero Hiru", "Noto Sans Sinhala", serif' }}
+        >
+          oSma;su;a wdrïNhla
+        </span>
+        <span className="sr-only">{t("brighterDays")}</span>
+      </>
+    ) : (
+      t("brighterDays")
+    )}
   </span>
 </h1>
 
@@ -1538,56 +1577,42 @@ export default function ZeroFMHome() {
               {t("digitalCommunity")}
             </p>
 
-            <div className="font-body mx-auto mt-5 flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em]">
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "english"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage ===
-                  "english"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                English
-              </button>
+            {siteLanguage === "tamil" && (
+              <p className="font-body mt-5 text-[12px] text-[#94A3B8]">
+                தேர்வு செய்யக்கூடிய மொழிகள்
+              </p>
+            )}
 
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "sinhala"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage ===
-                  "sinhala"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                සිංහල
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "tamil"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage === "tamil"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                தமிழ்
-              </button>
+            <div
+              className={`font-body mx-auto flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em] ${
+                siteLanguage === "tamil" ? "mt-2" : "mt-5"
+              }`}
+            >
+              {(siteLanguage === "tamil"
+                ? ([
+                    ["tamil", "தமிழ்"],
+                    ["sinhala", "சிங்களம்"],
+                    ["english", "ஆங்கிலம்"],
+                  ] as const)
+                : ([
+                    ["english", "English"],
+                    ["sinhala", "සිංහල"],
+                    ["tamil", "தமிழ்"],
+                  ] as const)
+              ).map(([code, label]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setSiteLanguage(code)}
+                  className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
+                    siteLanguage === code
+                      ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
+                      : "text-[#94A3B8] hover:text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <p
@@ -1620,7 +1645,7 @@ export default function ZeroFMHome() {
 {/* Weekly show posters, in a 3D carousel, on the same gold dust sky as the top */}
 <section
   id="shows"
-  className="relative z-[1] -mt-[30vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(6vh+1.5rem)] sm:pb-20"
+  className="relative z-[1] -mt-[45vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(4vh+1rem)] sm:pb-20"
 >
   {/* Posters rise over the last of the gold ring dust: the top of this
       section is see-through, so there is no empty gap after the ring */}
@@ -1630,8 +1655,8 @@ export default function ZeroFMHome() {
     style={{
       background:
         "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,212,0,0.05) 0%, rgba(255,212,0,0) 70%), radial-gradient(ellipse 75% 50% at 50% 50%, #0E1730 0%, #05080F 100%)",
-      maskImage: "linear-gradient(to bottom, transparent, #000 30vh)",
-      WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 30vh)",
+      maskImage: "linear-gradient(to bottom, transparent, #000 45vh)",
+      WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 45vh)",
     }}
   />
 

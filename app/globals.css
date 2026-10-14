@@ -317,3 +317,18 @@ html[data-site-language="tamil"],
 html[data-site-language="tamil"] body {
   font-family: "Noto Sans Tamil", sans-serif;
 }
+
+/* Letter spacing pulls Sinhala and Tamil letters apart, so those
+   languages never get it, whatever spacing a label asks for */
+[data-site-language="sinhala"] [class*="tracking-"],
+[data-site-language="tamil"] [class*="tracking-"] {
+  letter-spacing: normal !important;
+}
+
+/* Handwritten Sinhala font for the gold hero line (amsHiru, cut down to
+   only the letters that line uses, so it is tiny) */
+@font-face {
+  font-family: "Zero Hiru";
+  src: url("/fonts/zero-hiru-heading.woff2") format("woff2");
+  font-display: swap;
+}
