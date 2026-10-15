@@ -57,7 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           crossOrigin=""
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Kavivanar&family=Abhaya+Libre:wght@400;500;600;700;800&family=Tilt+Neon&family=Arimo:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Kavivanar&family=Abhaya+Libre:wght@400;500;600;700;800&family=Tilt+Neon&family=Arimo:wght@400;500;600;700&family=Caveat+Brush&display=swap"
           rel="stylesheet"
         />
       </head>

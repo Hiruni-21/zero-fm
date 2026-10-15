@@ -1,5 +1,6 @@
 "use client";
 
+import BrushHeading from "./BrushHeading";
 import React from "react";
 import Link from "next/link";
 import {
@@ -1527,9 +1528,14 @@ export default function ZeroFMHome() {
   className={`m-0 font-bold text-white ${
     wideScript
       ? "text-[42px] leading-[1.15] sm:text-[64px] lg:text-[80px]"
-      : "text-[38px] leading-[0.9] tracking-[-0.02em] min-[400px]:text-[44px] sm:text-[78px] lg:text-[88px]"
+      : "text-[46px] leading-[0.95] min-[400px]:text-[52px] sm:text-[92px] lg:text-[108px]"
   }`}
 >
+  {siteLanguage === "english" ? (
+    // English: painted brush style heading (BrushHeading.tsx)
+    <BrushHeading line1={t("goodMusic")} line2={t("brighterDays")} />
+  ) : (
+  <>
   {/* Main white heading */}
   <span className="block">
     {t("goodMusic")}
@@ -1578,6 +1584,8 @@ export default function ZeroFMHome() {
       t("brighterDays")
     )}
   </span>
+  </>
+  )}
 </h1>
 
             {/* Letter spacing breaks Sinhala and Tamil letters apart, so only English gets it */}

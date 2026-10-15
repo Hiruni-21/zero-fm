@@ -31,7 +31,7 @@ export const translations = {
 
     // Live Player
     "player.studio": "Zero FM On-Air",
-    "player.title": "Feel The Taste of Sweet Melodies",
+    "player.title": "Hit The Beat, Rock The Day",
     "player.location": "Colombo, Sri Lanka (UTC+5:30)",
     "player.liveRadio": "Live Radio",
     "player.liveNow": "Live Now",
@@ -204,7 +204,7 @@ export const translations = {
     "player.footerStream": "Nationwide Digital Stream · 24/7",
     "mobileApp.streaming247": "24/7 Streaming",
     "mobileApp.favoriteTracks": "Your Favorite Tracks",
-    "mobileApp.musicLibrary": "Melodies That Touch The Heart",
+    "mobileApp.musicLibrary": "Heart Touch Melodies",
     "mobileApp.languages": "Sinhala · Tamil · English",
     "mobileApp.stayUpToDate": "Stay Up to Date",
     "mobileApp.zeroStreaming": "Zero FM Streaming",
