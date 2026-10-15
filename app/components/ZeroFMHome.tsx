@@ -1464,8 +1464,10 @@ export default function ZeroFMHome() {
     ========================================================= */}
 <h1
   className={`m-0 font-bold text-white ${
-    wideScript
-      ? "text-[42px] leading-[1.15] sm:text-[64px] lg:text-[80px]"
+    siteLanguage === "sinhala"
+      ? "text-[40px] leading-[1.15] min-[400px]:text-[44px] sm:text-[78px] lg:text-[92px]"
+      : wideScript
+      ? "text-[39px] leading-[1.15] min-[400px]:text-[43px] sm:text-[77px] lg:text-[90px]"
       : "text-[46px] leading-[0.95] min-[400px]:text-[52px] sm:text-[92px] lg:text-[108px]"
   }`}
 >
@@ -1473,56 +1475,37 @@ export default function ZeroFMHome() {
     // English: painted brush style heading (BrushHeading.tsx)
     <BrushHeading line1={t("goodMusic")} line2={t("brighterDays")} />
   ) : (
-  <>
-  {/* Main white heading */}
-  <span className="block">
-    {t("goodMusic")}
-  </span>
-
-  {/* Yellow handwritten heading */}
-  <span
-    className={`mx-auto mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
-      wideScript
-        ? "w-fit text-[42px] leading-[1.2] sm:text-[68px] lg:text-[88px]"
-        : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[92px] lg:text-[110px]"
-    }`}
-    style={{
-      // Each language gets its own decorative font for the gold line, like English
-      fontFamily:
-        siteLanguage === "sinhala"
-          ? '"Noto Sans Sinhala", sans-serif'
-          : siteLanguage === "tamil"
-            ? '"Kavivanar", "Noto Sans Tamil", cursive'
-            : '"Covered By Your Grace", cursive',
-      color: "#FFD400",
-      textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
-    }}
-  >
-    {siteLanguage === "sinhala" && sinhalaFont !== "failed" ? (
-      <>
-        {/* FM Derana is an old style font that draws Sinhala from English keys,
-            so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
-            together if the Sinhala wording ever changes. */}
-        <span
-          aria-hidden="true"
-          style={{
-            fontFamily: '"Zero Sinhala Heading", "Noto Sans Sinhala", serif',
-            // This font draws smaller than the white line above, so scale it up
-            fontSize: "1.2em",
-            // Stay hidden (keeping its space) until the font has arrived
-            opacity: sinhalaFont === "ready" ? 1 : 0,
-            transition: "opacity 0.3s ease-out",
-          }}
-        >
-          oSma;su;a wdrïNhla
-        </span>
-        <span className="sr-only">{t("brighterDays")}</span>
-      </>
-    ) : (
-      t("brighterDays")
-    )}
-  </span>
-  </>
+  // Sinhala and Tamil: the same brush design, with their own fonts
+  <BrushHeading
+    script
+    line1={t("goodMusic")}
+    line2={t("brighterDays")}
+    line2Node={
+      siteLanguage === "sinhala" && sinhalaFont !== "failed" ? (
+        <>
+          {/* FM Derana is an old style font that draws Sinhala from English keys,
+              so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
+              together if the Sinhala wording ever changes. */}
+          <span
+            aria-hidden="true"
+            style={{
+              fontFamily: '"Zero Sinhala Heading", "Noto Sans Sinhala", serif',
+              // This font draws smaller than the other letters, so scale it up
+              fontSize: "1.2em",
+              // Stay hidden (keeping its space) until the font has arrived
+              opacity: sinhalaFont === "ready" ? 1 : 0,
+              transition: "opacity 0.3s ease-out",
+            }}
+          >
+            oSma;su;a wdrïNhla
+          </span>
+          <span className="sr-only">{t("brighterDays")}</span>
+        </>
+      ) : siteLanguage === "tamil" ? (
+        <span style={{ fontFamily: '"Kavivanar", "Noto Sans Tamil", cursive' }}>{t("brighterDays")}</span>
+      ) : undefined
+    }
+  />
   )}
 </h1>
 

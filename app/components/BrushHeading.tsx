@@ -10,29 +10,33 @@ import React from "react";
 // a slow float, a shine across MELODIOUS DAYS and wiggling dashes (globals.css).
 
 // Letters lean hard and the first letter of each word is drawn bigger, like a hand-painted sign
-function BrushWord({ word, delay }: { word: string; delay: string }) {
+function BrushWord({ word, delay, plain = false }: { word: string; delay: string; plain?: boolean }) {
   return (
     <span
       className="zf-paint inline-block origin-left"
       style={{
         ["--d" as string]: delay,
-        transform: "skewX(-14deg) scaleX(var(--zf-brush-narrow))",
+        transform: `skewX(${plain ? -8 : -14}deg) scale(var(--zf-brush-narrow), var(--zf-brush-tall, 1))`,
         WebkitTextStroke: "var(--zf-brush-stroke) #fff",
         filter: "url(#zf-dry-brush)",
       }}
     >
-      <span className="text-[1.22em] leading-[0]">{word.charAt(0)}</span>
-      {word.slice(1)}
+      {plain ? (
+        // Sinhala and Tamil letters join with the next ones, so no big first letter
+        word
+      ) : (
+        <>
+          <span className="text-[1.22em] leading-[0]">{word.charAt(0)}</span>
+          {word.slice(1)}
+        </>
+      )}
     </span>
   );
 }
 
-export default function BrushHeading({ line1, line2 }: { line1: string; line2: string }) {
-  const words = line1.trim().split(/\s+/);
-  const first = words[0] ?? "";
-  const rest = words.slice(1).join(" ");
-
-  // Each time the heading comes back on screen, paint it on again
+// Each time the heading comes back on screen, paint it on again:
+// changing the key remounts it, which restarts the CSS animations.
+function useReplayOnView() {
   const rootRef = React.useRef<HTMLSpanElement>(null);
   const [cycle, setCycle] = React.useState(0);
 
@@ -49,7 +53,29 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [cycle]);
+
+  return [rootRef, cycle] as const;
+}
+
+// script: Sinhala / Tamil. Same design, but keeps the page's own font for those letters.
+// line2Node: optional custom content for the gold label (the Sinhala heading font).
+export default function BrushHeading({
+  line1,
+  line2,
+  script = false,
+  line2Node,
+}: {
+  line1: string;
+  line2: string;
+  script?: boolean;
+  line2Node?: React.ReactNode;
+}) {
+  const words = line1.trim().split(/\s+/);
+  const first = words[0] ?? "";
+  const rest = words.slice(1).join(" ");
+
+  const [rootRef, cycle] = useReplayOnView();
 
   return (
     <span
@@ -58,9 +84,11 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
       className="zf-brush-float relative isolate mx-auto block w-fit -rotate-6 pb-3 pt-3"
       style={
         {
-          "--zf-brush-font": '"Caveat Brush", "Permanent Marker", cursive',
-          "--zf-brush-stroke": "0.035em",
-          "--zf-brush-narrow": "0.92",
+          "--zf-brush-font": script ? "inherit" : '"Caveat Brush", "Permanent Marker", cursive',
+          // Sinhala / Tamil letters drawn thicker, narrower and taller to match the English brush look
+          "--zf-brush-stroke": script ? "0.035em" : "0.035em",
+          "--zf-brush-narrow": script ? "0.9" : "0.92",
+          "--zf-brush-tall": script ? "1.1" : "1",
         } as React.CSSProperties
       }
     >
@@ -90,8 +118,8 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
       </svg>
 
       <span
-        className="zf-brush relative block uppercase leading-[0.86]"
-        style={{ fontFamily: "var(--zf-brush-font)", fontWeight: 400, letterSpacing: "-0.01em" }}
+        className={`zf-brush relative block ${script ? "leading-[0.98]" : "uppercase leading-[0.86]"}`}
+        style={{ fontFamily: "var(--zf-brush-font)", fontWeight: script ? 800 : 400, letterSpacing: "-0.01em" }}
       >
         <span className="relative block w-fit text-left">
           {/* Gold marker swipe behind the first word */}
@@ -100,7 +128,7 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
             className="zf-paint absolute -left-[8%] top-[34%] -z-10 h-[50%] w-[100%] -skew-x-12 bg-[#FFD400]/55"
             style={{ borderRadius: "40px 8px 50px 10px", ["--d" as string]: "0.1s" }}
           />
-          <BrushWord word={first} delay="0.35s" />
+          <BrushWord word={first} delay="0.35s" plain={script} />
           {/* Little dashes right after the R */}
           <svg aria-hidden="true" viewBox="0 0 40 40" className="pointer-events-none absolute left-[99%] top-[32%] w-[0.3em] overflow-visible">
             <g stroke="#FFD400" strokeWidth="4.5" strokeLinecap="round" fill="none">
@@ -109,13 +137,13 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
           </svg>
         </span>
         <span className="ml-[0.45em] block text-left">
-          <BrushWord word={rest} delay="0.75s" />
+          <BrushWord word={rest} delay="0.75s" plain={script} />
         </span>
 
         {/* Second line on a gold brush stroke */}
         <span
-          className="zf-paint relative ml-[2.4em] mt-[0.1em] block w-fit -skew-x-[8deg] px-[0.7em] py-[0.1em] text-[0.3em] leading-[1.2] tracking-[0.05em] text-[#090D16]"
-          style={{ fontFamily: '"Caveat Brush", cursive', ["--d" as string]: "1.15s" }}
+          className={`zf-paint relative ml-[2.4em] ${script ? "mt-[0.02em]" : "mt-[0.1em]"} block w-fit -skew-x-[8deg] px-[0.7em] py-[0.1em] ${script ? "text-[0.4em] leading-[1.35]" : "text-[0.3em] leading-[1.2] tracking-[0.05em]"} text-[#090D16]`}
+          style={{ fontFamily: script ? "inherit" : '"Caveat Brush", cursive', ["--d" as string]: "1.15s" }}
         >
           <span
             aria-hidden="true"
@@ -125,7 +153,7 @@ export default function BrushHeading({ line1, line2 }: { line1: string; line2: s
             {/* A soft shine that keeps sliding across the gold stroke */}
             <span className="zf-sheen absolute inset-y-0 left-0 w-1/3" />
           </span>
-          {line2}
+          {line2Node ?? line2}
         </span>
       </span>
     </span>
