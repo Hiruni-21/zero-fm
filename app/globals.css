@@ -432,3 +432,22 @@ html[data-site-language="sinhala"] body :not([style*="font-family"]):not(svg, sv
 @media (prefers-reduced-motion: reduce) {
   .zf-paint, .zf-pop, .zf-brush-float, .zf-sheen { animation: none; clip-path: none; opacity: 1; }
 }
+
+/* Smooth language switch: the page softly fades and blurs between languages */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+::view-transition-old(root) {
+  animation-name: zf-lang-out;
+}
+::view-transition-new(root) {
+  animation-name: zf-lang-in;
+}
+@keyframes zf-lang-out {
+  to { opacity: 0; filter: blur(6px); }
+}
+@keyframes zf-lang-in {
+  from { opacity: 0; filter: blur(6px); }
+}

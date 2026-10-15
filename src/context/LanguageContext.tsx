@@ -8,6 +8,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 import {
   translations,
   type SiteLanguage,
@@ -77,14 +78,27 @@ export function LanguageProvider({
   }, [language, hasMounted]);
 
   const setLanguage = useCallback((nextLanguage: SiteLanguage) => {
-    setLanguageState(nextLanguage);
+    // Fade the old language out and the new one in (browsers without
+    // view transitions, or visitors who prefer less motion, switch instantly)
+    const startViewTransition = (
+      document as Document & { startViewTransition?: (update: () => void) => unknown }
+    ).startViewTransition?.bind(document);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const update = () => {
+      setLanguageState(nextLanguage);
+      applyDocumentLanguage(nextLanguage);
+    };
+    if (startViewTransition && !reduceMotion) {
+      startViewTransition(() => flushSync(update));
+    } else {
+      update();
+    }
     saveLanguageCookie(nextLanguage);
     try {
       localStorage.setItem(STORAGE_KEY, nextLanguage);
     } catch {
       // localStorage may fail in private browsing mode
     }
-    applyDocumentLanguage(nextLanguage);
   }, []);
 
   const t = useCallback(

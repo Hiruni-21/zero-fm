@@ -1477,6 +1477,7 @@ export default function ZeroFMHome() {
   ) : (
   // Sinhala and Tamil: the same brush design, with their own fonts
   <BrushHeading
+  key={siteLanguage}
     script
     line1={t("goodMusic")}
     line2={t("brighterDays")}
