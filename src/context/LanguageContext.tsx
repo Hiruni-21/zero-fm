@@ -13,6 +13,7 @@ import {
   type SiteLanguage,
   type TranslationKey,
 } from "../i18n/translations";
+import { LANGUAGE_COOKIE, isSiteLanguage } from "../i18n/language-cookie";
 
 export type { SiteLanguage, TranslationKey };
 
@@ -22,8 +23,12 @@ export interface LanguageContextType {
   t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-const STORAGE_KEY = "zero-fm-language";
+const STORAGE_KEY = LANGUAGE_COOKIE;
 const DEFAULT_LANGUAGE: SiteLanguage = "english";
+
+function saveLanguageCookie(lang: SiteLanguage) {
+  document.cookie = `${LANGUAGE_COOKIE}=${lang}; path=/; max-age=31536000; samesite=lax`;
+}
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
@@ -36,29 +41,33 @@ function applyDocumentLanguage(lang: SiteLanguage) {
   document.body?.setAttribute("data-site-language", lang);
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<SiteLanguage>(DEFAULT_LANGUAGE);
+export function LanguageProvider({
+  children,
+  initialLanguage = DEFAULT_LANGUAGE,
+}: {
+  children: React.ReactNode;
+  initialLanguage?: SiteLanguage;
+}) {
+  // The server already read the language cookie, so start in that language
+  const [language, setLanguageState] = useState<SiteLanguage>(initialLanguage);
   const [hasMounted, setHasMounted] = useState(false);
 
-  // Restore language from localStorage on client-side mount without hydration mismatch
+  // Visitors who picked a language before the cookie existed only have it in
+  // localStorage: switch them once and save the cookie for next time
   useEffect(() => {
     setHasMounted(true);
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (
-        saved === "english" ||
-        saved === "sinhala" ||
-        saved === "tamil"
-      ) {
+      if (isSiteLanguage(saved) && saved !== initialLanguage) {
         setLanguageState(saved);
-        applyDocumentLanguage(saved);
-      } else {
-        applyDocumentLanguage(DEFAULT_LANGUAGE);
+        saveLanguageCookie(saved);
+      } else if (isSiteLanguage(saved)) {
+        saveLanguageCookie(saved);
       }
     } catch {
-      applyDocumentLanguage(DEFAULT_LANGUAGE);
+      // localStorage may fail in private browsing mode
     }
-  }, []);
+  }, [initialLanguage]);
 
   // Keep document attributes synchronized whenever language changes
   useEffect(() => {
@@ -69,6 +78,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = useCallback((nextLanguage: SiteLanguage) => {
     setLanguageState(nextLanguage);
+    saveLanguageCookie(nextLanguage);
     try {
       localStorage.setItem(STORAGE_KEY, nextLanguage);
     } catch {

@@ -1284,23 +1284,30 @@ export default function ZeroFMHome() {
   // so the big hero text gets smaller sizes and is allowed to wrap
   const wideScript = siteLanguage !== "english";
 
-  // The Sinhala decorative font only loads when someone picks Sinhala.
-  // Until it is ready the line shows in the normal Sinhala font.
-  const [sinhalaFontReady, setSinhalaFontReady] = React.useState(false);
+  // Fetch the Sinhala and Tamil gold-line fonts as soon as the page opens,
+  // so switching language later does not flash a plain font first.
+  // "failed" means the font could not load, so the normal Sinhala font is used.
+  const [sinhalaFont, setSinhalaFont] = React.useState<"loading" | "ready" | "failed">("loading");
 
   React.useEffect(() => {
-    if (siteLanguage !== "sinhala" || sinhalaFontReady) return;
     let cancelled = false;
+    document.fonts.load('1em "Kavivanar"').catch(() => {});
+    const giveUp = window.setTimeout(() => {
+      if (!cancelled) setSinhalaFont((state) => (state === "loading" ? "failed" : state));
+    }, 3000);
     document.fonts
       .load('1em "Zero Sinhala Heading"')
       .then((faces) => {
-        if (!cancelled && faces.length > 0) setSinhalaFontReady(true);
+        if (!cancelled) setSinhalaFont(faces.length > 0 ? "ready" : "failed");
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setSinhalaFont("failed");
+      });
     return () => {
       cancelled = true;
+      window.clearTimeout(giveUp);
     };
-  }, [siteLanguage, sinhalaFontReady]);
+  }, []);
 
   return (
     <main
@@ -1550,7 +1557,7 @@ export default function ZeroFMHome() {
       textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
     }}
   >
-    {siteLanguage === "sinhala" && sinhalaFontReady ? (
+    {siteLanguage === "sinhala" && sinhalaFont !== "failed" ? (
       <>
         {/* FM Derana is an old style font that draws Sinhala from English keys,
             so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
@@ -1561,6 +1568,9 @@ export default function ZeroFMHome() {
             fontFamily: '"Zero Sinhala Heading", "Noto Sans Sinhala", serif',
             // This font draws smaller than the white line above, so scale it up
             fontSize: "1.2em",
+            // Stay hidden (keeping its space) until the font has arrived
+            opacity: sinhalaFont === "ready" ? 1 : 0,
+            transition: "opacity 0.3s ease-out",
           }}
         >
           oSma;su;a wdrïNhla

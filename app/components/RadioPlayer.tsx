@@ -526,12 +526,6 @@ export default function RadioPlayer() {
                 </>
               )}
 
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <span className="rounded-md border border-white/[0.08] bg-white/[0.025] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-white/35">
-                  {t("player.liveRadio")}
-                </span>
-
-              </div>
             </div>
 
             {/* WAVEFORM */}
