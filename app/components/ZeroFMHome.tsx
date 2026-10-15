@@ -911,8 +911,8 @@ const SITE_TRANSLATIONS: Record<
     downloadApp: "Download App",
     getApp: "Get App",
     musicConnects: "Music Connects Us",
-    goodMusic: "Good Music",
-    brighterDays: "Brighter Days",
+    goodMusic: "Stream the rhythm",
+    brighterDays: "rock the day",
     digitalCommunity:
       "Sri Lanka's First Trilingual Radio Station",
     listenLive: "Listen Live",
@@ -1527,16 +1527,18 @@ export default function ZeroFMHome() {
   className={`m-0 font-bold text-white ${
     wideScript
       ? "text-[40px] leading-[1.15] sm:text-[52px] lg:text-[58px]"
-      : "text-[52px] leading-[0.9] tracking-[-0.045em] min-[400px]:text-[64px] sm:text-[70px] lg:text-[76px]"
+      : "text-[38px] leading-[0.9] tracking-[-0.045em] min-[400px]:text-[44px] sm:text-[70px] lg:text-[76px]"
   }`}
-  style={{
-    fontFamily: '"Space Grotesk", sans-serif',
-  }}
 >
   {/* Main white heading */}
   <span className="block">
     {t("goodMusic")}
   </span>
+
+  {/* English heading is three lines: "Stream the rhythm", "&", "rock the day" */}
+  {siteLanguage === "english" && (
+    <span className="mt-1 block text-[0.6em] leading-none text-[#FFD400]/80">&amp;</span>
+  )}
 
   {/* Yellow handwritten heading */}
   <span

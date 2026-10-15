@@ -54,7 +54,8 @@ export default function PageEffects() {
       if (!link) return;
       const href = link.getAttribute("href") ?? "";
       const hash = href.startsWith("#") ? href : href.startsWith("/#") ? href.slice(1) : "";
-      if (!hash || hash === "#home") return;
+      // No glow for the top of the page or the Music Library (Explore)
+      if (!hash || hash === "#home" || hash === "#music") return;
 
       const section = document.getElementById(hash.slice(1));
       if (!section) return;

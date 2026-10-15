@@ -1,32 +1,21 @@
 import type { Metadata } from "next";
-import {
-  Hanken_Grotesk,
-  JetBrains_Mono,
-  Space_Grotesk,
-} from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { LanguageProvider } from "@/src/context/LanguageContext";
 import { LANGUAGE_COOKIE, isSiteLanguage } from "@/src/i18n/language-cookie";
 import { LiveRadioProvider } from "./components/LiveRadio";
 
-const spaceGrotesk = Space_Grotesk({
-  weight: "variable",
-  variable: "--font-space-grotesk",
+// English fonts: Playfair Display for headings, Inter for everything else
+const headingFont = Playfair_Display({
+  variable: "--font-heading",
   subsets: ["latin"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const hankenGrotesk = Hanken_Grotesk({
-  weight: "variable",
-  variable: "--font-hanken-grotesk",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  weight: "variable",
-  variable: "--font-jetbrains-mono",
+const textFont = Inter({
+  variable: "--font-text",
   subsets: ["latin"],
   display: "swap",
 });
@@ -47,7 +36,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang={htmlLang}
       data-site-language={language}
-      className={`${spaceGrotesk.variable} ${hankenGrotesk.variable} ${jetBrainsMono.variable} h-full antialiased`}
+      className={`${headingFont.variable} ${textFont.variable} h-full antialiased`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -57,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           crossOrigin=""
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Kavivanar&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Kavivanar&family=Abhaya+Libre:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>

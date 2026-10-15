@@ -2,7 +2,7 @@
    ZERO FM — FIGMA FONT IMPORTS
    Keep these imports at the very top of the file.
    ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap');
 
 @import "tailwindcss";
 
@@ -24,9 +24,11 @@
   --online: #34d399;
 
   /* Figma font families */
-  --font-space-grotesk: "Space Grotesk", sans-serif;
-  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
-  --font-jetbrains-mono: "JetBrains Mono", monospace;
+  /* English fonts: Playfair Display for headings, Inter for everything else.
+     Both load in app/layout.tsx as --font-heading and --font-text. */
+  --font-space-grotesk: var(--font-heading), Georgia, serif;
+  --font-plus-jakarta: var(--font-text), system-ui, sans-serif;
+  --font-jetbrains-mono: var(--font-text), system-ui, sans-serif;
   --font-covered-grace: "Covered By Your Grace", cursive;
 
   /* Reusable typography sizes */
@@ -263,7 +265,7 @@ html[data-site-language="tamil"] body,
 
 /* Default font for the whole website */
 body {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-plus-jakarta);
 }
 
 /* All headings */
@@ -273,32 +275,32 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space-grotesk);
 }
 
 /* Existing Tailwind font utility classes */
 .font-display {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-space-grotesk);
 }
 
 .font-body {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-plus-jakarta);
 }
 
 .font-mono {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-jetbrains-mono);
 }
 
 /* Buttons */
 button,
 input[type="button"],
 input[type="submit"] {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: var(--font-plus-jakarta);
 }
 
 /* Navigation and small uppercase labels */
 nav a {
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-jetbrains-mono);
 }
 
 /* Preserve handwritten styling where explicitly used */
@@ -331,4 +333,66 @@ html[data-site-language="tamil"] body {
   font-family: "Zero Sinhala Heading";
   src: url("/fonts/zero-sinhala-heading.woff2") format("woff2");
   font-display: swap;
+}
+
+/* Playfair Display is already a narrow font, so the tight letter spacing made
+   for the old heading font squeezed it. Give headings a natural spacing.
+   Small uppercase labels (font-mono) keep their wide spacing. */
+:is(h1, h2, h3, h4, h5, h6, .font-display):not(.font-mono) {
+  letter-spacing: -0.005em;
+}
+
+/* All Sinhala text uses Abhaya Libre (an elegant style that matches the
+   English Playfair Display). Text that sets its own font inline, like the
+   gold Derana line and the handwritten "Hit", keeps it. */
+html[data-site-language="sinhala"] body :not([style*="font-family"]):not(svg, svg *) {
+  font-family: "Zero Sinhala Text", "Abhaya Libre", "Noto Sans Sinhala", serif !important;
+}
+
+/* Abhaya Libre's Sinhala letters, drawn 18% bigger: they are small next to the
+   old font, which made small text hard to read. English letters in the same
+   text still come from "Abhaya Libre" at normal size. */
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3tmeuGtX-Co5MNzeAOqinEQYUnXgPRE4r80.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYj2rCsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYo23CsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYx2zCsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEY22_CsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
 }

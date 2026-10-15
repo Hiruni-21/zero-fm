@@ -170,10 +170,10 @@ export const translations = {
     "community.card3Line4": "Days",
 
     // Request Song
-    "request.title": "REQUEST A SONG",
-    "request.subtitle": "Want to hear your favourite song? Send us your request!",
-    "request.couldBeNext1": "Your request",
-    "request.couldBeNext2": "could be next!",
+    "request.title": "Got a memory tied to a song?",
+    "request.subtitle": "",
+    "request.couldBeNext1": "The next beat on air",
+    "request.couldBeNext2": "could be yours!",
     "request.nameLabel": "Your Name",
     "request.phoneLabel": "Phone Number",
     "request.songLabel": "Song / Artist",
@@ -187,7 +187,7 @@ export const translations = {
     "request.errorPhone": "Enter a valid phone number.",
     "request.success": "Your song request has been sent. Thank you!",
     "request.errorGeneric": "Unable to submit your song request.",
-    "request.broadcastLine": "Broadcast Line",
+    "request.broadcastLine": "Memory Lane",
     "request.todaysPrograms": "TODAY'S\nPROGRAMS",
     "request.todaysProgramsLine1": "TODAY'S",
     "request.todaysProgramsLine2": "PROGRAMS",
