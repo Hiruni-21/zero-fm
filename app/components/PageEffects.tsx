@@ -32,8 +32,9 @@ export default function PageEffects() {
   );
   const toastTimer = useRef(0);
 
-  // After a menu or footer link jumps to a section, that section glows gold
-  // for a moment so it is easy to see where you landed
+  // After a menu or footer link jumps to a section, its main card gets a
+  // spotlight for a moment (everything around it dims) so it is easy to see
+  // where you landed
   useEffect(() => {
     let flashTimer = 0;
     let waitTimer = 0;
@@ -41,12 +42,12 @@ export default function PageEffects() {
 
     const flash = (el: HTMLElement) => {
       flashed?.classList.remove("zf-flash");
-      // Restart the glow even when the same section is clicked twice
+      // Restart the spotlight even when the same section is clicked twice
       void el.offsetWidth;
       el.classList.add("zf-flash");
       flashed = el;
       window.clearTimeout(flashTimer);
-      flashTimer = window.setTimeout(() => el.classList.remove("zf-flash"), 1800);
+      flashTimer = window.setTimeout(() => el.classList.remove("zf-flash"), 2400);
     };
 
     const onClick = (event: MouseEvent) => {
@@ -59,13 +60,16 @@ export default function PageEffects() {
 
       const section = document.getElementById(hash.slice(1));
       if (!section) return;
-      // Big sections glow on their main card rather than the whole width
+      // The spotlight goes on the card that link is about: a block marked
+      // data-zf-spot (Contact: the Hotline / WhatsApp column), else the
+      // section's main card
       const target =
-        section.classList.contains("zf-card")
+        section.querySelector<HTMLElement>("[data-zf-spot]") ??
+        (section.classList.contains("zf-card")
           ? section
-          : (section.querySelector<HTMLElement>(".zf-card") ?? section);
+          : (section.querySelector<HTMLElement>(".zf-card") ?? section));
 
-      // Glow once the page has finished scrolling there
+      // Spotlight once the page has finished scrolling there
       window.clearTimeout(waitTimer);
       const done = () => {
         window.removeEventListener("scrollend", done);
@@ -289,24 +293,30 @@ export default function PageEffects() {
   return (
     <>
       <style jsx global>{`
-        /* Gold glow on the section a link just jumped to */
+        /* Spotlight on the card a link just jumped to: a huge dark shadow
+           around it dims the rest of the screen, then fades away */
         .zf-flash {
-          animation: zf-flash 1.8s ease-out;
+          position: relative;
+          z-index: 40;
+          animation: zf-flash 2.4s ease-in-out;
         }
 
         @keyframes zf-flash {
-          0%,
-          35% {
+          0% {
             box-shadow:
-              inset 0 0 0 2px rgba(255, 212, 0, 0.85),
-              0 0 0 4px rgba(255, 212, 0, 0.18),
-              0 0 60px rgba(255, 212, 0, 0.3);
+              0 0 0 1px rgba(255, 212, 0, 0),
+              0 0 0 100vmax rgba(3, 5, 10, 0);
+          }
+          18%,
+          65% {
+            box-shadow:
+              0 0 0 1px rgba(255, 212, 0, 0.55),
+              0 0 0 100vmax rgba(3, 5, 10, 0.72);
           }
           100% {
             box-shadow:
-              inset 0 0 0 2px rgba(255, 212, 0, 0),
-              0 0 0 4px rgba(255, 212, 0, 0),
-              0 0 60px rgba(255, 212, 0, 0);
+              0 0 0 1px rgba(255, 212, 0, 0),
+              0 0 0 100vmax rgba(3, 5, 10, 0);
           }
         }
 

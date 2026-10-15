@@ -1526,7 +1526,7 @@ export default function ZeroFMHome() {
 <h1
   className={`m-0 font-bold text-white ${
     wideScript
-      ? "text-[40px] leading-[1.15] sm:text-[56px] lg:text-[66px]"
+      ? "text-[42px] leading-[1.15] sm:text-[64px] lg:text-[80px]"
       : "text-[38px] leading-[0.9] tracking-[-0.02em] min-[400px]:text-[44px] sm:text-[78px] lg:text-[88px]"
   }`}
 >
@@ -1539,7 +1539,7 @@ export default function ZeroFMHome() {
   <span
     className={`mx-auto mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
       wideScript
-        ? "w-fit text-[40px] leading-[1.2] sm:text-[58px] lg:text-[72px]"
+        ? "w-fit text-[42px] leading-[1.2] sm:text-[68px] lg:text-[88px]"
         : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[92px] lg:text-[110px]"
     }`}
     style={{
@@ -1585,7 +1585,7 @@ export default function ZeroFMHome() {
               className={`mt-4 text-[#E2E8F0] ${
                 siteLanguage === "english"
                   ? "font-mono text-[13px] font-semibold uppercase tracking-[0.19em] sm:text-[16px]"
-                  : "text-[15px] font-medium tracking-normal sm:text-[18px]"
+                  : "text-[16px] font-medium tracking-normal sm:text-[20px]"
               }`}
             >
               {t("digitalCommunity")}
@@ -1634,7 +1634,7 @@ export default function ZeroFMHome() {
               className={`font-body mt-4 text-[#B8C4D6] ${
                 siteLanguage === "english"
                   ? "text-[13px] font-medium uppercase tracking-[0.17em] sm:text-[15px]"
-                  : "text-[15px] tracking-normal sm:text-[17px]"
+                  : "text-[16px] tracking-normal sm:text-[19px]"
               }`}
             >
               {t(
@@ -1809,7 +1809,7 @@ export default function ZeroFMHome() {
               </div>
             </div>
 
-            <div>
+            <div data-zf-spot className="-m-4 self-start rounded-2xl p-4">
               <h3 className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-white">
                 {t(
                   "supportConnect"
