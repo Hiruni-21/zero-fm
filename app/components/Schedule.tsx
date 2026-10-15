@@ -324,7 +324,7 @@ export default function Schedule() {
             <CalendarIcon />
           </span>
 
-          <h3 className="min-w-0 font-display text-[20px] font-bold leading-[1.4] text-white sm:text-[22px]">
+          <h3 className="min-w-0 font-display text-[24px] font-bold leading-[1.3] tracking-[-0.01em] text-white sm:text-[28px]">
             {t("schedule.todaysPrograms")}
           </h3>
         </div>

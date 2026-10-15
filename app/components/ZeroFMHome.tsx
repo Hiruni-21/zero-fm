@@ -911,8 +911,8 @@ const SITE_TRANSLATIONS: Record<
     downloadApp: "Download App",
     getApp: "Get App",
     musicConnects: "Music Connects Us",
-    goodMusic: "Stream the rhythm",
-    brighterDays: "rock the day",
+    goodMusic: "Brighter beginnings",
+    brighterDays: "melodious days",
     digitalCommunity:
       "Sri Lanka's First Trilingual Radio Station",
     listenLive: "Listen Live",
@@ -1526,8 +1526,8 @@ export default function ZeroFMHome() {
 <h1
   className={`m-0 font-bold text-white ${
     wideScript
-      ? "text-[40px] leading-[1.15] sm:text-[52px] lg:text-[58px]"
-      : "text-[38px] leading-[0.9] tracking-[-0.045em] min-[400px]:text-[44px] sm:text-[70px] lg:text-[76px]"
+      ? "text-[40px] leading-[1.15] sm:text-[56px] lg:text-[66px]"
+      : "text-[38px] leading-[0.9] tracking-[-0.02em] min-[400px]:text-[44px] sm:text-[78px] lg:text-[88px]"
   }`}
 >
   {/* Main white heading */}
@@ -1535,17 +1535,12 @@ export default function ZeroFMHome() {
     {t("goodMusic")}
   </span>
 
-  {/* English heading is three lines: "Stream the rhythm", "&", "rock the day" */}
-  {siteLanguage === "english" && (
-    <span className="mt-1 block text-[0.6em] leading-none text-[#FFD400]/80">&amp;</span>
-  )}
-
   {/* Yellow handwritten heading */}
   <span
     className={`mx-auto mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
       wideScript
-        ? "w-fit text-[40px] leading-[1.2] sm:text-[52px] lg:text-[62px]"
-        : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[82px] lg:text-[96px]"
+        ? "w-fit text-[40px] leading-[1.2] sm:text-[58px] lg:text-[72px]"
+        : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[92px] lg:text-[110px]"
     }`}
     style={{
       // Each language gets its own decorative font for the gold line, like English
@@ -1589,8 +1584,8 @@ export default function ZeroFMHome() {
             <p
               className={`mt-4 text-[#E2E8F0] ${
                 siteLanguage === "english"
-                  ? "font-mono text-[11px] font-semibold uppercase tracking-[0.19em] sm:text-[12px]"
-                  : "text-[13px] font-medium tracking-normal sm:text-[14px]"
+                  ? "font-mono text-[13px] font-semibold uppercase tracking-[0.19em] sm:text-[16px]"
+                  : "text-[15px] font-medium tracking-normal sm:text-[18px]"
               }`}
             >
               {t("digitalCommunity")}
@@ -1638,8 +1633,8 @@ export default function ZeroFMHome() {
             <p
               className={`font-body mt-4 text-[#B8C4D6] ${
                 siteLanguage === "english"
-                  ? "text-[11px] font-medium uppercase tracking-[0.17em]"
-                  : "text-[13px] tracking-normal"
+                  ? "text-[13px] font-medium uppercase tracking-[0.17em] sm:text-[15px]"
+                  : "text-[15px] tracking-normal sm:text-[17px]"
               }`}
             >
               {t(
@@ -1665,7 +1660,7 @@ export default function ZeroFMHome() {
 {/* Weekly show posters, in a 3D carousel, on the same gold dust sky as the top */}
 <section
   id="shows"
-  className="relative z-[1] -mt-[45vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(4vh+1rem)] sm:pb-20"
+  className="relative z-[1] -mt-[62vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(4vh+1rem)] sm:pb-20"
 >
   {/* Posters rise over the last of the gold ring dust: the top of this
       section is see-through, so there is no empty gap after the ring */}
@@ -1683,6 +1678,28 @@ export default function ZeroFMHome() {
   <GoldDust density={1.6} />
 
   <div className="relative z-10 mx-auto w-full max-w-[1440px]">
+    {/* Neon line above the weekly evening show posters */}
+    <div className="mb-6 px-5 text-center sm:mb-8">
+      {siteLanguage === "sinhala" ? (
+        <p
+          className="pb-1 text-[30px] font-bold leading-tight text-[#FFF6C2] sm:text-[40px] lg:text-[44px]"
+          style={{ textShadow: "0 0 6px #FFD400, 0 0 14px #FFD400, 0 0 30px #FFB300" }}
+        >
+          හිත යන හැන්දෑව
+        </p>
+      ) : (
+        <p
+          className="text-[32px] leading-tight text-[#FFF6C2] sm:text-[44px] lg:text-[50px]"
+          style={{
+            fontFamily: '"Tilt Neon", sans-serif',
+            textShadow: "0 0 6px #FFD400, 0 0 14px #FFD400, 0 0 30px #FFB300",
+          }}
+        >
+          Spark The week @ 6
+        </p>
+      )}
+    </div>
+
     <ProgramPosterCarousel />
   </div>
 </section>

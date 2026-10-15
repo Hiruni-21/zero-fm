@@ -2,7 +2,7 @@
    ZERO FM — FIGMA FONT IMPORTS
    Keep these imports at the very top of the file.
    ========================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
@@ -24,11 +24,9 @@
   --online: #34d399;
 
   /* Figma font families */
-  /* English fonts: Playfair Display for headings, Inter for everything else.
-     Both load in app/layout.tsx as --font-heading and --font-text. */
-  --font-space-grotesk: var(--font-heading), Georgia, serif;
-  --font-plus-jakarta: var(--font-text), system-ui, sans-serif;
-  --font-jetbrains-mono: var(--font-text), system-ui, sans-serif;
+  --font-space-grotesk: "Space Grotesk", sans-serif;
+  --font-plus-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
   --font-covered-grace: "Covered By Your Grace", cursive;
 
   /* Reusable typography sizes */
@@ -265,7 +263,7 @@ html[data-site-language="tamil"] body,
 
 /* Default font for the whole website */
 body {
-  font-family: var(--font-plus-jakarta);
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 /* All headings */
@@ -275,32 +273,34 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-space-grotesk);
+  /* Helvetica look (like the first "Good Music" heading). Apple devices use
+     real Helvetica; others get Arimo, a free look-alike from Google Fonts */
+  font-family: "Helvetica Neue", Helvetica, "Arimo", Arial, sans-serif;
 }
 
 /* Existing Tailwind font utility classes */
 .font-display {
-  font-family: var(--font-space-grotesk);
+  font-family: "Helvetica Neue", Helvetica, "Arimo", Arial, sans-serif;
 }
 
 .font-body {
-  font-family: var(--font-plus-jakarta);
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 .font-mono {
-  font-family: var(--font-jetbrains-mono);
+  font-family: "JetBrains Mono", monospace;
 }
 
 /* Buttons */
 button,
 input[type="button"],
 input[type="submit"] {
-  font-family: var(--font-plus-jakarta);
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 /* Navigation and small uppercase labels */
 nav a {
-  font-family: var(--font-jetbrains-mono);
+  font-family: "JetBrains Mono", monospace;
 }
 
 /* Preserve handwritten styling where explicitly used */
@@ -335,15 +335,7 @@ html[data-site-language="tamil"] body {
   font-display: swap;
 }
 
-/* Playfair Display is already a narrow font, so the tight letter spacing made
-   for the old heading font squeezed it. Give headings a natural spacing.
-   Small uppercase labels (font-mono) keep their wide spacing. */
-:is(h1, h2, h3, h4, h5, h6, .font-display):not(.font-mono) {
-  letter-spacing: -0.005em;
-}
-
-/* All Sinhala text uses Abhaya Libre (an elegant style that matches the
-   English Playfair Display). Text that sets its own font inline, like the
+/* All Sinhala text uses Abhaya Libre (an elegant style). Text that sets its own font inline, like the
    gold Derana line and the handwritten "Hit", keeps it. */
 html[data-site-language="sinhala"] body :not([style*="font-family"]):not(svg, svg *) {
   font-family: "Zero Sinhala Text", "Abhaya Libre", "Noto Sans Sinhala", serif !important;

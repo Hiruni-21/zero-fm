@@ -379,7 +379,7 @@ export default function RadioPlayer() {
               {t("player.studio")}
             </p>
 
-            <h2 className="mt-2 font-display text-[28px] font-bold leading-[1.35] tracking-[-0.03em] text-white sm:text-[40px] lg:text-[48px]">
+            <h2 className="mt-2 font-display text-[30px] font-bold leading-[1.15] tracking-[-0.02em] text-white sm:text-[42px] lg:text-[52px]">
               {t("player.title")}
             </h2>
           </div>
