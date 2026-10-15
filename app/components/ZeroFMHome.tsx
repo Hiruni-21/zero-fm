@@ -8,6 +8,7 @@ import {
 } from "./LanguageContext";
 
 import MobileMenu from "./MobileMenu";
+import LanguageSwitcher from "./LanguageSwitcher";
 import CategoryModal from "./CategoryModal";
 import PageEffects from "./PageEffects";
 import Interactions3D from "./Interactions3D";
@@ -1283,23 +1284,23 @@ export default function ZeroFMHome() {
   // so the big hero text gets smaller sizes and is allowed to wrap
   const wideScript = siteLanguage !== "english";
 
-  // The Sinhala handwritten font only loads when someone picks Sinhala.
+  // The Sinhala decorative font only loads when someone picks Sinhala.
   // Until it is ready the line shows in the normal Sinhala font.
-  const [hiruFontReady, setHiruFontReady] = React.useState(false);
+  const [sinhalaFontReady, setSinhalaFontReady] = React.useState(false);
 
   React.useEffect(() => {
-    if (siteLanguage !== "sinhala" || hiruFontReady) return;
+    if (siteLanguage !== "sinhala" || sinhalaFontReady) return;
     let cancelled = false;
     document.fonts
-      .load('1em "Zero Hiru"')
+      .load('1em "Zero Sinhala Heading"')
       .then((faces) => {
-        if (!cancelled && faces.length > 0) setHiruFontReady(true);
+        if (!cancelled && faces.length > 0) setSinhalaFontReady(true);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [siteLanguage, hiruFontReady]);
+  }, [siteLanguage, sinhalaFontReady]);
 
   return (
     <main
@@ -1428,6 +1429,8 @@ export default function ZeroFMHome() {
               {t("downloadApp")}
             </a>
 
+            <LanguageSwitcher />
+
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -1547,14 +1550,18 @@ export default function ZeroFMHome() {
       textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
     }}
   >
-    {siteLanguage === "sinhala" && hiruFontReady ? (
+    {siteLanguage === "sinhala" && sinhalaFontReady ? (
       <>
-        {/* amsHiru is an old style font that draws Sinhala from English keys,
+        {/* FM Derana is an old style font that draws Sinhala from English keys,
             so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
             together if the Sinhala wording ever changes. */}
         <span
           aria-hidden="true"
-          style={{ fontFamily: '"Zero Hiru", "Noto Sans Sinhala", serif' }}
+          style={{
+            fontFamily: '"Zero Sinhala Heading", "Noto Sans Sinhala", serif',
+            // This font draws smaller than the white line above, so scale it up
+            fontSize: "1.2em",
+          }}
         >
           oSma;su;a wdrïNhla
         </span>
@@ -1584,6 +1591,7 @@ export default function ZeroFMHome() {
             )}
 
             <div
+              id="hero-language-picker"
               className={`font-body mx-auto flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em] ${
                 siteLanguage === "tamil" ? "mt-2" : "mt-5"
               }`}

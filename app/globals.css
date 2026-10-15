@@ -325,10 +325,10 @@ html[data-site-language="tamil"] body {
   letter-spacing: normal !important;
 }
 
-/* Handwritten Sinhala font for the gold hero line (amsHiru, cut down to
+/* Decorative Sinhala font for the gold hero line (FM Derana, cut down to
    only the letters that line uses, so it is tiny) */
 @font-face {
-  font-family: "Zero Hiru";
-  src: url("/fonts/zero-hiru-heading.woff2") format("woff2");
+  font-family: "Zero Sinhala Heading";
+  src: url("/fonts/zero-sinhala-heading.woff2") format("woff2");
   font-display: swap;
 }
