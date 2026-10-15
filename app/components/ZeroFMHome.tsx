@@ -1520,16 +1520,11 @@ export default function ZeroFMHome() {
               {t("digitalCommunity")}
             </p>
 
-            {siteLanguage === "tamil" && (
-              <p className="font-body mt-5 text-[12px] text-[#94A3B8]">
-                தேர்வு செய்யக்கூடிய மொழிகள்
-              </p>
-            )}
 
             <div
               id="hero-language-picker"
               className={`font-body mx-auto flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em] ${
-                siteLanguage === "tamil" ? "mt-2" : "mt-5"
+                "mt-5"
               }`}
             >
               {(siteLanguage === "tamil"
