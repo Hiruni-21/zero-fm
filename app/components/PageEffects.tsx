@@ -32,6 +32,57 @@ export default function PageEffects() {
   );
   const toastTimer = useRef(0);
 
+  // After a menu or footer link jumps to a section, that section glows gold
+  // for a moment so it is easy to see where you landed
+  useEffect(() => {
+    let flashTimer = 0;
+    let waitTimer = 0;
+    let flashed: HTMLElement | null = null;
+
+    const flash = (el: HTMLElement) => {
+      flashed?.classList.remove("zf-flash");
+      // Restart the glow even when the same section is clicked twice
+      void el.offsetWidth;
+      el.classList.add("zf-flash");
+      flashed = el;
+      window.clearTimeout(flashTimer);
+      flashTimer = window.setTimeout(() => el.classList.remove("zf-flash"), 1800);
+    };
+
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (!link) return;
+      const href = link.getAttribute("href") ?? "";
+      const hash = href.startsWith("#") ? href : href.startsWith("/#") ? href.slice(1) : "";
+      if (!hash || hash === "#home") return;
+
+      const section = document.getElementById(hash.slice(1));
+      if (!section) return;
+      // Big sections glow on their main card rather than the whole width
+      const target =
+        section.classList.contains("zf-card")
+          ? section
+          : (section.querySelector<HTMLElement>(".zf-card") ?? section);
+
+      // Glow once the page has finished scrolling there
+      window.clearTimeout(waitTimer);
+      const done = () => {
+        window.removeEventListener("scrollend", done);
+        window.clearTimeout(waitTimer);
+        flash(target);
+      };
+      window.addEventListener("scrollend", done, { once: true });
+      waitTimer = window.setTimeout(done, 1100);
+    };
+
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      window.clearTimeout(flashTimer);
+      window.clearTimeout(waitTimer);
+    };
+  }, []);
+
   // Toasts
   useEffect(() => {
     const onToast = (event: Event) => {
@@ -237,6 +288,33 @@ export default function PageEffects() {
   return (
     <>
       <style jsx global>{`
+        /* Gold glow on the section a link just jumped to */
+        .zf-flash {
+          animation: zf-flash 1.8s ease-out;
+        }
+
+        @keyframes zf-flash {
+          0%,
+          35% {
+            box-shadow:
+              inset 0 0 0 2px rgba(255, 212, 0, 0.85),
+              0 0 0 4px rgba(255, 212, 0, 0.18),
+              0 0 60px rgba(255, 212, 0, 0.3);
+          }
+          100% {
+            box-shadow:
+              inset 0 0 0 2px rgba(255, 212, 0, 0),
+              0 0 0 4px rgba(255, 212, 0, 0),
+              0 0 60px rgba(255, 212, 0, 0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .zf-flash {
+            animation-duration: 0.01s;
+          }
+        }
+
         html {
           scroll-padding-top: 136px;
         }

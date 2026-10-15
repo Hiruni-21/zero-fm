@@ -196,7 +196,7 @@ export const translations = {
 
     // Added: player, mobile companion, request queue
     "player.onAir": "On Air",
-    "player.liveStream": "Live Stream",
+    "player.liveStream": "Live Radio",
     "player.ready": "Ready",
     "player.mute": "Mute",
     "player.unmute": "Unmute",
@@ -247,7 +247,7 @@ export const translations = {
     "footer.broadcasting": "Broadcasting progressive electronic, alternative club sounds and curated underground frequencies.",
     "footer.transmitting": "Transmitting 24/7 Digital Audio",
     "footer.platform": "Platform",
-    "footer.liveStream": "Live Stream",
+    "footer.liveStream": "Live Radio",
     "footer.requestSong": "Request Song",
     "footer.todaysSchedule": "Today's Schedule",
     "footer.explore": "Explore",
@@ -313,7 +313,7 @@ export const translations = {
     connectWithZero: "CONNECT WITH ZERO",
     joinCommunity: "Join our community and stay connected with the music you love.",
     platform: "Platform",
-    liveStream: "Live Stream",
+    liveStream: "Live Radio",
     requestSong: "Request Song",
     todaysSchedule: "Today's Schedule",
     explore: "Explore",

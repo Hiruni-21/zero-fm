@@ -91,16 +91,15 @@ export default function LegalPage({
       </div>
 
       <footer className="border-t border-white/[0.08] bg-[#070B13]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 font-mono text-[9px] uppercase tracking-[0.08em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 font-mono text-[11px] uppercase tracking-[0.08em] text-[#AEBBCD] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
           <p>© {new Date().getFullYear()} Zero FM Broadcasting Network. All rights reserved.</p>
 
           <div className="flex gap-5">
             <Link href="/privacy-policy" className="transition hover:text-[#FFD400]">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="transition hover:text-[#FFD400]">
-              Terms &amp; Conditions
-            </Link>
+            {/* Not clickable until the Terms page is approved */}
+            <span className="cursor-default">Terms &amp; Conditions</span>
           </div>
         </div>
       </footer>

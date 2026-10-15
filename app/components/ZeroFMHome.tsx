@@ -298,7 +298,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Zero FM on Facebook"
         title="Facebook"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="facebook"
@@ -312,7 +312,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Message Zero FM on WhatsApp"
         title="WhatsApp"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="whatsapp"
@@ -326,7 +326,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Zero FM on YouTube"
         title="YouTube"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="youtube"
@@ -952,7 +952,7 @@ const SITE_TRANSLATIONS: Record<
     joinCommunity:
       "Join our community and stay in tune.",
     platform: "Platform",
-    liveStream: "Live Stream",
+    liveStream: "Live Radio",
     requestSong: "Request Song",
     todaysSchedule: "Today's Schedule",
     explore: "Explore",
@@ -1575,9 +1575,9 @@ export default function ZeroFMHome() {
 
             {/* Letter spacing breaks Sinhala and Tamil letters apart, so only English gets it */}
             <p
-              className={`mt-4 text-[#94A3B8] ${
+              className={`mt-4 text-[#E2E8F0] ${
                 siteLanguage === "english"
-                  ? "font-mono text-[10px] font-medium uppercase tracking-[0.19em] sm:text-[11px]"
+                  ? "font-mono text-[11px] font-semibold uppercase tracking-[0.19em] sm:text-[12px]"
                   : "text-[13px] font-medium tracking-normal sm:text-[14px]"
               }`}
             >
@@ -1598,9 +1598,9 @@ export default function ZeroFMHome() {
             >
               {(siteLanguage === "tamil"
                 ? ([
-                    ["tamil", "தமிழ்"],
-                    ["sinhala", "சிங்களம்"],
                     ["english", "ஆங்கிலம்"],
+                    ["sinhala", "சிங்களம்"],
+                    ["tamil", "தமிழ்"],
                   ] as const)
                 : ([
                     ["english", "English"],
@@ -1624,9 +1624,9 @@ export default function ZeroFMHome() {
             </div>
 
             <p
-              className={`font-body mt-4 text-[#64748B] ${
+              className={`font-body mt-4 text-[#B8C4D6] ${
                 siteLanguage === "english"
-                  ? "text-[10px] uppercase tracking-[0.17em]"
+                  ? "text-[11px] font-medium uppercase tracking-[0.17em]"
                   : "text-[13px] tracking-normal"
               }`}
             >
@@ -1640,9 +1640,9 @@ export default function ZeroFMHome() {
     <div
       ref={heroCueRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-[#FFD400]/70"
+      className="pointer-events-none absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-[#FFD400]"
     >
-      <span className="flex h-9 w-[22px] justify-center rounded-full border border-[#FFD400]/40 pt-1.5">
+      <span className="flex h-9 w-[22px] justify-center rounded-full border-2 border-[#FFD400]/80 pt-1.5">
         <span className="zf-scroll-dot h-2 w-[3px] rounded-full bg-[#FFD400]" />
       </span>
       Scroll
@@ -1805,7 +1805,7 @@ export default function ZeroFMHome() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 pt-6 font-mono text-[11px] uppercase tracking-[0.12em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 pt-6 font-mono text-[12px] uppercase tracking-[0.12em] text-[#AEBBCD] sm:flex-row sm:items-center sm:justify-between">
             <p>
               ©{" "}
               {new Date().getFullYear()}{" "}
@@ -1826,9 +1826,8 @@ export default function ZeroFMHome() {
                 {t("privacy")}
               </Link>
 
-              <Link href="/terms">
-                {t("terms")}
-              </Link>
+              {/* Not clickable until the Terms page is approved */}
+              <span className="cursor-default">{t("terms")}</span>
             </div>
           </div>
         </div>

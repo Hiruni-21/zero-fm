@@ -5,14 +5,14 @@ import { useLanguage } from "./LanguageContext";
 
 type SiteLanguage = "english" | "sinhala" | "tamil";
 
-// Each language is shown in its own script; in Tamil every name is in Tamil,
-// the same as the picker under the hero
+// Always English, Sinhala, Tamil in that order. Each language is shown in its
+// own script; in Tamil every name is in Tamil, the same as the picker under the hero
 export function languageChoices(current: SiteLanguage): [SiteLanguage, string][] {
   return current === "tamil"
     ? [
-        ["tamil", "தமிழ்"],
-        ["sinhala", "சிங்களம்"],
         ["english", "ஆங்கிலம்"],
+        ["sinhala", "சிங்களம்"],
+        ["tamil", "தமிழ்"],
       ]
     : [
         ["english", "English"],
