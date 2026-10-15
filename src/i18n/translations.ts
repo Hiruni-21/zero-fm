@@ -30,7 +30,7 @@ export const translations = {
     "hero.openLivePlayer": "Open live player",
 
     // Live Player
-    "player.studio": "Zero FM On-Air Studio",
+    "player.studio": "Zero FM On-Air",
     "player.title": "Live Player & Station Schedule",
     "player.location": "Colombo, Sri Lanka (UTC+5:30)",
     "player.liveRadio": "Live Radio",
