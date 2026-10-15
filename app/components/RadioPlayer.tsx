@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Schedule from "./Schedule";
+import MusicBrowserModal from "./MusicBrowserModal";
 import { useLanguage } from "./LanguageContext";
 import { useLiveRadio } from "./LiveRadio";
 import NowPlayingArt from "./NowPlayingArt";
@@ -398,7 +399,7 @@ export default function RadioPlayer() {
       {/* THREE CARDS                                                        */}
       {/* ================================================================== */}
 
-      <div className="mx-auto grid w-full max-w-[1380px] items-stretch gap-2.5 px-3 sm:px-4 lg:h-[680px] lg:min-h-[560px] lg:grid-cols-[1fr_1.2fr] lg:px-5 xl:gap-3 mb-10 sm:mb-14">
+      <div className="mx-auto grid w-full max-w-[1380px] items-stretch gap-2.5 px-3 sm:px-4 lg:h-[680px] lg:min-h-[560px] lg:grid-cols-[1fr_1.15fr_1fr] lg:px-5 xl:gap-3 mb-10 sm:mb-14">
 
         {/* ================================================================ */}
         {/* LEFT — RADIO PLAYER                                             */}
@@ -779,6 +780,24 @@ export default function RadioPlayer() {
     <Schedule />
   </div>
 </section>
+
+        {/* ================================================================ */}
+        {/* RIGHT — SEARCH SONGS AND ADD TO QUEUE (was the nav search icon)  */}
+        {/* ================================================================ */}
+
+        <section
+          id="search-songs"
+          className="zf-card relative flex h-[600px] min-h-0 min-w-0 scroll-mt-24 overflow-hidden rounded-[28px] lg:h-full lg:scroll-mt-[130px]"
+        >
+          <div className="relative flex min-h-0 w-full min-w-0 flex-col overflow-hidden">
+            <MusicBrowserModal
+              embedded
+              language="all"
+              title={t("requestWidget.title")}
+              onClose={() => {}}
+            />
+          </div>
+        </section>
       </div>
 
       {/* ================================================================== */}

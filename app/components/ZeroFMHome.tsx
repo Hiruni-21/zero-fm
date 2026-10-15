@@ -10,7 +10,6 @@ import {
 
 import MobileMenu from "./MobileMenu";
 import LanguageSwitcher from "./LanguageSwitcher";
-import CategoryModal from "./CategoryModal";
 import PageEffects from "./PageEffects";
 import Interactions3D from "./Interactions3D";
 import {
@@ -73,7 +72,7 @@ const SOCIAL_LINKS = {
 };
 
 type IconName =
-  | "search"
+  | "phone"
   | "radio"
   | "music"
   | "community"
@@ -93,11 +92,8 @@ function Icon({
   className?: string;
 }) {
   const shapes: Record<IconName, React.ReactNode> = {
-    search: (
-      <>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m16 16 4.5 4.5" />
-      </>
+    phone: (
+      <path d="M5 4h3.5l1.8 4.4-2.3 1.4a11 11 0 0 0 6.2 6.2l1.4-2.3L20 15.5V19a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" />
     ),
 
     radio: (
@@ -915,7 +911,7 @@ const SITE_TRANSLATIONS: Record<
     goodMusic: "Brighter beginnings",
     brighterDays: "melodious days",
     digitalCommunity:
-      "Sri Lanka's First Trilingual Radio Station",
+      "Sri Lanka's First Trilingual online Radio Station",
     listenLive: "Listen Live",
     contactStudio: "Contact Studio",
     anytimeAnywhere:
@@ -961,7 +957,7 @@ const SITE_TRANSLATIONS: Record<
     aboutZero: "About Zero FM",
     pressMedia: "Press & Media",
     supportConnect:
-      "Support & Connect",
+      "Connect",
     contactStudioBooth:
       "Contact Studio Booth",
     helpFaq: "Help Center & FAQs",
@@ -972,7 +968,7 @@ const SITE_TRANSLATIONS: Record<
     transmitting:
       "Transmitting 24/7 Digital Audio",
     colomboStream:
-      "Sri Lanka's First Trilingual Radio Station",
+      "Sri Lanka's First Trilingual online Radio Station",
     searchExample:
       "Example: manike, mage hithe, yohani",
     singlishHint:
@@ -1176,43 +1172,7 @@ const SITE_TRANSLATIONS: Record<
       "Singlish தட்டச்சும் ஆதரிக்கப்படுகிறது",
   },
 };
-/*
- * Search icon popup: the same song list as Explore, with every song and
- * language filters. Picking a song sends it to the Radio.co queue through
- * /api/queue, exactly like Explore and the request form.
- */
-function SearchOverlay({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  const { t } = useLanguage();
-
-  if (!open) return null;
-
-  return (
-    <CategoryModal
-      category={{
-        title: t("requestWidget.title"),
-        language: "all",
-      }}
-      onClose={onClose}
-    />
-  );
-}
-
-
 export default function ZeroFMHome() {
-  const [searchOpen, setSearchOpen] =
-    React.useState(false);
-
-  const closeSearch = React.useCallback(
-    () => setSearchOpen(false),
-    []
-  );
-
   // Highlights the navbar link for the section on screen
   const activeNav = useActiveSection();
 
@@ -1362,10 +1322,6 @@ export default function ZeroFMHome() {
 
       <SideSocialBar />
 
-      <SearchOverlay
-        open={searchOpen}
-        onClose={closeSearch}
-      />
 
       <header className="fixed left-0 right-0 top-0 z-[100] h-[72px] w-full border-b border-white/[0.06] bg-[#05080F]/55 backdrop-blur-xl">
         <div className="mx-auto flex h-full max-w-[1440px] items-center gap-3 px-4 sm:gap-4 sm:px-8 lg:px-12">
@@ -1439,27 +1395,9 @@ export default function ZeroFMHome() {
 
             <LanguageSwitcher />
 
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search Zero FM"
-              title="Search"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 text-[#FFD400] transition hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16]"
-            >
-              <Icon name="search" className="size-5" />
-            </button>
           </div>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 xl:hidden">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search Zero FM"
-              title="Search"
-              className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 text-[#FFD400] transition hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16]"
-            >
-              <Icon name="search" className="size-5" />
-            </button>
 
             {/* Jumps to the store buttons in the footer */}
             <a
@@ -1825,18 +1763,31 @@ export default function ZeroFMHome() {
               </h3>
 
               <div className="footer-links mt-5 flex flex-col gap-3.5 text-[14px] text-[#8F9CAE]">
-                {/* Tap to call / open WhatsApp. Update both numbers here. */}
-                <a href="tel:+94727170170">
-                  Hotline: 072 717 0170
-                </a>
+                {/* Hotline and studio WhatsApp are the same number: show it once,
+                    with a Call button (opens the dialler) and a WhatsApp button. */}
+                <p className="font-mono text-[18px] font-semibold tracking-[0.04em] text-white">
+                  072 717 0170
+                </p>
 
-                <a
-                  href="https://wa.me/94727170170"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  WhatsApp Studio: 072 717 0170
-                </a>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="tel:+94727170170"
+                    className="flex h-9 items-center gap-2 rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 px-4 text-[13px] font-semibold text-[#FFD400] transition hover:bg-[#FFD400] hover:text-[#090D16]"
+                  >
+                    <Icon name="phone" className="size-4" />
+                    {siteLanguage === "sinhala" ? "අමතන්න" : siteLanguage === "tamil" ? "அழைக்க" : "Call"}
+                  </a>
+
+                  <a
+                    href="https://wa.me/94727170170"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-4 text-[13px] font-semibold text-[#25D366] transition hover:bg-[#25D366] hover:text-[#090D16]"
+                  >
+                    <Icon name="whatsapp" className="size-4" />
+                    WhatsApp
+                  </a>
+                </div>
 
               </div>
             </div>

@@ -388,3 +388,47 @@ html[data-site-language="sinhala"] body :not([style*="font-family"]):not(svg, sv
   unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
   size-adjust: 118%;
 }
+
+/* English brush heading: each piece paints on left to right, then the gold dashes keep wiggling */
+.zf-paint {
+  clip-path: inset(-40% 100% -40% -20%);
+  animation: zf-paint 0.55s cubic-bezier(0.6, 0, 0.3, 1) var(--d, 0s) forwards;
+}
+@keyframes zf-paint {
+  to { clip-path: inset(-40% -20% -40% -20%); }
+}
+.zf-pop {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    zf-pop 0.35s ease-out var(--d, 0s) forwards,
+    zf-wiggle 2.6s ease-in-out calc(var(--d, 0s) + 0.35s) infinite;
+}
+@keyframes zf-pop {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes zf-wiggle {
+  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+  50% { opacity: 1; transform: rotate(-8deg) scale(1.15); }
+}
+.zf-brush-float {
+  animation: zf-float 5s ease-in-out 2s infinite;
+}
+@keyframes zf-float {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(1.5deg) translateY(-6px); }
+}
+.zf-sheen {
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  transform: translateX(-120%);
+  animation: zf-sheen 3.5s ease-in-out 2s infinite;
+}
+@keyframes zf-sheen {
+  0% { transform: translateX(-120%); }
+  45%, 100% { transform: translateX(360%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zf-paint, .zf-pop, .zf-brush-float, .zf-sheen { animation: none; clip-path: none; opacity: 1; }
+}
