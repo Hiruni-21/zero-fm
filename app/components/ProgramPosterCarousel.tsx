@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLanguage } from "./LanguageContext";
 
 /*
  * Weekly program posters in a 3D "cover flow": the poster in the middle
@@ -10,16 +11,26 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * hidden, and for reduced motion.
  */
 
-const POSTERS = [
+const ENGLISH_POSTERS = [
   { src: "/images/programs/cover-lanthaya.webp", alt: "Cover Lanthaya, every Monday at 6.30 PM" },
   { src: "/images/programs/time-capsule.webp", alt: "Time Capsule, every Tuesday at 8.30 PM" },
   { src: "/images/programs/hitlist.webp", alt: "Hitlist, every Wednesday at 6.30 PM" },
   { src: "/images/programs/mixxer.webp", alt: "Mixxer, every Friday at 6.30 PM" },
 ];
 
+// Same shows in Tamil, used when the site is switched to Tamil
+const TAMIL_POSTERS = [
+  { src: "/images/programs/tamil/cover-lanthaya.webp", alt: "கவர் லந்தாய, ஒவ்வொரு திங்கட்கிழமையும் மாலை 6:30 மணிக்கு" },
+  { src: "/images/programs/tamil/time-capsule.webp", alt: "டைம் கெப்சூல், ஒவ்வொரு செவ்வாய்க்கிழமையும் இரவு 8:30 மணிக்கு" },
+  { src: "/images/programs/tamil/hitlist.webp", alt: "ஹிட்லிஸ்ட், ஒவ்வொரு புதன்கிழமையும் மாலை 6:30 மணிக்கு" },
+  { src: "/images/programs/tamil/mixxer.webp", alt: "மிக்சர் JAM, ஒவ்வொரு வெள்ளிக்கிழமையும் மாலை 6:30 மணிக்கு" },
+];
+
 const AUTO_PLAY_MS = 4500;
 
 export default function ProgramPosterCarousel() {
+  const { language } = useLanguage();
+  const POSTERS = language === "tamil" ? TAMIL_POSTERS : ENGLISH_POSTERS;
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);

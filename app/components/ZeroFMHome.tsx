@@ -1,5 +1,6 @@
 "use client";
 
+import BrushHeading from "./BrushHeading";
 import React from "react";
 import Link from "next/link";
 import {
@@ -8,7 +9,7 @@ import {
 } from "./LanguageContext";
 
 import MobileMenu from "./MobileMenu";
-import CategoryModal from "./CategoryModal";
+import LanguageSwitcher from "./LanguageSwitcher";
 import PageEffects from "./PageEffects";
 import Interactions3D from "./Interactions3D";
 import {
@@ -71,7 +72,7 @@ const SOCIAL_LINKS = {
 };
 
 type IconName =
-  | "search"
+  | "phone"
   | "radio"
   | "music"
   | "community"
@@ -91,11 +92,8 @@ function Icon({
   className?: string;
 }) {
   const shapes: Record<IconName, React.ReactNode> = {
-    search: (
-      <>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m16 16 4.5 4.5" />
-      </>
+    phone: (
+      <path d="M5 4h3.5l1.8 4.4-2.3 1.4a11 11 0 0 0 6.2 6.2l1.4-2.3L20 15.5V19a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" />
     ),
 
     radio: (
@@ -297,7 +295,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Zero FM on Facebook"
         title="Facebook"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="facebook"
@@ -311,7 +309,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Message Zero FM on WhatsApp"
         title="WhatsApp"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="whatsapp"
@@ -325,7 +323,7 @@ function SocialLinks() {
         rel="noopener noreferrer"
         aria-label="Zero FM on YouTube"
         title="YouTube"
-        className="flex size-8 items-center justify-center rounded-full border border-white/[0.08] bg-[#121826] text-[#94A3B8] transition hover:border-[#FFD400]/40 hover:text-[#FFD400]"
+        className="flex size-9 items-center justify-center rounded-full border border-white/20 bg-[#1A2233] text-[#E2E8F0] transition hover:border-[#FFD400] hover:text-[#FFD400]"
       >
         <Icon
           name="youtube"
@@ -910,10 +908,10 @@ const SITE_TRANSLATIONS: Record<
     downloadApp: "Download App",
     getApp: "Get App",
     musicConnects: "Music Connects Us",
-    goodMusic: "Good Music",
-    brighterDays: "Brighter Days",
+    goodMusic: "Brighter beginnings",
+    brighterDays: "melodious days",
     digitalCommunity:
-      "Sri Lanka's First Trilingual Radio Station",
+      "Sri Lanka's First Trilingual online Radio Station",
     listenLive: "Listen Live",
     contactStudio: "Contact Studio",
     anytimeAnywhere:
@@ -951,7 +949,7 @@ const SITE_TRANSLATIONS: Record<
     joinCommunity:
       "Join our community and stay in tune.",
     platform: "Platform",
-    liveStream: "Live Stream",
+    liveStream: "Live Radio",
     requestSong: "Request Song",
     todaysSchedule: "Today's Schedule",
     explore: "Explore",
@@ -959,7 +957,7 @@ const SITE_TRANSLATIONS: Record<
     aboutZero: "About Zero FM",
     pressMedia: "Press & Media",
     supportConnect:
-      "Support & Connect",
+      "Connect",
     contactStudioBooth:
       "Contact Studio Booth",
     helpFaq: "Help Center & FAQs",
@@ -970,7 +968,7 @@ const SITE_TRANSLATIONS: Record<
     transmitting:
       "Transmitting 24/7 Digital Audio",
     colomboStream:
-      "Sri Lanka's First Trilingual Radio Station",
+      "Sri Lanka's First Trilingual online Radio Station",
     searchExample:
       "Example: manike, mage hithe, yohani",
     singlishHint:
@@ -1085,23 +1083,23 @@ const SITE_TRANSLATIONS: Record<
     getApp: "செயலி",
     musicConnects:
       "இசை நம்மை இணைக்கிறது",
-    goodMusic: "நல்ல இசை.",
+    goodMusic: "இசையோடு உங்கள்",
     brighterDays:
-      "பிரகாசமான நாட்கள்.",
+      "இனிய நாள் தொடங்கட்டும்",
     digitalCommunity:
-      "இலங்கையின் டிஜிட்டல் இசை சமூகம்",
+      "இலங்கையின் முதல் மும்மொழி வானொலி தளம்",
     listenLive:
       "நேரலையாக கேளுங்கள்",
     contactStudio:
       "ஸ்டுடியோவைத் தொடர்பு கொள்ளுங்கள்",
     anytimeAnywhere:
-      "எப்போது வேண்டுமானாலும் • எங்கு வேண்டுமானாலும் • அனைவருக்கும்",
+      "உலகெங்கும் ஓங்கி ஒலித்திடும்",
     onAirNow:
       "தற்போது ஒலிபரப்பு",
     feelGoodVibes:
       "நல்ல இசை உணர்வுகளை அனுபவிக்கவும்",
     liveNow:
-      "இப்போது நேரலை",
+      "நேரலை ஒளிபரப்பு",
     nationwideDigitalStream:
       "நாடு முழுவதும் டிஜிட்டல் ஒளிபரப்பு",
     searchSongsArtists:
@@ -1137,15 +1135,15 @@ const SITE_TRANSLATIONS: Record<
       "ZERO உடன் இணையுங்கள்",
     joinCommunity:
       "எங்கள் சமூகத்தில் இணைந்து இசையுடன் தொடர்ந்து இருங்கள்.",
-    platform: "தளம்",
+    platform: "இயங்குதளம்",
     liveStream:
       "நேரலை ஒளிபரப்பு",
     requestSong:
-      "பாடலைக் கோருங்கள்",
+      "விருப்பப் பாடலுக்கான கோரிக்கை",
     todaysSchedule:
-      "இன்றைய அட்டவணை",
+      "இன்றைய நிகழ்ச்சிகள் அட்டவணை",
     explore:
-      "ஆராயுங்கள்",
+      "மேலும் ஆராய்க",
     company:
       "நிறுவனம்",
     aboutZero:
@@ -1153,7 +1151,7 @@ const SITE_TRANSLATIONS: Record<
     pressMedia:
       "பத்திரிகை மற்றும் ஊடகம்",
     supportConnect:
-      "ஆதரவு மற்றும் தொடர்பு",
+      "உதவி மற்றும் தொடர்பு",
     contactStudioBooth:
       "ஸ்டுடியோவைத் தொடர்பு கொள்ளுங்கள்",
     helpFaq:
@@ -1165,52 +1163,16 @@ const SITE_TRANSLATIONS: Record<
     broadcasting:
       "முன்னேற்றமான எலக்ட்ரானிக், மாற்று கிளப் இசை மற்றும் தேர்ந்தெடுக்கப்பட்ட அண்டர்கிரவுண்ட் ஒலிகளை ஒலிபரப்புகிறது.",
     transmitting:
-      "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
+      "24/7 எண்ணியல் ஒலிபரப்பு",
     colomboStream:
-      "இலங்கையின் முதல் மும்மொழி வானொலி நிலையம்",
+      "இலங்கையின் முதல் மும்மொழி வானொலி தளம்",
     searchExample:
       "உதாரணம்: manike, mage hithe, yohani",
     singlishHint:
       "Singlish தட்டச்சும் ஆதரிக்கப்படுகிறது",
   },
 };
-/*
- * Search icon popup: the same song list as Explore, with every song and
- * language filters. Picking a song sends it to the Radio.co queue through
- * /api/queue, exactly like Explore and the request form.
- */
-function SearchOverlay({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  const { t } = useLanguage();
-
-  if (!open) return null;
-
-  return (
-    <CategoryModal
-      category={{
-        title: t("requestWidget.title"),
-        language: "all",
-      }}
-      onClose={onClose}
-    />
-  );
-}
-
-
 export default function ZeroFMHome() {
-  const [searchOpen, setSearchOpen] =
-    React.useState(false);
-
-  const closeSearch = React.useCallback(
-    () => setSearchOpen(false),
-    []
-  );
-
   // Highlights the navbar link for the section on screen
   const activeNav = useActiveSection();
 
@@ -1256,7 +1218,7 @@ export default function ZeroFMHome() {
 
       const logo = heroLogoRef.current;
       if (logo) {
-        const show = Math.min(Math.max((p - 0.3) / 0.12, 0), 1) * (1 - Math.min(Math.max((p - 0.62) / 0.1, 0), 1));
+        const show = Math.min(Math.max((p - 0.3) / 0.12, 0), 1) * (1 - Math.min(Math.max((p - 0.6) / 0.1, 0), 1));
         logo.style.opacity = String(show);
         logo.style.transform = `scale(${0.85 + show * 0.15})`;
       }
@@ -1282,6 +1244,31 @@ export default function ZeroFMHome() {
   // Sinhala and Tamil words are much wider than English at the same size,
   // so the big hero text gets smaller sizes and is allowed to wrap
   const wideScript = siteLanguage !== "english";
+
+  // Fetch the Sinhala and Tamil gold-line fonts as soon as the page opens,
+  // so switching language later does not flash a plain font first.
+  // "failed" means the font could not load, so the normal Sinhala font is used.
+  const [sinhalaFont, setSinhalaFont] = React.useState<"loading" | "ready" | "failed">("loading");
+
+  React.useEffect(() => {
+    let cancelled = false;
+    document.fonts.load('1em "Kavivanar"').catch(() => {});
+    const giveUp = window.setTimeout(() => {
+      if (!cancelled) setSinhalaFont((state) => (state === "loading" ? "failed" : state));
+    }, 3000);
+    document.fonts
+      .load('1em "Zero Sinhala Heading"')
+      .then((faces) => {
+        if (!cancelled) setSinhalaFont(faces.length > 0 ? "ready" : "failed");
+      })
+      .catch(() => {
+        if (!cancelled) setSinhalaFont("failed");
+      });
+    return () => {
+      cancelled = true;
+      window.clearTimeout(giveUp);
+    };
+  }, []);
 
   return (
     <main
@@ -1335,10 +1322,6 @@ export default function ZeroFMHome() {
 
       <SideSocialBar />
 
-      <SearchOverlay
-        open={searchOpen}
-        onClose={closeSearch}
-      />
 
       <header className="fixed left-0 right-0 top-0 z-[100] h-[72px] w-full border-b border-white/[0.06] bg-[#05080F]/55 backdrop-blur-xl">
         <div className="mx-auto flex h-full max-w-[1440px] items-center gap-3 px-4 sm:gap-4 sm:px-8 lg:px-12">
@@ -1410,27 +1393,11 @@ export default function ZeroFMHome() {
               {t("downloadApp")}
             </a>
 
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search Zero FM"
-              title="Search"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 text-[#FFD400] transition hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16]"
-            >
-              <Icon name="search" className="size-5" />
-            </button>
+            <LanguageSwitcher />
+
           </div>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2 xl:hidden">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Search Zero FM"
-              title="Search"
-              className="flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 text-[#FFD400] transition hover:border-[#FFD400] hover:bg-[#FFD400] hover:text-[#090D16]"
-            >
-              <Icon name="search" className="size-5" />
-            </button>
 
             {/* Jumps to the store buttons in the footer */}
             <a
@@ -1455,7 +1422,7 @@ export default function ZeroFMHome() {
 <section
   id="home"
   ref={heroRef}
-  className="relative -mt-[128px] h-[240vh] scroll-mt-0 bg-[#05080F] sm:h-[270vh]"
+  className="relative -mt-[128px] h-[200vh] scroll-mt-0 bg-[#05080F] sm:h-[210vh]"
 >
   <div className="sticky top-0 h-[100svh] overflow-hidden">
     <div
@@ -1497,104 +1464,102 @@ export default function ZeroFMHome() {
     ========================================================= */}
 <h1
   className={`m-0 font-bold text-white ${
-    wideScript
-      ? "text-[40px] leading-[1.15] sm:text-[52px] lg:text-[58px]"
-      : "text-[52px] leading-[0.9] tracking-[-0.045em] min-[400px]:text-[64px] sm:text-[70px] lg:text-[76px]"
+    siteLanguage === "sinhala"
+      ? "text-[40px] leading-[1.15] min-[400px]:text-[44px] sm:text-[78px] lg:text-[92px]"
+      : wideScript
+      ? "text-[39px] leading-[1.15] min-[400px]:text-[43px] sm:text-[77px] lg:text-[90px]"
+      : "text-[46px] leading-[0.95] min-[400px]:text-[52px] sm:text-[92px] lg:text-[108px]"
   }`}
-  style={{
-    fontFamily: '"Space Grotesk", sans-serif',
-  }}
 >
-  {/* Main white heading */}
-  <span className="block">
-    {t("goodMusic")}
-  </span>
-
-  {/* Yellow handwritten heading */}
-  <span
-    className={`mx-auto mt-1 block max-w-full -rotate-2 pb-3 font-normal tracking-normal sm:pb-4 ${
-      wideScript
-        ? "w-fit text-[40px] leading-[1.2] sm:text-[52px] lg:text-[62px]"
-        : "w-fit whitespace-nowrap text-[56px] leading-[1] min-[400px]:text-[68px] sm:text-[82px] lg:text-[96px]"
-    }`}
-    style={{
-      fontFamily: '"Covered By Your Grace", cursive',
-      color: "#FFD400",
-      textShadow: "0 4px 12px rgba(255, 212, 0, 0.20)",
-    }}
-  >
-    {t("brighterDays")}
-  </span>
+  {siteLanguage === "english" ? (
+    // English: painted brush style heading (BrushHeading.tsx)
+    <BrushHeading line1={t("goodMusic")} line2={t("brighterDays")} />
+  ) : (
+  // Sinhala and Tamil: the same brush design, with their own fonts
+  <BrushHeading
+    key={siteLanguage}
+    script
+    line1={t("goodMusic")}
+    line2={t("brighterDays")}
+    line2Node={
+      siteLanguage === "sinhala" && sinhalaFont !== "failed" ? (
+        <>
+          {/* FM Derana is an old style font that draws Sinhala from English keys,
+              so this spells "දීප්තිමත් ආරම්භයක්" in its key layout. Change both
+              together if the Sinhala wording ever changes. */}
+          <span
+            aria-hidden="true"
+            style={{
+              fontFamily: '"Zero Sinhala Heading", "Noto Sans Sinhala", serif',
+              // This font draws smaller than the other letters, so scale it up
+              fontSize: "1.2em",
+              // Stay hidden (keeping its space) until the font has arrived
+              opacity: sinhalaFont === "ready" ? 1 : 0,
+              transition: "opacity 0.3s ease-out",
+            }}
+          >
+            oSma;su;a wdrïNhla
+          </span>
+          <span className="sr-only">{t("brighterDays")}</span>
+        </>
+      ) : siteLanguage === "tamil" ? (
+        <span style={{ fontFamily: '"Kavivanar", "Noto Sans Tamil", cursive' }}>{t("brighterDays")}</span>
+      ) : undefined
+    }
+  />
+  )}
 </h1>
 
             {/* Letter spacing breaks Sinhala and Tamil letters apart, so only English gets it */}
             <p
-              className={`mt-4 text-[#94A3B8] ${
+              className={`mt-4 text-[#E2E8F0] ${
                 siteLanguage === "english"
-                  ? "font-mono text-[10px] font-medium uppercase tracking-[0.19em] sm:text-[11px]"
-                  : "text-[13px] font-medium tracking-normal sm:text-[14px]"
+                  ? "font-mono text-[13px] font-semibold uppercase tracking-[0.19em] sm:text-[16px]"
+                  : "text-[16px] font-medium tracking-normal sm:text-[20px]"
               }`}
             >
               {t("digitalCommunity")}
             </p>
 
-            <div className="font-body mx-auto mt-5 flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em]">
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "english"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage ===
-                  "english"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                English
-              </button>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "sinhala"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage ===
-                  "sinhala"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                සිංහල
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setSiteLanguage(
-                    "tamil"
-                  )
-                }
-                className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
-                  siteLanguage === "tamil"
-                    ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
-                    : "text-[#94A3B8] hover:text-white"
-                }`}
-              >
-                தமிழ்
-              </button>
+            <div
+              id="hero-language-picker"
+              className={`font-body mx-auto flex w-fit gap-1 rounded-full border border-white/[0.08] bg-[#0F1523] p-1 text-[10px] uppercase tracking-[0.07em] ${
+                "mt-5"
+              }`}
+            >
+              {(siteLanguage === "tamil"
+                ? ([
+                    ["english", "ஆங்கிலம்"],
+                    ["sinhala", "சிங்களம்"],
+                    ["tamil", "தமிழ்"],
+                  ] as const)
+                : ([
+                    ["english", "English"],
+                    ["sinhala", "සිංහල"],
+                    ["tamil", "தமிழ்"],
+                  ] as const)
+              ).map(([code, label]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setSiteLanguage(code)}
+                  className={`rounded-full px-2 py-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD400]/60 ${
+                    siteLanguage === code
+                      ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
+                      : "text-[#94A3B8] hover:text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <p
-              className={`font-body mt-4 text-[#64748B] ${
+              className={`font-body mt-4 text-[#B8C4D6] ${
                 siteLanguage === "english"
-                  ? "text-[10px] uppercase tracking-[0.17em]"
-                  : "text-[13px] tracking-normal"
+                  ? "text-[13px] font-medium uppercase tracking-[0.17em] sm:text-[15px]"
+                  : "text-[16px] tracking-normal sm:text-[19px]"
               }`}
             >
               {t(
@@ -1607,9 +1572,9 @@ export default function ZeroFMHome() {
     <div
       ref={heroCueRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em] text-[#FFD400]/70"
+      className="pointer-events-none absolute inset-x-0 bottom-8 flex flex-col items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-[#FFD400]"
     >
-      <span className="flex h-9 w-[22px] justify-center rounded-full border border-[#FFD400]/40 pt-1.5">
+      <span className="flex h-9 w-[22px] justify-center rounded-full border-2 border-[#FFD400]/80 pt-1.5">
         <span className="zf-scroll-dot h-2 w-[3px] rounded-full bg-[#FFD400]" />
       </span>
       Scroll
@@ -1620,20 +1585,46 @@ export default function ZeroFMHome() {
 {/* Weekly show posters, in a 3D carousel, on the same gold dust sky as the top */}
 <section
   id="shows"
-  className="relative scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] bg-[#05080F] pb-16 pt-6 sm:pb-20"
+  className="relative z-[1] -mt-[62vh] scroll-mt-[72px] overflow-hidden border-b border-white/[0.06] pb-16 pt-[calc(4vh+1rem)] sm:pb-20"
 >
+  {/* Posters rise over the last of the gold ring dust: the top of this
+      section is see-through, so there is no empty gap after the ring */}
   <div
     aria-hidden="true"
     className="pointer-events-none absolute inset-0"
     style={{
       background:
         "radial-gradient(ellipse 60% 45% at 50% 50%, rgba(255,212,0,0.05) 0%, rgba(255,212,0,0) 70%), radial-gradient(ellipse 75% 50% at 50% 50%, #0E1730 0%, #05080F 100%)",
+      maskImage: "linear-gradient(to bottom, transparent, #000 45vh)",
+      WebkitMaskImage: "linear-gradient(to bottom, transparent, #000 45vh)",
     }}
   />
 
   <GoldDust density={1.6} />
 
   <div className="relative z-10 mx-auto w-full max-w-[1440px]">
+    {/* Neon line above the weekly evening show posters */}
+    <div className="mb-6 px-5 text-center sm:mb-8">
+      {siteLanguage === "sinhala" ? (
+        <p
+          className="pb-1 text-[30px] font-bold leading-tight text-[#FFF6C2] sm:text-[40px] lg:text-[44px]"
+          style={{ textShadow: "0 0 6px #FFD400, 0 0 14px #FFD400, 0 0 30px #FFB300" }}
+        >
+          හිත යන හැන්දෑව
+        </p>
+      ) : (
+        <p
+          className="text-[32px] leading-tight text-[#FFF6C2] sm:text-[44px] lg:text-[50px]"
+          style={{
+            fontFamily: '"Tilt Neon", sans-serif',
+            textShadow: "0 0 6px #FFD400, 0 0 14px #FFD400, 0 0 30px #FFB300",
+          }}
+        >
+          Spark The week @ 6
+        </p>
+      )}
+    </div>
+
     <ProgramPosterCarousel />
   </div>
 </section>
@@ -1743,7 +1734,7 @@ export default function ZeroFMHome() {
               </div>
             </div>
 
-            <div>
+            <div data-zf-spot className="-m-4 self-start rounded-2xl p-4">
               <h3 className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-white">
                 {t(
                   "supportConnect"
@@ -1751,24 +1742,37 @@ export default function ZeroFMHome() {
               </h3>
 
               <div className="footer-links mt-5 flex flex-col gap-3.5 text-[14px] text-[#8F9CAE]">
-                {/* Tap to call / open WhatsApp. Update both numbers here. */}
-                <a href="tel:+94727170170">
-                  Hotline: 072 717 0170
-                </a>
+                {/* Hotline and studio WhatsApp are the same number: show it once,
+                    with a Call button (opens the dialler) and a WhatsApp button. */}
+                <p className="font-mono text-[18px] font-semibold tracking-[0.04em] text-white">
+                  072 717 0170
+                </p>
 
-                <a
-                  href="https://wa.me/94727170170"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  WhatsApp Studio: 072 717 0170
-                </a>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="tel:+94727170170"
+                    className="flex h-9 items-center gap-2 rounded-full border border-[#FFD400]/40 bg-[#FFD400]/10 px-4 text-[13px] font-semibold text-[#FFD400] transition hover:bg-[#FFD400] hover:text-[#090D16]"
+                  >
+                    <Icon name="phone" className="size-4" />
+                    {siteLanguage === "sinhala" ? "අමතන්න" : siteLanguage === "tamil" ? "அழைக்க" : "Call"}
+                  </a>
+
+                  <a
+                    href="https://wa.me/94727170170"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-9 items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-4 text-[13px] font-semibold text-[#25D366] transition hover:bg-[#25D366] hover:text-[#090D16]"
+                  >
+                    <Icon name="whatsapp" className="size-4" />
+                    WhatsApp
+                  </a>
+                </div>
 
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 pt-6 font-mono text-[11px] uppercase tracking-[0.12em] text-[#64748B] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 pt-6 font-mono text-[12px] uppercase tracking-[0.12em] text-[#AEBBCD] sm:flex-row sm:items-center sm:justify-between">
             <p>
               ©{" "}
               {new Date().getFullYear()}{" "}
@@ -1789,9 +1793,8 @@ export default function ZeroFMHome() {
                 {t("privacy")}
               </Link>
 
-              <Link href="/terms">
-                {t("terms")}
-              </Link>
+              {/* Not clickable until the Terms page is approved */}
+              <span className="cursor-default">{t("terms")}</span>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { TOAST_EVENT, type ToastDetail } from "../lib/ui-events";
  * Page-wide interactions that sit on top of the existing design:
  * - thin yellow scroll progress line under the navbar
  * - navbar shadow once the page is scrolled
+ * - smooth gliding mouse-wheel scroll on computers
  * - sections fade up as they scroll into view
  * - press feedback on buttons and links
  * - back-to-top button
@@ -30,6 +31,62 @@ export default function PageEffects() {
     null
   );
   const toastTimer = useRef(0);
+
+  // After a menu or footer link jumps to a section, its main card gets a
+  // spotlight for a moment (everything around it dims) so it is easy to see
+  // where you landed
+  useEffect(() => {
+    let flashTimer = 0;
+    let waitTimer = 0;
+    let flashed: HTMLElement | null = null;
+
+    const flash = (el: HTMLElement) => {
+      flashed?.classList.remove("zf-flash");
+      // Restart the spotlight even when the same section is clicked twice
+      void el.offsetWidth;
+      el.classList.add("zf-flash");
+      flashed = el;
+      window.clearTimeout(flashTimer);
+      flashTimer = window.setTimeout(() => el.classList.remove("zf-flash"), 2400);
+    };
+
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.("a[href]");
+      if (!link) return;
+      const href = link.getAttribute("href") ?? "";
+      const hash = href.startsWith("#") ? href : href.startsWith("/#") ? href.slice(1) : "";
+      // No glow for the top of the page or the Music Library (Explore)
+      if (!hash || hash === "#home" || hash === "#music") return;
+
+      const section = document.getElementById(hash.slice(1));
+      if (!section) return;
+      // The spotlight goes on the card that link is about: a block marked
+      // data-zf-spot (Contact: the Hotline / WhatsApp column), else the
+      // section's main card
+      const target =
+        section.querySelector<HTMLElement>("[data-zf-spot]") ??
+        (section.classList.contains("zf-card")
+          ? section
+          : (section.querySelector<HTMLElement>(".zf-card") ?? section));
+
+      // Spotlight once the page has finished scrolling there
+      window.clearTimeout(waitTimer);
+      const done = () => {
+        window.removeEventListener("scrollend", done);
+        window.clearTimeout(waitTimer);
+        flash(target);
+      };
+      window.addEventListener("scrollend", done, { once: true });
+      waitTimer = window.setTimeout(done, 1100);
+    };
+
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      window.clearTimeout(flashTimer);
+      window.clearTimeout(waitTimer);
+    };
+  }, []);
 
   // Toasts
   useEffect(() => {
@@ -80,6 +137,82 @@ export default function PageEffects() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       document.documentElement.removeAttribute("data-scrolled");
+    };
+  }, []);
+
+  // Smooth mouse-wheel scrolling on computers: each wheel turn glides the
+  // page instead of jumping it. Phones keep their own native scrolling
+  useEffect(() => {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+
+    let target = window.scrollY;
+    let current = window.scrollY;
+    let lastSet = current;
+    let frame = 0;
+    let last = 0;
+
+    const maxScroll = () =>
+      document.documentElement.scrollHeight - window.innerHeight;
+
+    // Let boxes that scroll on their own (popups, long lists) handle the wheel
+    const insideScroller = (el: Element | null, dy: number) => {
+      for (; el && el !== document.body; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (!/(auto|scroll)/.test(style.overflowY)) continue;
+        if (el.scrollHeight <= el.clientHeight + 1) continue;
+        if (dy < 0 ? el.scrollTop > 0 : el.scrollTop + el.clientHeight < el.scrollHeight - 1) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const step = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      // Someone else moved the page (menu link, scrollbar): stop and follow
+      if (Math.abs(window.scrollY - lastSet) > 3) {
+        target = current = lastSet = window.scrollY;
+        frame = 0;
+        return;
+      }
+
+      current += (target - current) * (1 - Math.exp(-dt * 9));
+      if (Math.abs(target - current) < 0.5) current = target;
+      lastSet = Math.round(current);
+      window.scrollTo({ top: current, behavior: "instant" });
+
+      frame = current === target ? 0 : window.requestAnimationFrame(step);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (event.defaultPrevented || event.ctrlKey) return;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      if (insideScroller(event.target as Element | null, event.deltaY)) return;
+
+      event.preventDefault();
+      const unit =
+        event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+
+      if (!frame) {
+        target = current = lastSet = window.scrollY;
+        last = performance.now();
+        frame = window.requestAnimationFrame(step);
+      }
+      target = Math.max(0, Math.min(maxScroll(), target + event.deltaY * unit));
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", onWheel);
+      window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -160,6 +293,39 @@ export default function PageEffects() {
   return (
     <>
       <style jsx global>{`
+        /* Spotlight on the card a link just jumped to: a huge dark shadow
+           around it dims the rest of the screen, then fades away */
+        .zf-flash {
+          position: relative;
+          z-index: 40;
+          animation: zf-flash 2.4s ease-in-out;
+        }
+
+        @keyframes zf-flash {
+          0% {
+            box-shadow:
+              0 0 0 1px rgba(255, 212, 0, 0),
+              0 0 0 100vmax rgba(3, 5, 10, 0);
+          }
+          18%,
+          65% {
+            box-shadow:
+              0 0 0 1px rgba(255, 212, 0, 0.55),
+              0 0 0 100vmax rgba(3, 5, 10, 0.72);
+          }
+          100% {
+            box-shadow:
+              0 0 0 1px rgba(255, 212, 0, 0),
+              0 0 0 100vmax rgba(3, 5, 10, 0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .zf-flash {
+            animation-duration: 0.01s;
+          }
+        }
+
         html {
           scroll-padding-top: 136px;
         }

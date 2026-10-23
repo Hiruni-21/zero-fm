@@ -23,6 +23,22 @@ type DayPart = "lateNight" | "morning" | "afternoon" | "evening" | "night";
 
 const DAY_MINUTES = 24 * 60;
 
+// Program names come from the schedule in English; some have their own Tamil name
+const TAMIL_PROGRAM_NAMES: Record<string, string> = {
+  "After Midnight Non-Stop": "நள்ளிரவுக்குப் பின் இடைவிடாத உங்கள் மனம் கவர்ந்த பாடல்கள்",
+  "Good Morning Sri Lanka": "வணக்கம் இலங்கை தேசம்",
+  "Morning Classics": "விடியலுடன் செவ்வியல் பாடல்கள்",
+  "Non Stop Sri Lankan Chartbusters": "இடைவிடாத இலங்கையின் பிரபல பாடல்கள்",
+  "Zero Hits": "ஜீரோ பிரபலமான பாடல்கள்",
+  "Deep Lo-Fi & Sri Lankan Ambient": "டீப் லோ-ஃபை & இலங்கை ஆம்பியன்ட்",
+  "Night Vibes": "இரவு ராகங்கள்",
+  "Live DJ Sets & Community Calls": "நேரலை DJ இசை & நேயர்களின் அழைப்புகள்",
+};
+
+function programName(name: string, language: string) {
+  return language === "tamil" ? TAMIL_PROGRAM_NAMES[name] ?? name : name;
+}
+
 function timeToMinutes(time: string) {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
@@ -59,9 +75,15 @@ function formatClock(minutes: number) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-function formatDuration(minutes: number) {
+// Tamil: "3 மணி நேரம்" for a show's length, "1ம 45நி" (short) for time left
+function formatDuration(minutes: number, language = "english", short = false) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
+  if (language === "tamil") {
+    if (!h) return `${m}நி`;
+    if (!m) return short ? `${h}ம` : `${h} மணி நேரம்`;
+    return `${h}ம ${m}நி`;
+  }
   if (!h) return `${m}m`;
   return m ? `${h}h ${m}m` : `${h}h`;
 }
@@ -114,7 +136,7 @@ function LiveDot() {
 }
 
 export default function Schedule() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [schedule, setSchedule] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -315,7 +337,7 @@ export default function Schedule() {
             <CalendarIcon />
           </span>
 
-          <h3 className="min-w-0 font-display text-[20px] font-bold leading-[1.4] text-white sm:text-[22px]">
+          <h3 className="min-w-0 font-display text-[24px] font-bold leading-[1.3] tracking-[-0.01em] text-white sm:text-[28px]">
             {t("schedule.todaysPrograms")}
           </h3>
         </div>
@@ -345,7 +367,7 @@ export default function Schedule() {
           <p className="mt-2 truncate font-display text-[19px] font-semibold leading-tight text-white">
             {loading
               ? t("schedule.loadingProgram")
-              : currentProgram?.program || t("schedule.noLiveProgram")}
+              : (currentProgram && programName(currentProgram.program, language)) || t("schedule.noLiveProgram")}
           </p>
 
           {liveProgress && (
@@ -375,7 +397,7 @@ export default function Schedule() {
             <p className="mt-1 truncate font-display text-[15px] font-semibold text-white">
               {loading
                 ? t("schedule.loadingProgram")
-                : nextProgram?.program || t("schedule.noUpcomingProgram")}
+                : (nextProgram && programName(nextProgram.program, language)) || t("schedule.noUpcomingProgram")}
             </p>
           </div>
 
@@ -460,7 +482,7 @@ export default function Schedule() {
                           active ? "text-[#FFD400]" : "text-white"
                         }`}
                       >
-                        {program.program}
+                        {programName(program.program, language)}
                       </p>
 
                       {active ? (
@@ -528,7 +550,7 @@ function FullScheduleModal({
   currentProgramIndex: number;
   onClose: () => void;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [visible, setVisible] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const liveRef = useRef<HTMLLIElement>(null);
@@ -653,7 +675,7 @@ function FullScheduleModal({
                   </p>
 
                   <p className="mt-1.5 font-mono text-[12px] text-[#64748B]">
-                    {formatDuration(end - start)}
+                    {formatDuration(end - start, language)}
                   </p>
                 </div>
 
@@ -663,7 +685,7 @@ function FullScheduleModal({
                       active ? "text-[#FFD400]" : "text-white"
                     }`}
                   >
-                    {program.program}
+                    {programName(program.program, language)}
                   </p>
 
                   <p className="mt-1 font-mono text-[11px] text-[#8F9CAE]">
@@ -693,7 +715,7 @@ function FullScheduleModal({
                   ) : (
                     <span className="font-mono text-[12px] text-[#A8B2C2]">
                       {t("schedule.startsIn", {
-                        time: formatDuration(startsIn),
+                        time: formatDuration(startsIn, language, true),
                       })}
                     </span>
                   )}

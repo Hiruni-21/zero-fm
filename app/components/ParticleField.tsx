@@ -130,10 +130,11 @@ export default function ParticleField({ progressRef }: Props) {
       smooth += (progressRef.current - smooth) * Math.min(dt * 6, 1);
       const p = reduceMotion ? 0.45 : smooth;
 
-      // Phases: 0–0.4 gather into the ring, 0.4–0.72 turn it, 0.72–1 burst
+      // Phases: 0–0.4 gather into the ring, 0.4–0.7 turn it, 0.68–0.88 burst
+      // (ends early so the posters follow straight after, with no empty gap)
       const gather = ease(clamp01(p / 0.4));
-      const turn = ease(clamp01((p - 0.38) / 0.34));
-      const burst = ease(clamp01((p - 0.72) / 0.28));
+      const turn = ease(clamp01((p - 0.38) / 0.32));
+      const burst = ease(clamp01((p - 0.68) / 0.2));
 
       flight += dt * 260 * (1 - gather * 0.85);
       spin += dt * (0.12 + turn * 0.1);

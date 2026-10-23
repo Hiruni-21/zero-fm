@@ -29,6 +29,8 @@ type MusicBrowserModalProps = {
   title: string;
   language: BrowserLanguage;
   onClose: () => void;
+  // Shown inside a page card instead of a popup: no close button, no Escape, no autofocus
+  embedded?: boolean;
 };
 
 const LANGUAGE_FILTERS: BrowserLanguage[] = [
@@ -1043,6 +1045,7 @@ export default function MusicBrowserModal({
   title,
   language,
   onClose,
+  embedded = false,
 }: MusicBrowserModalProps) {
   const { t } = useLanguage();
   const [tracks, setTracks] =
@@ -1138,7 +1141,7 @@ export default function MusicBrowserModal({
     const handleKeyDown = (
       event: KeyboardEvent,
     ) => {
-      if (event.key !== "Escape") {
+      if (event.key !== "Escape" || embedded) {
         return;
       }
 
@@ -1164,7 +1167,7 @@ export default function MusicBrowserModal({
         handleKeyDown,
       );
     };
-  }, [onClose, view]);
+  }, [onClose, view, embedded]);
 
   /* =======================================================
      CLASSIFY TRACKS
@@ -1392,6 +1395,7 @@ const requestAnother = () => {
 
         </div>
 
+        {!embedded && (
         <button
           type="button"
           onClick={handleClose}
@@ -1400,6 +1404,7 @@ const requestAnother = () => {
         >
           ×
         </button>
+        )}
 
       </div>
 
@@ -1418,7 +1423,7 @@ const requestAnother = () => {
 
             <input
               type="search"
-              autoFocus
+              autoFocus={!embedded}
               value={search}
               onChange={(event) =>
                 setSearch(

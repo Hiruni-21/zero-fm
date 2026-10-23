@@ -431,8 +431,11 @@ export default function RequestSong() {
                 {/* A long heading (a full sentence) gets a smaller size */}
                 <h2
                   className={`mt-4 font-display font-bold tracking-[-0.02em] ${
-                    t("request.title").length > 24
-                      ? "text-[28px] leading-[1.35] sm:text-[34px] lg:text-[40px]"
+                    // A very long single word (Tamil) gets a smaller phone size so it fits
+                    Math.max(...t("request.title").split(/\s+/).map((word) => word.length)) > 14
+                      ? "text-[24px] leading-[1.3] min-[400px]:text-[28px] sm:text-[42px] lg:text-[52px]"
+                      : t("request.title").length > 24
+                      ? "text-[32px] leading-[1.15] sm:text-[42px] lg:text-[52px]"
                       : "text-[36px] leading-[1.02] sm:text-[48px] lg:text-[56px]"
                   }`}
                 >

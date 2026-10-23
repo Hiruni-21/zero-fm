@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "./LanguageContext";
+import { GlobeIcon, languageChoices } from "./LanguageSwitcher";
 import { selectSection, useActiveSection } from "../lib/active-section";
 
 const navItems: [string, string][] = [
@@ -13,7 +14,7 @@ const navItems: [string, string][] = [
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const activeSection = useActiveSection();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +92,34 @@ export default function MobileMenu() {
               </a>
             );
           })}
+
+          {/* Change language from anywhere, without scrolling up to the hero */}
+          <div className="mt-1 border-t border-white/10 px-2 pb-1 pt-3">
+            <div className="mb-2 flex items-center gap-1.5 px-1 text-[11px] text-white/45">
+              <GlobeIcon className="size-3.5" />
+              {language === "tamil" ? "மொழி" : language === "sinhala" ? "භාෂාව" : "Language"}
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {languageChoices(language).map(([code, label]) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => {
+                    setLanguage(code);
+                    setIsOpen(false);
+                  }}
+                  aria-current={language === code ? "true" : undefined}
+                  className={`rounded-lg px-1 py-2 text-[12px] transition ${
+                    language === code
+                      ? "bg-[#FFD400]/10 font-bold text-[#FFD400]"
+                      : "text-white/65 hover:bg-white/5"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </nav>
       )}
     </div>

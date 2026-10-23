@@ -273,12 +273,14 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Space Grotesk", sans-serif;
+  /* Helvetica look (like the first "Good Music" heading). Apple devices use
+     real Helvetica; others get Arimo, a free look-alike from Google Fonts */
+  font-family: "Helvetica Neue", Helvetica, "Arimo", Arial, sans-serif;
 }
 
 /* Existing Tailwind font utility classes */
 .font-display {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Helvetica Neue", Helvetica, "Arimo", Arial, sans-serif;
 }
 
 .font-body {
@@ -316,4 +318,136 @@ html[data-site-language="sinhala"] body {
 html[data-site-language="tamil"],
 html[data-site-language="tamil"] body {
   font-family: "Noto Sans Tamil", sans-serif;
+}
+
+/* Letter spacing pulls Sinhala and Tamil letters apart, so those
+   languages never get it, whatever spacing a label asks for */
+[data-site-language="sinhala"] [class*="tracking-"],
+[data-site-language="tamil"] [class*="tracking-"] {
+  letter-spacing: normal !important;
+}
+
+/* Decorative Sinhala font for the gold hero line (FM Derana, cut down to
+   only the letters that line uses, so it is tiny) */
+@font-face {
+  font-family: "Zero Sinhala Heading";
+  src: url("/fonts/zero-sinhala-heading.woff2") format("woff2");
+  font-display: swap;
+}
+
+/* All Sinhala text uses Abhaya Libre (an elegant style). Text that sets its own font inline, like the
+   gold Derana line and the handwritten "Hit", keeps it. */
+html[data-site-language="sinhala"] body :not([style*="font-family"]):not(svg, svg *) {
+  font-family: "Zero Sinhala Text", "Abhaya Libre", "Noto Sans Sinhala", serif !important;
+}
+
+/* Abhaya Libre's Sinhala letters, drawn 18% bigger: they are small next to the
+   old font, which made small text hard to read. English letters in the same
+   text still come from "Abhaya Libre" at normal size. */
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3tmeuGtX-Co5MNzeAOqinEQYUnXgPRE4r80.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 500;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYj2rCsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 600;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYo23CsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 700;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEYx2zCsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+@font-face {
+  font-family: "Zero Sinhala Text";
+  font-weight: 800;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/abhayalibre/v18/e3t5euGtX-Co5MNzeAOqinEY22_CsNZJyIU9Ba0c.woff2) format('woff2');
+  unicode-range: U+0964-0965, U+0D81-0DF4, U+1CF2, U+200C-200D, U+25CC;
+  size-adjust: 118%;
+}
+
+/* English brush heading: each piece paints on left to right, then the gold dashes keep wiggling */
+.zf-paint {
+  clip-path: inset(-40% 100% -40% -20%);
+  animation: zf-paint 0.55s cubic-bezier(0.6, 0, 0.3, 1) var(--d, 0s) forwards;
+}
+@keyframes zf-paint {
+  to { clip-path: inset(-40% -20% -40% -20%); }
+}
+.zf-pop {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    zf-pop 0.35s ease-out var(--d, 0s) forwards,
+    zf-wiggle 2.6s ease-in-out calc(var(--d, 0s) + 0.35s) infinite;
+}
+@keyframes zf-pop {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes zf-wiggle {
+  0%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
+  50% { opacity: 1; transform: rotate(-8deg) scale(1.15); }
+}
+.zf-brush-float {
+  animation: zf-float 5s ease-in-out 2s infinite;
+}
+@keyframes zf-float {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(1.5deg) translateY(-6px); }
+}
+.zf-sheen {
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  transform: translateX(-120%);
+  animation: zf-sheen 3.5s ease-in-out 2s infinite;
+}
+@keyframes zf-sheen {
+  0% { transform: translateX(-120%); }
+  45%, 100% { transform: translateX(360%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zf-paint, .zf-pop, .zf-brush-float, .zf-sheen { animation: none; clip-path: none; opacity: 1; }
+}
+
+/* Smooth language switch: the page softly fades and blurs between languages */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+::view-transition-old(root) {
+  animation-name: zf-lang-out;
+}
+::view-transition-new(root) {
+  animation-name: zf-lang-in;
+}
+@keyframes zf-lang-out {
+  to { opacity: 0; filter: blur(6px); }
+}
+@keyframes zf-lang-in {
+  from { opacity: 0; filter: blur(6px); }
 }
