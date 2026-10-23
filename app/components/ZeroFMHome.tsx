@@ -1135,15 +1135,15 @@ const SITE_TRANSLATIONS: Record<
       "ZERO உடன் இணையுங்கள்",
     joinCommunity:
       "எங்கள் சமூகத்தில் இணைந்து இசையுடன் தொடர்ந்து இருங்கள்.",
-    platform: "தளம்",
+    platform: "இயங்குதளம்",
     liveStream:
       "நேரலை ஒளிபரப்பு",
     requestSong:
-      "பாடலைக் கோருங்கள்",
+      "விருப்பப் பாடலுக்கான கோரிக்கை",
     todaysSchedule:
-      "இன்றைய அட்டவணை",
+      "இன்றைய நிகழ்ச்சிகள் அட்டவணை",
     explore:
-      "ஆராயுங்கள்",
+      "மேலும் ஆராய்க",
     company:
       "நிறுவனம்",
     aboutZero:
@@ -1151,7 +1151,7 @@ const SITE_TRANSLATIONS: Record<
     pressMedia:
       "பத்திரிகை மற்றும் ஊடகம்",
     supportConnect:
-      "ஆதரவு மற்றும் தொடர்பு",
+      "உதவி மற்றும் தொடர்பு",
     contactStudioBooth:
       "ஸ்டுடியோவைத் தொடர்பு கொள்ளுங்கள்",
     helpFaq:
@@ -1163,7 +1163,7 @@ const SITE_TRANSLATIONS: Record<
     broadcasting:
       "முன்னேற்றமான எலக்ட்ரானிக், மாற்று கிளப் இசை மற்றும் தேர்ந்தெடுக்கப்பட்ட அண்டர்கிரவுண்ட் ஒலிகளை ஒலிபரப்புகிறது.",
     transmitting:
-      "24/7 டிஜிட்டல் ஆடியோ ஒலிபரப்பு",
+      "24/7 எண்ணியல் ஒலிபரப்பு",
     colomboStream:
       "இலங்கையின் முதல் மும்மொழி வானொலி தளம்",
     searchExample:
@@ -1477,7 +1477,7 @@ export default function ZeroFMHome() {
   ) : (
   // Sinhala and Tamil: the same brush design, with their own fonts
   <BrushHeading
-  key={siteLanguage}
+    key={siteLanguage}
     script
     line1={t("goodMusic")}
     line2={t("brighterDays")}
