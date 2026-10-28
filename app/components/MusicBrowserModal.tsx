@@ -13,6 +13,7 @@ import {
   preloadRequestableTracks,
   type RequestableTrack,
 } from "../lib/request-tracks";
+import { apiUrl } from "../lib/api-url";
 
 export { preloadRequestableTracks };
 
@@ -848,7 +849,7 @@ function lookupArtwork(artist: string, title: string) {
 
       try {
         const params = new URLSearchParams({ artist, title });
-        const response = await fetch(`/api/artwork?${params.toString()}`, {
+        const response = await fetch(apiUrl(`/api/artwork?${params.toString()}`), {
           cache: "force-cache",
         });
         const data: { artwork?: string | null } = response.ok
@@ -1292,7 +1293,7 @@ const submitRequest = async () => {
 
   try {
     // Sends the request to the Radio.co queue through this site's server.
-    const response = await fetch("/api/queue", {
+    const response = await fetch(apiUrl("/api/queue"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ trackId: selectedTrack.id }),

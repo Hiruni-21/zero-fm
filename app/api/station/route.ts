@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 const STATION_ID = "s83b3fe12f";
@@ -20,7 +21,7 @@ type RadioStatusResponse = {
   status?: unknown;
 };
 
-export async function GET() {
+async function handleGET() {
   try {
     const [stationResponse, statusResult] = await Promise.all([
       fetch(STATION_URL, { cache: "no-store" }),
@@ -91,3 +92,6 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withCors(handleGET);
+export const OPTIONS = corsPreflight;

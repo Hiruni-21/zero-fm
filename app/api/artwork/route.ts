@@ -1,6 +1,7 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
@@ -109,3 +110,6 @@ export async function GET(request: Request) {
     });
   }
 }
+
+export const GET = withCors(handleGET);
+export const OPTIONS = corsPreflight;

@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 const STATION_ID = "s83b3fe12f";
@@ -16,7 +17,7 @@ type RadioTracksResponse = {
   tracks?: RadioTrack[];
 };
 
-export async function GET() {
+async function handleGET() {
   const url = `https://public.radio.co/stations/${STATION_ID}/requests/tracks`;
 
   try {
@@ -80,3 +81,6 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withCors(handleGET);
+export const OPTIONS = corsPreflight;

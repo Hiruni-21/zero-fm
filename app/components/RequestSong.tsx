@@ -19,6 +19,7 @@ import {
   preloadRequestableTracks,
   type RequestableTrack,
 } from "../lib/request-tracks";
+import { apiUrl } from "../lib/api-url";
 
 type PickedTrack = {
   id: number;
@@ -319,8 +320,7 @@ export default function RequestSong() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        "/api/queue",
+      const response = await fetch(apiUrl("/api/queue"),
         {
           method: "POST",
 
@@ -358,7 +358,7 @@ export default function RequestSong() {
        * Keep a record of who asked, in the server log.
        * This never blocks the listener's request.
        */
-      void fetch("/api/request", {
+      void fetch(apiUrl("/api/request"), {
         method: "POST",
         headers: {
           "content-type":

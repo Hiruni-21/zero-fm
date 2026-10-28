@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 const STATION_ID = "s83b3fe12f";
@@ -30,7 +31,7 @@ function readRadioMessage(text: string): string | null {
   return null;
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   let body: QueueRequestBody;
 
   try {
@@ -108,3 +109,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withCors(handlePOST);
+export const OPTIONS = corsPreflight;

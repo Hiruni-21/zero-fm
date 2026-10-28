@@ -5,6 +5,8 @@
  * Request Song form, so neither has to wait or download it twice.
  */
 
+import { apiUrl } from "./api-url";
+
 export type RequestableTrack = {
   id: number;
   title: string;
@@ -49,7 +51,7 @@ export function preloadRequestableTracks(
   if (pendingTracks) return pendingTracks;
 
   pendingTracks = (async () => {
-    const response = await fetch("/api/tracks");
+    const response = await fetch(apiUrl("/api/tracks"));
     const result: TracksResponse = await response.json();
 
     if (!response.ok) {

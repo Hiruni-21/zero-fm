@@ -6,6 +6,8 @@
  * part polling on its own.
  */
 
+import { apiUrl } from "./api-url";
+
 // Short enough that a new song shows up within a few seconds of starting
 const FRESH_FOR_MS = 4_000;
 
@@ -20,7 +22,7 @@ export function fetchNowPlaying<T>(): Promise<T> {
 
   if (!pending) {
     pending = (async () => {
-      const response = await fetch("/api/now-playing", {
+      const response = await fetch(apiUrl("/api/now-playing"), {
         cache: "no-store",
       });
 

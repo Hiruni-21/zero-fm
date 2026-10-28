@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 type SongRequestBody = {
@@ -6,7 +7,7 @@ type SongRequestBody = {
   song?: unknown;
 };
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     const body: unknown =
       await request.json();
@@ -165,3 +166,6 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export const POST = withCors(handlePOST);
+export const OPTIONS = corsPreflight;
