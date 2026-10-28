@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "./LanguageContext";
+import { apiUrl } from "../lib/api-url";
 
 type Program = {
   time: string;
@@ -162,7 +163,7 @@ export default function Schedule() {
 
     const fetchSchedule = async () => {
       try {
-        const response = await fetch("/api/schedule", {
+        const response = await fetch(apiUrl("/api/schedule"), {
           cache: "no-store",
         });
 

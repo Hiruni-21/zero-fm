@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "../lib/api-url";
 
 type HistoryTrack = {
   title?: string;
@@ -18,7 +19,7 @@ export default function RecentlyPlayed() {
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch("/api/history", {
+      const response = await fetch(apiUrl("/api/history"), {
         cache: "no-store",
       });
 

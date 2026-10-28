@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "../lib/api-url";
 
 const STATION_ART = "https://images.radio.co/station_logos/s83b3fe12f.20231001063451.jpg";
 
@@ -21,7 +22,7 @@ export default function NowPlayingArtwork() {
 
     const fetchArtwork = async () => {
       try {
-        const response = await fetch("/api/now-playing", { cache: "no-store" });
+        const response = await fetch(apiUrl("/api/now-playing"), { cache: "no-store" });
         if (!response.ok) return;
         const result: TrackResponse = await response.json();
         const image = result.data?.artwork_urls?.large || result.data?.artwork_urls?.standard;

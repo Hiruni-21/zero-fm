@@ -39,7 +39,12 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Send the page in the visitor's saved language, so a refresh never
   // shows English first
-  const saved = (await cookies()).get(LANGUAGE_COOKIE)?.value;
+  // (The Hostinger copy is plain files with no server, so it starts in
+  // English and switches to the saved language in the browser.)
+  const saved =
+    process.env.STATIC_EXPORT === "1"
+      ? undefined
+      : (await cookies()).get(LANGUAGE_COOKIE)?.value;
   const language = isSiteLanguage(saved) ? saved : "english";
   const htmlLang = language === "sinhala" ? "si" : language === "tamil" ? "ta" : "en";
 

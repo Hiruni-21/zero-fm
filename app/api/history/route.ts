@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 const STATION_ID = "s83b3fe12f";
@@ -12,7 +13,7 @@ type HistoryResponse = {
   tracks?: HistoryTrack[];
 };
 
-export async function GET() {
+async function handleGET() {
   const url = `https://public.radio.co/stations/${STATION_ID}/history`;
 
   try {
@@ -65,3 +66,6 @@ export async function GET() {
     );
   }
 }
+
+export const GET = withCors(handleGET);
+export const OPTIONS = corsPreflight;

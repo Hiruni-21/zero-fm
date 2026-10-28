@@ -1,3 +1,4 @@
+import { corsPreflight, withCors } from "../../lib/cors";
 import { NextResponse } from "next/server";
 
 type ScheduleItem = {
@@ -59,7 +60,7 @@ const SCHEDULE: ScheduleItem[] = [
   },
 ];
 
-export async function GET() {
+async function handleGET() {
   return NextResponse.json(
     {
       station: "Zero FM",
@@ -74,3 +75,6 @@ export async function GET() {
     }
   );
 }
+
+export const GET = withCors(handleGET);
+export const OPTIONS = corsPreflight;
