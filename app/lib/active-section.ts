@@ -80,7 +80,7 @@ function compute() {
     return;
   }
 
-  emit(best?.id ?? "home");
+  if (best) emit(best.id);
 }
 
 function schedule() {
