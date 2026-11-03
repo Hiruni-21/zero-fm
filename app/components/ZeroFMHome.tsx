@@ -205,9 +205,8 @@ function Icon({
 
 // Store pages for the Zero FM app (the site and the app launch together).
 // Until a link is filled in here, its button stays on this page.
-const APP_STORE_URL = "";
-const GOOGLE_PLAY_URL = "";
-
+const APP_STORE_URL = "https://apps.apple.com/app/id6473833172";
+const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.m3cf18bcee6a4.app";
 const SIDE_SOCIALS = [
   { key: "facebook", label: "Facebook" },
   { key: "whatsapp", label: "WhatsApp" },
