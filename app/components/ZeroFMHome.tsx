@@ -1619,7 +1619,7 @@ export default function ZeroFMHome() {
             textShadow: "0 0 6px #FFD400, 0 0 14px #FFD400, 0 0 30px #FFB300",
           }}
         >
-          Spark The week @ 6.30
+          Spark the week @ 6.30
         </p>
       )}
     </div>
